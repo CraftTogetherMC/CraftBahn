@@ -6,8 +6,8 @@
 - Debugging
 - Bestehende Daten aus altem Plugin importieren (php)
 - /fahrzieledit setwarp -cmd für das setzen der Teleport-Position hinzufügen (setlocation == MarkerPosition)
-- /farhzieledit add/remove-owner -cmd für die Verwaltung weiterer Besitzer hinzufügen.
-- TrainListener wieder einfügen (Für EnterMessages und weiter CraftBahn features)
+- /farhzieledit add/remove-owner -cmd für die Verwaltung weiterer Besitzer (participants) hinzufügen.
+- TrainListener wieder einfügen (Für EnterMessages und weitere CraftBahn features)
 - PluginMessage: Andere server im Netzwerk bei Änderungen benachrichtigen
 - Bei /fahrziel Route setzen wenn Ziel sich auf anderem Server befindet
 - /fahrziele (Liste) übersichtlicher gestalten.. (Mit Pagination)
