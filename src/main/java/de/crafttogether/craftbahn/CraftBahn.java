@@ -16,6 +16,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dynmap.DynmapAPI;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -32,14 +33,14 @@ public final class CraftBahn extends JavaPlugin {
     public void onEnable() {
         plugin = this;
 
-        if(getConfig() != null)
+        if (getConfig() != null)
             saveDefaultConfig();
 
         FileConfiguration config = getConfig();
 
         if (!getServer().getPluginManager().isPluginEnabled("Dynmap")) {
             plugin.getLogger().warning("Couln't find Dynmap");
-            Bukkit.getServer().getPluginManager().disablePlugin((Plugin)plugin);
+            Bukkit.getServer().getPluginManager().disablePlugin((Plugin) plugin);
             return;
         }
 
@@ -51,10 +52,10 @@ public final class CraftBahn extends JavaPlugin {
 
         // Register Commands
         Commands commands = new Commands();
-        registerCommand("rbf", (TabExecutor)commands);
-        registerCommand("fahrziel", (TabExecutor)commands);
-        registerCommand("fahrziele", (TabExecutor)commands);
-        registerCommand("fahrzieledit", (TabExecutor)commands);
+        registerCommand("rbf", (TabExecutor) commands);
+        registerCommand("fahrziel", (TabExecutor) commands);
+        registerCommand("fahrziele", (TabExecutor) commands);
+        registerCommand("fahrzieledit", (TabExecutor) commands);
 
         if (getConfig().getBoolean("Settings.Debug"))
             getLogger().info("[MySQL]: Initialize Adapter...");
@@ -78,33 +79,48 @@ public final class CraftBahn extends JavaPlugin {
         MySQLAdapter = new MySQLAdapter(myCfg);
         MySQL = MySQLAdapter.getConnection();
 
-        if (getConfig().getBoolean("Settings.Debug"))
-            getLogger().info("[MySQL]: Create Tables ...");
-
         // Create Tables
         try {
-            String query =
-                "CREATE TABLE `cb_destinations` (\n" +
-                "  `name` varchar(24) NOT NULL,\n" +
-                "  `type` varchar(24) NOT NULL,\n" +
-                "  `server` varchar(24) NOT NULL,\n" +
-                "  `world` varchar(24) NOT NULL,\n" +
-                "  `loc_x` double NOT NULL,\n" +
-                "  `loc_y` double NOT NULL,\n" +
-                "  `loc_z` double NOT NULL,\n" +
-                "  `owner` varchar(36) NOT NULL,\n" +
-                "  `participants` longtext,\n" +
-                "  `public` tinyint(1) NOT NULL,\n" +
-                "  `tp_x` double,\n" +
-                "  `tp_y` double,\n" +
-                "  `tp_z` double\n" +
-                ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+            ResultSet result = MySQL.query("SHOW TABLES LIKE '%sdestinations';", MySQL.getTablePrefix());
 
-            MySQL.execute(query, MySQL.getTablePrefix());
+            if (!result.next()) {
+                getLogger().info("[MySQL]: Create Tables ...");
+
+                MySQL.execute(
+                    "CREATE TABLE `%sdestinations` (\n" +
+                    "  `id` int(11) NOT NULL,\n" +
+                    "  `name` varchar(24) NOT NULL,\n" +
+                    "  `type` varchar(24) NOT NULL,\n" +
+                    "  `server` varchar(24) NOT NULL,\n" +
+                    "  `world` varchar(24) NOT NULL,\n" +
+                    "  `loc_x` double NOT NULL,\n" +
+                    "  `loc_y` double NOT NULL,\n" +
+                    "  `loc_z` double NOT NULL,\n" +
+                    "  `owner` varchar(36) NOT NULL,\n" +
+                    "  `participants` longtext DEFAULT NULL,\n" +
+                    "  `public` tinyint(1) NOT NULL,\n" +
+                    "  `tp_x` double DEFAULT NULL,\n" +
+                    "  `tp_y` double DEFAULT NULL,\n" +
+                    "  `tp_z` double DEFAULT NULL\n" +
+                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;\n"
+                , MySQL.getTablePrefix());
+
+                MySQL.execute(
+                    "ALTER TABLE `%sdestinations`\n" +
+                    "  ADD PRIMARY KEY (`id`);"
+                , MySQL.getTablePrefix());
+
+                MySQL.execute(
+                    "ALTER TABLE `%sdestinations`\n" +
+                    "  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;"
+                , MySQL.getTablePrefix());
+            }
         }
-
         catch (SQLException ex) {
             getLogger().warning("[MySQL]: " + ex.getMessage());
+        }
+        finally {
+            MySQL.close();
         }
 
         DestinationStorage.loadAll((err, destinations) -> {
