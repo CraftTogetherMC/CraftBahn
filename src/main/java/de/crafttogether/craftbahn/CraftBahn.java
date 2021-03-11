@@ -1,24 +1,18 @@
 package de.crafttogether.craftbahn;
 
-import de.crafttogether.craftbahn.destinations.Destination;
 import de.crafttogether.craftbahn.destinations.DestinationStorage;
+import de.crafttogether.craftbahn.listener.TrainEnterListener;
 import de.crafttogether.craftbahn.util.MySQLAdapter;
 import de.crafttogether.craftbahn.util.MySQLAdapter.MySQLConfig;
 import de.crafttogether.craftbahn.util.MySQLAdapter.MySQLConnection;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dynmap.DynmapAPI;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 
 public final class CraftBahn extends JavaPlugin {
     private static CraftBahn plugin;
@@ -27,38 +21,38 @@ public final class CraftBahn extends JavaPlugin {
     private DynmapAPI dynmap;
 
     private MySQLAdapter MySQLAdapter;
-    private MySQLConnection MySQL;
 
     @Override
     public void onEnable() {
         plugin = this;
 
-        if (getConfig() != null)
-            saveDefaultConfig();
-
-        FileConfiguration config = getConfig();
-
-        if (!getServer().getPluginManager().isPluginEnabled("Dynmap")) {
-            plugin.getLogger().warning("Couln't find Dynmap");
-            Bukkit.getServer().getPluginManager().disablePlugin((Plugin) plugin);
+        // Check dependencies
+        if (!getServer().getPluginManager().isPluginEnabled("Train_Carts")) {
+            plugin.getLogger().warning("Couln't find TrainCarts");
+            Bukkit.getServer().getPluginManager().disablePlugin(plugin);
             return;
         }
 
-        this.serverName = config.getString("Settings.ServerName");
+        if (!getServer().getPluginManager().isPluginEnabled("Dynmap")) {
+            plugin.getLogger().warning("Couln't find Dynmap");
+            Bukkit.getServer().getPluginManager().disablePlugin(plugin);
+            return;
+        }
+
+        // Initialize
+        FileConfiguration config = getConfig();
         this.dynmap = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("Dynmap");
+        this.serverName = config.getString("Settings.ServerName");
 
         // Register Listener
-        //getServer().getPluginManager().registerEvents(new TrainListener(), (Plugin)this);
+        getServer().getPluginManager().registerEvents(new TrainEnterListener(), this);
 
         // Register Commands
         Commands commands = new Commands();
-        registerCommand("rbf", (TabExecutor) commands);
-        registerCommand("fahrziel", (TabExecutor) commands);
-        registerCommand("fahrziele", (TabExecutor) commands);
-        registerCommand("fahrzieledit", (TabExecutor) commands);
-
-        if (getConfig().getBoolean("Settings.Debug"))
-            getLogger().info("[MySQL]: Initialize Adapter...");
+        registerCommand("rbf", commands);
+        registerCommand("fahrziel", commands);
+        registerCommand("fahrziele", commands);
+        registerCommand("fahrzieledit", commands);
 
         // Setup MySQLConfig
         MySQLAdapter.MySQLConfig myCfg = new MySQLConfig();
@@ -77,16 +71,16 @@ public final class CraftBahn extends JavaPlugin {
 
         // Initialize MySQLAdapter
         MySQLAdapter = new MySQLAdapter(myCfg);
-        MySQL = MySQLAdapter.getConnection();
+        MySQLConnection mySQL = MySQLAdapter.getConnection();
 
         // Create Tables
         try {
-            ResultSet result = MySQL.query("SHOW TABLES LIKE '%sdestinations';", MySQL.getTablePrefix());
+            ResultSet result = mySQL.query("SHOW TABLES LIKE '%sdestinations';", mySQL.getTablePrefix());
 
             if (!result.next()) {
                 getLogger().info("[MySQL]: Create Tables ...");
 
-                MySQL.execute(
+                mySQL.execute(
                     "CREATE TABLE `%sdestinations` (\n" +
                     "  `id` int(11) NOT NULL,\n" +
                     "  `name` varchar(24) NOT NULL,\n" +
@@ -103,43 +97,33 @@ public final class CraftBahn extends JavaPlugin {
                     "  `tp_y` double DEFAULT NULL,\n" +
                     "  `tp_z` double DEFAULT NULL\n" +
                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;\n"
-                , MySQL.getTablePrefix());
+                , mySQL.getTablePrefix());
 
-                MySQL.execute(
+                mySQL.execute(
                     "ALTER TABLE `%sdestinations`\n" +
                     "  ADD PRIMARY KEY (`id`);"
-                , MySQL.getTablePrefix());
+                , mySQL.getTablePrefix());
 
-                MySQL.execute(
+                mySQL.execute(
                     "ALTER TABLE `%sdestinations`\n" +
                     "  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;"
-                , MySQL.getTablePrefix());
+                , mySQL.getTablePrefix());
             }
         }
         catch (SQLException ex) {
             getLogger().warning("[MySQL]: " + ex.getMessage());
         }
         finally {
-            MySQL.close();
+            mySQL.close();
         }
 
-        DestinationStorage.loadAll((err, destinations) -> {
-            Bukkit.getLogger().info("Loaded " + destinations.size() + " destinations");
-
-            for (Destination dest : destinations) {
-                Bukkit.getLogger().info(dest.toString());
-            }
-        });
+        // Load all destinations from database into our cache
+        DestinationStorage.loadAll((err, destinations) -> Bukkit.getLogger().info("Loaded " + destinations.size() + " destinations"));
     }
 
     private void registerCommand(String cmd, TabExecutor executor) {
-        getCommand(cmd).setExecutor((CommandExecutor)executor);
-        getCommand(cmd).setTabCompleter((TabCompleter)executor);
-    }
-
-    public void broadcast(List<Player> players, String message) {
-        for (Player p : players)
-            p.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+        getCommand(cmd).setExecutor(executor);
+        getCommand(cmd).setTabCompleter(executor);
     }
 
     public void onDisable() {
@@ -147,19 +131,8 @@ public final class CraftBahn extends JavaPlugin {
             MySQLAdapter.disconnect();
     }
 
-    public MySQLAdapter getMySQLAdapter() {
-        return MySQLAdapter;
-    }
-
-    public DynmapAPI getDynmap() {
-        return dynmap;
-    }
-
-    public String getServerName() {
-        return serverName;
-    }
-
-    public static CraftBahn getInstance() {
-        return plugin;
-    }
+    public MySQLAdapter getMySQLAdapter() { return MySQLAdapter; }
+    public DynmapAPI getDynmap() { return dynmap; }
+    public String getServerName() { return serverName; }
+    public static CraftBahn getInstance() { return plugin; }
 }

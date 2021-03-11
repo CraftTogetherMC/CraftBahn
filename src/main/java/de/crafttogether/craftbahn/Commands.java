@@ -1,26 +1,25 @@
 package de.crafttogether.craftbahn;
 
-import java.util.*;
-
-import de.crafttogether.craftbahn.CraftBahn;
-import de.crafttogether.craftbahn.destinations.CTLocation;
 import de.crafttogether.craftbahn.destinations.Destination;
 import de.crafttogether.craftbahn.destinations.DestinationStorage;
+import de.crafttogether.craftbahn.util.CTLocation;
 import de.crafttogether.craftbahn.util.MarkerManager;
-import net.md_5.bungee.api.chat.BaseComponent;
+import de.crafttogether.craftbahn.util.Message;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.chat.ComponentSerializer;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Random;
 
 public class Commands implements TabExecutor {
     private CraftBahn plugin = CraftBahn.getInstance();
@@ -69,57 +68,54 @@ public class Commands implements TabExecutor {
                 return false;
 
             if (args.length == 0) {
-                TextComponent newLine = new TextComponent(ComponentSerializer.parse("{text: \"\n\"}"));
                 sendMessage(p, "&e-------------- &c&lCraftBahn &e--------------");
 
                 TextComponent message = new TextComponent();
-                message.addExtra((BaseComponent)newLine);
-                message.addExtra((BaseComponent)new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8» &6Willkommen bei der CraftBahn!")));
-                message.addExtra((BaseComponent)newLine);
-                message.addExtra((BaseComponent)new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8» &eUnser Schienennetz erstreckt sich")));
-                message.addExtra((BaseComponent)newLine);
-                message.addExtra((BaseComponent)new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8» &ein alle Himmelsrichtungen.")));
-                message.addExtra((BaseComponent)newLine);
-                message.addExtra((BaseComponent)new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8")));
-                message.addExtra((BaseComponent)newLine);
-                message.addExtra((BaseComponent)new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8» &6&lAnleitung: ")));
-                p.spigot().sendMessage((BaseComponent)message);
+                message.addExtra(Message.newLine());
+                message.addExtra(Message.format("&6CraftBahn &8» &6Willkommen bei der CraftBahn!"));
+                message.addExtra(Message.newLine());
+                message.addExtra(Message.format("&6CraftBahn &8» &eUnser Schienennetz erstreckt sich"));
+                message.addExtra(Message.newLine());
+                message.addExtra(Message.format("&6CraftBahn &8» &ein alle Himmelsrichtungen."));
+                message.addExtra(Message.newLine());
+                message.addExtra(Message.format("&6CraftBahn &8"));
+                message.addExtra(Message.newLine());
+                message.addExtra(Message.format("&6CraftBahn &8» &6&lAnleitung: "));
+                p.spigot().sendMessage(message);
 
                 message = new TextComponent();
-                message.addExtra((BaseComponent)new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8» &c/bahnhof")));
+                message.addExtra(Message.format("&6CraftBahn &8» &c/bahnhof"));
                 message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/bahnhof"));
-                message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(ChatColor.translateAlternateColorCodes('&', "&eHowTo: &6Bahnhof"))).create()));
-                p.spigot().sendMessage((BaseComponent)message);
+                message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format("&eHowTo: &6Bahnhof"))).create()));
+                p.spigot().sendMessage(message);
 
                 message = new TextComponent();
-                message.addExtra((BaseComponent)new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8")));
-                message.addExtra((BaseComponent)newLine);
-                message.addExtra((BaseComponent)new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8» &6&lFahrziel wählen")));
-                p.spigot().sendMessage((BaseComponent)message);
+                message.addExtra(Message.format("&6CraftBahn &8"));
+                message.addExtra(Message.newLine());
+                message.addExtra(Message.format("&6CraftBahn &8» &6&lFahrziel wählen"));
+                p.spigot().sendMessage(message);
 
                 message = new TextComponent();
-                message.addExtra((BaseComponent)new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8» &c/fahrziele")));
+                message.addExtra(Message.format("&6CraftBahn &8» &c/fahrziele"));
                 message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele"));
-                message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(ChatColor.translateAlternateColorCodes('&', "&6Alle Fahrziele auflisten"))).create()));
-                p.spigot().sendMessage((BaseComponent)message);
+                message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format("&6Alle Fahrziele auflisten"))).create()));
+                p.spigot().sendMessage(message);
                 sendMessage(p, "&6CraftBahn &8» &eoder");
 
                 message = new TextComponent();
-                message.addExtra((BaseComponent)new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8» &c/fahrziel &7<name>")));
+                message.addExtra(Message.format("&6CraftBahn &8» &c/fahrziel &7<name>"));
                 message.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/fahrziel "));
-                message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(ChatColor.translateAlternateColorCodes('&', "&6Lege ein Fahrziel fest mit &c/fahrziel &7<name>"))).create()));
-                p.spigot().sendMessage((BaseComponent)message);
+                message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format("&6Lege ein Fahrziel fest mit &c/fahrziel &7<name>"))).create()));
+                p.spigot().sendMessage(message);
 
                 message = new TextComponent();
-                message.addExtra((BaseComponent)new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8")));
-                message.addExtra((BaseComponent) newLine);
-                message.addExtra((BaseComponent)new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8» &eGute Fahrt!")));
-
-                p.spigot().sendMessage((BaseComponent)message);
-                message = new TextComponent(new BaseComponent[] { (BaseComponent)newLine });
-                message.addExtra((BaseComponent)new TextComponent(ChatColor.translateAlternateColorCodes('&', "&e----------------------------------------")));
-                message.addExtra((BaseComponent)newLine);
-                p.spigot().sendMessage((BaseComponent)message);
+                message.addExtra(Message.format("&6CraftBahn &8"));
+                message.addExtra(Message.newLine());
+                message.addExtra(Message.format("&6CraftBahn &8» &eGute Fahrt!"));
+                message.addExtra(Message.newLine());
+                message.addExtra(Message.format("&e----------------------------------------"));
+                message.addExtra(Message.newLine());
+                p.spigot().sendMessage(message);
                 return true;
             }
 
@@ -525,26 +521,25 @@ public class Commands implements TabExecutor {
                 hoverText += "\n&6Koordinaten: &e" + dest.getLocation().getX() + ", " + dest.getLocation().getY() + ", " + dest.getLocation().getZ();
 
             TextComponent message = new TextComponent();
-            message.addExtra((BaseComponent)new TextComponent(ChatColor.translateAlternateColorCodes('&', "&7 > &e" + dest.getName())));
+            message.addExtra(Message.format("&7 > &e" + dest.getName()));
             message.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/fahrziel " + dest.getName()));
-            message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(ChatColor.translateAlternateColorCodes('&', hoverText))).create()));
+            message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format(hoverText))).create()));
 
             if (dest.getLocation() != null && p.hasPermission("ctdestinations.see.location")) {
-                Location loc = dest.getTeleportLocation().getBukkitLocation();
-                TextComponent tp = new TextComponent();
-                tp.addExtra((BaseComponent)new TextComponent(ChatColor.translateAlternateColorCodes('&', " &7[&fTP&7]")));
-                tp.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrzieledit tp " + dest.getName()));
-                tp.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(ChatColor.translateAlternateColorCodes('&', "&6Teleportiere zum Zielort"))).create()));
-                message.addExtra((BaseComponent)tp);
+                TextComponent tpBtn = new TextComponent();
+                tpBtn.addExtra(Message.format(" &7[&fTP&7]"));
+                tpBtn.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrzieledit tp " + dest.getName()));
+                tpBtn.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format("&6Teleportiere zum Zielort"))).create()));
+                message.addExtra(tpBtn);
             }
 
-            p.spigot().sendMessage((BaseComponent)message);
+            p.spigot().sendMessage(message);
         }
     }
 
     private void sendMessage(Player p, String message) {
         if (p.isOnline())
-            p.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+            p.sendMessage(Message.format(message));
     }
 
     public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {

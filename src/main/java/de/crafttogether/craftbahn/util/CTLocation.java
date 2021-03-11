@@ -1,4 +1,4 @@
-package de.crafttogether.craftbahn.destinations;
+package de.crafttogether.craftbahn.util;
 
 import de.crafttogether.craftbahn.CraftBahn;
 import org.bukkit.Bukkit;
@@ -12,7 +12,7 @@ public class CTLocation {
     private double y;
     private double z;
 
-    CTLocation(String server, String world, double x, double y, double z) {
+    public CTLocation(String server, String world, double x, double y, double z) {
         this.server = server;
         this.world = world;
         this.x = x;

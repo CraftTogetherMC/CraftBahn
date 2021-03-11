@@ -13,7 +13,7 @@ public class MySQLAdapter {
     private static MySQLConfig config;
     private HikariDataSource dataSource;
 
-    public interface Callback<E extends Throwable, V extends Object> {
+    public interface Callback<E extends Throwable, V> {
         void call(E exception, V result);
     }
 

@@ -1,6 +1,7 @@
 package de.crafttogether.craftbahn.destinations;
 
 import de.crafttogether.craftbahn.CraftBahn;
+import de.crafttogether.craftbahn.util.CTLocation;
 import de.crafttogether.craftbahn.util.MySQLAdapter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;

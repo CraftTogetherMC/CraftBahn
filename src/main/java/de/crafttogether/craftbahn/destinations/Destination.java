@@ -1,6 +1,6 @@
 package de.crafttogether.craftbahn.destinations;
 
-import org.bukkit.Location;
+import de.crafttogether.craftbahn.util.CTLocation;
 
 import java.util.ArrayList;
 import java.util.List;
