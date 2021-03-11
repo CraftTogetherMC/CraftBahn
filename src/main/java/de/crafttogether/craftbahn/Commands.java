@@ -145,7 +145,7 @@ public class Commands implements TabExecutor {
             if (p == null)
                 return false;
 
-            List<Destination> destinations = DestinationStorage.getDestinations();
+            Collection<Destination> destinations = DestinationStorage.getDestinations();
             if (destinations.size() < 1) {
                 sendMessage(p, "&6CraftBahn &8» &cEs ist noch kein Ziel in der Liste. Tippe &e/destination add <name> &cum eines zu speichern.");
                 return true;
@@ -277,9 +277,15 @@ public class Commands implements TabExecutor {
                     return true;
                 }
 
-                sendMessage(p, "&6CraftBahn &8» &aZiel gelöscht.");
-                MarkerManager.deleteMarker(dest);
-                DestinationStorage.deleteDestination(dest.getName());
+                Player finalP = p;
+                DestinationStorage.delete(dest.getId(), (err, affectedRows) -> {
+                    if (err != null)
+                        sendMessage(finalP, "&6CraftBahn &8» Es trat ein Fehler beim speichern der Änderungen auf. Bitte kontaktiere einen Administrator.");
+                    else {
+                        MarkerManager.deleteMarker(dest);
+                        sendMessage(finalP, "&6CraftBahn &8» &aZiel gelöscht.");
+                    }
+                });
             }
 
             else if (args[0].equalsIgnoreCase("setowner")) {
@@ -314,7 +320,7 @@ public class Commands implements TabExecutor {
 
                 // Speichern
                 Player finalP = p;
-                DestinationStorage.update(dest, (err, success) -> {
+                DestinationStorage.update(dest, (err, affectedRows) -> {
                     if (err != null)
                         sendMessage(finalP, "&6CraftBahn &8» Es trat ein Fehler beim speichern der Änderungen auf. Bitte kontaktiere einen Administrator.");
                     else
@@ -358,7 +364,7 @@ public class Commands implements TabExecutor {
                 // Speichern
                 Player finalP = p;
                 Destination.DestinationType finalType = type;
-                DestinationStorage.update(dest, (err, success) -> {
+                DestinationStorage.update(dest, (err, affectedRows) -> {
                     if (err != null)
                         sendMessage(finalP, "&6CraftBahn &8» Es trat ein Fehler beim speichern der Änderungen auf. Bitte kontaktiere einen Administrator.");
                     else
@@ -387,7 +393,7 @@ public class Commands implements TabExecutor {
 
                 // Speichern
                 Player finalP = p;
-                DestinationStorage.update(dest, (err, success) -> {
+                DestinationStorage.update(dest, (err, affectedRows) -> {
                     if (err != null)
                         sendMessage(finalP, "&6CraftBahn &8» Es trat ein Fehler beim speichern der Änderungen auf. Bitte kontaktiere einen Administrator.");
                     else {
@@ -418,7 +424,7 @@ public class Commands implements TabExecutor {
 
                 // Speichern
                 Player finalP = p;
-                DestinationStorage.update(dest, (err, success) -> {
+                DestinationStorage.update(dest, (err, affectedRows) -> {
                     if (err != null)
                         sendMessage(finalP, "&6CraftBahn &8» Es trat ein Fehler beim speichern der Änderungen auf. Bitte kontaktiere einen Administrator.");
                     else {
@@ -447,7 +453,7 @@ public class Commands implements TabExecutor {
 
                 // Speichern
                 Player finalP = p;
-                DestinationStorage.update(dest, (err, success) -> {
+                DestinationStorage.update(dest, (err, affectedRows) -> {
                     if (err != null)
                         sendMessage(finalP, "&6CraftBahn &8» Es trat ein Fehler beim speichern der Änderungen auf. Bitte kontaktiere einen Administrator.");
                     else {
@@ -463,7 +469,7 @@ public class Commands implements TabExecutor {
                 }
 
                 MarkerManager.createMarkerSets();
-                List<Destination> destinations = DestinationStorage.getDestinations();
+                Collection<Destination> destinations = DestinationStorage.getDestinations();
 
                 for (Destination dest : destinations)
                     MarkerManager.setMarker(dest, true);
@@ -590,7 +596,7 @@ public class Commands implements TabExecutor {
                     if (!sender.hasPermission("ctdestinations.edit." + args[0]))
                         return new ArrayList<>();
 
-                    List<Destination> destinations = DestinationStorage.getDestinations();
+                    Collection<Destination> destinations = DestinationStorage.getDestinations();
                     for (Destination dest : DestinationStorage.getDestinations()) {
                         if ((args[0].equalsIgnoreCase("setprivate") && !dest.isPublic().booleanValue()) || (
                                 args[0].equalsIgnoreCase("setpublic") && dest.isPublic().booleanValue()))
