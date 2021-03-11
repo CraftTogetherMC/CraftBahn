@@ -14,10 +14,11 @@
 - MarkerSystem überarbeiten
 
 **Tabelle:**
-![](https://craft-together.de/~irgendsoeintyp/chrome_QIyZubjuUn.png)
+![](https://craft-together.de/~irgendsoeintyp/chrome_42JbdTaOft.png)
 
 ``` sql
 CREATE TABLE `cb_destinations` (
+  `id` int(11) NOT NULL,
   `name` varchar(24) NOT NULL,
   `type` varchar(24) NOT NULL,
   `server` varchar(24) NOT NULL,
@@ -32,4 +33,12 @@ CREATE TABLE `cb_destinations` (
   `tp_y` double DEFAULT NULL,
   `tp_z` double DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `cb_destinations`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `cb_destinations`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  
+COMMIT;
 ```
