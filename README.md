@@ -12,3 +12,25 @@
 - Bei /fahrziel Route setzen wenn Ziel sich auf anderem Server befindet
 - /fahrziele (Liste) übersichtlicher gestalten.. (Mit Pagination)
 - MarkerSystem überarbeiten
+
+**Tabelle:**
+![](https://craft-together.de/~irgendsoeintyp/chrome_Zo4kXHfknK.png)
+
+``` sql
+CREATE TABLE `cb_destinations` (
+  `id` int(11) NOT NULL,
+  `name` varchar(24) NOT NULL,
+  `type` varchar(24) NOT NULL,
+  `server` varchar(24) NOT NULL,
+  `world` varchar(24) NOT NULL,
+  `loc_x` double NOT NULL,
+  `loc_y` double NOT NULL,
+  `loc_z` double NOT NULL,
+  `owner` varchar(36) NOT NULL,
+  `participants` longtext NOT NULL,
+  `public` tinyint(1) NOT NULL,
+  `tp_x` double NOT NULL,
+  `tp_y` double NOT NULL,
+  `tp_z` double NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+```
