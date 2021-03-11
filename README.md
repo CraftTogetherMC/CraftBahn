@@ -4,7 +4,7 @@
 
 **TODO:**
 - Debugging
-- /fahrzieledit settplocation -cmd für das setzen der Teleport-Position hinzufügen (setlocation == MarkerPosition)
+- /fahrzieledit setwarp -cmd für das setzen der Teleport-Position hinzufügen (setlocation == MarkerPosition)
 - /farhzieledit add/remove-owner -cmd für die Verwaltung weiterer Besitzer hinzufügen.
 - TrainListener wieder einfügen (Für EnterMessages und weiter CraftBahn features)
 - PluginMessage: Andere server im Netzwerk bei Änderungen benachrichtigen
