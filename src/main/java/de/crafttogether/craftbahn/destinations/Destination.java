@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class Destination {
+    private Integer id = null;
     private String name = null;
     private String server = null;
     private String world = null;
@@ -67,6 +68,8 @@ public class Destination {
         this.isPublic = isPublic;
     }
 
+    public Integer getId() { return id; }
+
     public String getName() {
         return this.name;
     }
@@ -98,6 +101,8 @@ public class Destination {
     public Boolean isPublic() {
         return this.isPublic;
     }
+
+    public void setId(Integer id) { this.id = id; }
 
     public void setName(String name) {
         this.name = name;
@@ -163,6 +168,6 @@ public class Destination {
         String strParticipants = "";
         for (UUID participant : participants) strParticipants += participant.toString() + ",";
         if (strParticipants.length() > 1) strParticipants = strParticipants.substring(-1);
-        return "name=" + name + ", server=" + server + ", world=" + world + ", type=" + (type == null ? null : type.toString()) + ", owner=" + owner + ", participants=[" + strParticipants + "], isPrivate=" + isPublic + ", location=[" + (location == null ? null : location.toString()) + "], teleportLocation=[" + (teleportLocation == null ? null : teleportLocation.toString()) + "]";
+        return "id=" + id + ", name=" + name + ", server=" + server + ", world=" + world + ", type=" + (type == null ? null : type.toString()) + ", owner=" + owner + ", participants=[" + strParticipants + "], isPrivate=" + isPublic + ", location=[" + (location == null ? null : location.toString()) + "], teleportLocation=[" + (teleportLocation == null ? null : teleportLocation.toString()) + "]";
     }
 }

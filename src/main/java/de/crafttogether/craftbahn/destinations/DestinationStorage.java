@@ -7,15 +7,16 @@ import org.bukkit.Location;
 import org.json.JSONArray;
 
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 public class DestinationStorage {
-    private static List<Destination> destinations = new ArrayList<Destination>();
+    private static List<Destination> destinations = new ArrayList<>();
 
-    public static void insert(Destination destination, Destination.Callback<SQLException, Boolean> callback) {
-        MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQL();
+    public static void insert(Destination destination, Destination.Callback<SQLException, Integer> callback) {
+        MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         CTLocation loc = destination.getLocation();
         CTLocation tpLoc = destination.getTeleportLocation();
@@ -24,9 +25,7 @@ public class DestinationStorage {
         for (UUID uuid : destination.getParticipants())
             participants.put(uuid.toString());
 
-        Bukkit.getLogger().info("Insert " + destination.getName() + " into `cb_destinations` ...");
-
-        MySQL.executeAsync("INSERT INTO `cb_destinations` " +
+        MySQL.insertAsync("INSERT INTO `cb_destinations` " +
         "(" +
             "`name`, " +
             "`type`, " +
@@ -59,36 +58,39 @@ public class DestinationStorage {
             (tpLoc != null ? loc.getZ() : null) +
         ");",
 
-        (err, result) -> {
+        (err, lastInsertedId) -> {
             if (err != null)
                 Bukkit.getLogger().warning("[MySQL:] Error: " + err.getMessage());
-            else
-                Bukkit.getLogger().info("Inserted " + destination.getName());
 
-            callback.call(err, result);
+            // Add to cache
+            destination.setId(lastInsertedId);
+            destinations.add(destination);
+
+            callback.call(err, lastInsertedId);
         });
     }
 
     public static void update(Destination destination, Destination.Callback<SQLException, Boolean> callback) {
-        MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQL();
+        MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         // TODO: MySQL.updateAsync();
     }
 
+    // Unused
     public static void load(String destinationName, Destination.Callback<SQLException, Destination> callback) {
-        MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQL();
+        MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         // TODO: MySQL.queryAsync();
     }
 
-    public static void delete(String destinationName, Destination.Callback<SQLException, Destination> callback) {
-        MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQL();
+    public static void delete(String destinationName, Destination.Callback<SQLException, Boolean> callback) {
+        MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         // TODO: MySQL.executeAsync();
     }
 
     public static void loadAll(Destination.Callback<SQLException, List<Destination>> callback) {
-        MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQL();
+        MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         MySQL.queryAsync("SELECT * FROM `%sdestinations`", (err, result) -> {
             if (err != null) {
@@ -117,6 +119,7 @@ public class DestinationStorage {
                     }
 
                     Destination dest = new Destination(name);
+                    dest.setId(result.getInt("id"));
                     dest.setServer(server);
                     dest.setWorld(world);
                     dest.setOwner(UUID.fromString(result.getString("owner")));
@@ -128,6 +131,9 @@ public class DestinationStorage {
 
                     found.add(dest);
                 }
+
+                // Update cache
+                destinations = found;
 
                 callback.call(null, found);
 
@@ -150,7 +156,7 @@ public class DestinationStorage {
         return null;
     }
 
-    public static void addDestination(String name, UUID owner, Destination.DestinationType type, Location loc, Boolean isPublic, Destination.Callback<SQLException, Boolean> callback) {
+    public static void addDestination(String name, UUID owner, Destination.DestinationType type, Location loc, Boolean isPublic, Destination.Callback<SQLException, Integer> callback) {
         String serverName = CraftBahn.getInstance().getServerName();
         CTLocation ctLoc = CTLocation.fromBukkitLocation(loc);
 

@@ -5,10 +5,7 @@ import de.crafttogether.craftbahn.CraftBahn;
 import org.bukkit.Bukkit;
 
 import javax.annotation.Nullable;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class MySQLAdapter {
     private static MySQLAdapter instance;
@@ -90,6 +87,30 @@ public class MySQLAdapter {
             return resultSet;
         }
 
+        public int insert(String statement, final Object... args) throws SQLException {
+            if (args.length > 0) statement = String.format(statement, args);
+            String finalStatement = statement;
+
+            int lastInsertedId = 0;
+            try {
+                connection = dataSource.getConnection();
+                preparedStatement = connection.prepareStatement(finalStatement, Statement.RETURN_GENERATED_KEYS);
+                preparedStatement.executeUpdate();
+
+                resultSet = preparedStatement.getGeneratedKeys();
+                if (resultSet.next())
+                    lastInsertedId = resultSet.getInt(1);
+            }
+            catch (SQLException e) {
+                if (e.getMessage().contains("link failure"))
+                    Bukkit.getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
+                else
+                    throw e;
+            }
+
+            return lastInsertedId;
+        }
+
         public int update(String statement, final Object... args) throws SQLException {
             if (args.length > 0) statement = String.format(statement, args);
             String finalStatement = statement;
@@ -149,14 +170,33 @@ public class MySQLAdapter {
             return this;
         }
 
+        public MySQLConnection insertAsync(String statement, final @Nullable Callback<SQLException, Integer> callback, final Object... args) {
+            if (args.length > 0) statement = String.format(statement, args);
+            final String finalStatement = statement;
+
+            executeAsync(() -> {
+                try {
+                    int lastInsertedId = insert(finalStatement);
+                    callback.call(null, lastInsertedId);
+                } catch (SQLException e) {
+                    if (e.getMessage().contains("link failure"))
+                        Bukkit.getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
+                    else
+                        callback.call(e, 0);
+                }
+            });
+
+            return this;
+        }
+
         public MySQLConnection updateAsync(String statement, final @Nullable Callback<SQLException, Integer> callback, final Object... args) {
             if (args.length > 0) statement = String.format(statement, args);
             final String finalStatement = statement;
 
             executeAsync(() -> {
                 try {
-                   int rows = update(finalStatement);
-                   callback.call(null, rows);
+                    int rows = update(finalStatement);
+                    callback.call(null, rows);
                 } catch (SQLException e) {
                     if (e.getMessage().contains("link failure"))
                         Bukkit.getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");

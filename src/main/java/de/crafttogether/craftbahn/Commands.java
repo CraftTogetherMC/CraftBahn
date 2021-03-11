@@ -252,11 +252,11 @@ public class Commands implements TabExecutor {
                 }
 
                 Player finalP = p;
-                DestinationStorage.addDestination(args[1], p.getUniqueId(), type, p.getLocation(), Boolean.valueOf(isPublic), (err, result) -> {
+                DestinationStorage.addDestination(args[1], p.getUniqueId(), type, p.getLocation(), Boolean.valueOf(isPublic), (err, id) -> {
                     if (err != null)
                         sendMessage(finalP, "&6CraftBahn &8» Es trat ein Fehler beim speichern des Fahrziel auf. Bitte kontaktiere einen Administrator.");
                     else
-                        sendMessage(finalP, "&6CraftBahn &8» &aZiel gespeichert.");
+                        sendMessage(finalP, "&6CraftBahn &8» &aFahrziel wurde erstellt. ID: " + id);
                 });
             }
 

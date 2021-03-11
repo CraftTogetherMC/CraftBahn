@@ -131,8 +131,8 @@ public final class CraftBahn extends JavaPlugin {
             MySQLAdapter.disconnect();
     }
 
-    public MySQLConnection getMySQL() {
-        return MySQL;
+    public MySQLAdapter getMySQLAdapter() {
+        return MySQLAdapter;
     }
 
     public DynmapAPI getDynmap() {
