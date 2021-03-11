@@ -113,7 +113,7 @@ public class MarkerManager {
 
         label = "<div class=\"ctdestination\" id=\"" + dest.getName() + "\"><div style=\"padding:6px\"><h3 style=\"padding:0px;margin:0px;color:#ffaa00\">" + dest.getName() + " <span style=\"color:#aaaaaa\">(" + label + ")</span></h3>" + (showOwner.booleanValue() ? ("<span style=\"font-weight:bold;color:#aaaaaa;\">Besitzer:</span> " + owner + "<br>") : "") + "<span style=\"font-style:italic;font-weight:bold;color:#ff5555\">/fahrziel " + dest.getName() + "</span></div></div>";
         deleteMarker(dest);
-        Location loc = dest.getLocation();
+        Location loc = dest.getLocation().getBukkitLocation();
         set.createMarker(dest.getName(), label, true, loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ(), icon, false);
     }
 }

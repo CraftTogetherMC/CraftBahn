@@ -3,6 +3,7 @@ package de.crafttogether.craftbahn;
 import java.util.*;
 
 import de.crafttogether.craftbahn.CraftBahn;
+import de.crafttogether.craftbahn.destinations.CTLocation;
 import de.crafttogether.craftbahn.destinations.Destination;
 import de.crafttogether.craftbahn.destinations.DestinationStorage;
 import de.crafttogether.craftbahn.util.MarkerManager;
@@ -54,7 +55,7 @@ public class Commands implements TabExecutor {
                 dest = list.get(rand.nextInt(list.size()));
 
                 sendMessage(p, "&6CraftBahn &8» &cDu wurdest zum " + dest.getType() + " &f'&e" + dest.getName() + "'&f &cteleportiert.");
-                p.teleport(dest.getLocation());
+                p.teleport(dest.getTeleportLocation().getBukkitLocation());
             }
             else
                 sendMessage(p, "&6CraftBahn &8» &cEs wurde kein mögliches Ziel gefunden.");
@@ -250,8 +251,13 @@ public class Commands implements TabExecutor {
                     return true;
                 }
 
-                sendMessage(p, "&6CraftBahn &8» &aZiel gespeichert.");
-                DestinationStorage.addDestination(args[1], p.getUniqueId(), type, p.getLocation(), Boolean.valueOf(isPublic));
+                Player finalP = p;
+                DestinationStorage.addDestination(args[1], p.getUniqueId(), type, p.getLocation(), Boolean.valueOf(isPublic), (err, result) -> {
+                    if (err != null)
+                        sendMessage(finalP, "&6CraftBahn &8» Es trat ein Fehler beim speichern des Fahrziel auf. Bitte kontaktiere einen Administrator.");
+                    else
+                        sendMessage(finalP, "&6CraftBahn &8» &aZiel gespeichert.");
+                });
             }
 
             else if (args[0].equalsIgnoreCase("remove")) {
@@ -377,7 +383,7 @@ public class Commands implements TabExecutor {
                 }
 
                 Destination dest = DestinationStorage.getDestination(args[1]);
-                dest.setLocation(p.getLocation());
+                dest.setLocation(CTLocation.fromBukkitLocation(p.getLocation()));
 
                 // Speichern
                 Player finalP = p;
@@ -482,7 +488,7 @@ public class Commands implements TabExecutor {
                 }
 
                 Destination dest = DestinationStorage.getDestination(args[1]);
-                p.teleport(dest.getLocation());
+                p.teleport(dest.getTeleportLocation().getBukkitLocation());
 
                 sendMessage(p, "&6CraftBahn &8» &6Du wurdest zum Ziel: &f'&e" + dest.getName() + "&f' &6teleportiert.");
             }
@@ -518,7 +524,7 @@ public class Commands implements TabExecutor {
             message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(ChatColor.translateAlternateColorCodes('&', hoverText))).create()));
 
             if (dest.getLocation() != null && p.hasPermission("ctdestinations.see.location")) {
-                Location loc = dest.getLocation();
+                Location loc = dest.getTeleportLocation().getBukkitLocation();
                 TextComponent tp = new TextComponent();
                 tp.addExtra((BaseComponent)new TextComponent(ChatColor.translateAlternateColorCodes('&', " &7[&fTP&7]")));
                 tp.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrzieledit tp " + dest.getName()));

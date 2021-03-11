@@ -4,4 +4,19 @@ main: de.crafttogether.craftbahn.CraftBahn
 api-version: 1.13
 depend: [Train_Carts]
 authors: [J0schlZ]
+website: https://craft-together.de/
 description: Ich mag Züge
+commands:
+  fahrziel:
+    description: Fahrziel wählen
+    usage: /fahrziel
+  fahrziele:
+    description: Fahrziele auflisten
+    usage: /fahrziele
+  fahrzieledit:
+    description: Fahrziele verwalten
+    usage: /fahrzieledit
+  rbf:
+    description: Teleportiere zu zufälligem Bahnhof
+    usage: /rbf
+    aliases: [rt, rtp]

@@ -2,6 +2,7 @@ package de.crafttogether.craftbahn.destinations;
 
 import org.bukkit.Location;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -10,9 +11,10 @@ public class Destination {
     private String server = null;
     private String world = null;
     private UUID owner = null;
-    private List<UUID> participants = null;
+    private List<UUID> participants = new ArrayList<UUID>();
     private Enum<?> type = null;
-    private Location location = null;
+    private CTLocation location = null;
+    private CTLocation teleportLocation = null;
     private Boolean isPublic = null;
 
     public interface Callback<E extends Throwable, V extends Object> {
@@ -53,7 +55,7 @@ public class Destination {
         this.name = name;
     }
 
-    public Destination(String name, String server, String world, UUID owner, List<UUID> participants, Enum<?> type, Location location, Boolean isPublic) {
+    public Destination(String name, String server, String world, UUID owner, List<UUID> participants, Enum<?> type, CTLocation location, CTLocation teleportLocation, Boolean isPublic) {
         this.name = name;
         this.server = server;
         this.world = world;
@@ -61,6 +63,7 @@ public class Destination {
         this.participants = participants;
         this.type = type;
         this.location = location;
+        this.teleportLocation = teleportLocation;
         this.isPublic = isPublic;
     }
 
@@ -86,8 +89,10 @@ public class Destination {
         return this.type;
     }
 
-    public Location getLocation() {
-        return this.location;
+    public CTLocation getLocation() { return this.location; }
+
+    public CTLocation getTeleportLocation() {
+        return teleportLocation;
     }
 
     public Boolean isPublic() {
@@ -132,8 +137,12 @@ public class Destination {
         this.type = DestinationType.valueOf(type);
     }
 
-    public void setLocation(Location location) {
+    public void setLocation(CTLocation location) {
         this.location = location;
+    }
+
+    public void setTeleportLocation(CTLocation teleportLocation) {
+        this.teleportLocation = teleportLocation;
     }
 
     public void setPublic(Boolean isPublic) {
@@ -148,5 +157,12 @@ public class Destination {
             case "spielerbahnhof": return DestinationType.PLAYER_STATION;
         }
         return null;
+    }
+
+    public String toString() {
+        String strParticipants = "";
+        for (UUID participant : participants) strParticipants += participant.toString() + ",";
+        if (strParticipants.length() > 1) strParticipants = strParticipants.substring(-1);
+        return "name=" + name + ", server=" + server + ", world=" + world + ", type=" + (type == null ? null : type.toString()) + ", owner=" + owner + ", participants=[" + strParticipants + "], isPrivate=" + isPublic + ", location=[" + (location == null ? null : location.toString()) + "], teleportLocation=[" + (teleportLocation == null ? null : teleportLocation.toString()) + "]";
     }
 }
