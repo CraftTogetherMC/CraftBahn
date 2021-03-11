@@ -104,7 +104,7 @@ public class DestinationStorage {
         }, MySQL.getTablePrefix(), destination.getId());
     }
 
-    // Unused
+    // TODO: Trigger if other server updates a destination
     public static void load(int destinationId, Destination.Callback<SQLException, Destination> callback) {
         MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
@@ -124,8 +124,8 @@ public class DestinationStorage {
                         destinations.put(dest.getId(), dest);
                     }
                 } catch (SQLException ex) {
+                    err = ex;
                     Bukkit.getLogger().warning("[MySQL:] Error: " + err.getMessage());
-                    return;
                 }
                 finally {
                     MySQL.close();
@@ -146,10 +146,9 @@ public class DestinationStorage {
             }
             else {
                 // Update cache
-                if (destinations.containsKey(destinationId))
-                    destinations.remove(destinationId);
+                destinations.remove(destinationId);
 
-                callback.call(err, affectedRows);
+                callback.call(null, affectedRows);
                 MySQL.close();
             }
         }, MySQL.getTablePrefix(), destinationId);
@@ -168,15 +167,18 @@ public class DestinationStorage {
                 try {
                     while (result.next()) {
                         Destination dest = setupDestination(result);
+
+                        // Update cache
                         destinations.put(dest.getId(), dest);
                     }
                 } catch (SQLException ex) {
+                    err = ex;
                     Bukkit.getLogger().warning("[MySQL:] Error: " + ex.getMessage());
                 }
                 finally {
                     MySQL.close();
                 }
-
+                Bukkit.getLogger().info("loaded " + destinations.values().size());
                 callback.call(err, destinations.values());
             }
         }, MySQL.getTablePrefix());

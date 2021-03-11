@@ -1,5 +1,6 @@
-package de.crafttogether.craftbahn;
+package de.crafttogether.craftbahn.commands;
 
+import de.crafttogether.craftbahn.CraftBahn;
 import de.crafttogether.craftbahn.destinations.Destination;
 import de.crafttogether.craftbahn.destinations.DestinationStorage;
 import de.crafttogether.craftbahn.util.CTLocation;
@@ -130,7 +131,7 @@ public class Commands implements TabExecutor {
                 return true;
             }
 
-            Bukkit.getServer().dispatchCommand((CommandSender)p, "train destination " + dest.getName());
+            Bukkit.getServer().dispatchCommand(p, "train destination " + dest.getName());
             return true;
         }
 
@@ -142,6 +143,7 @@ public class Commands implements TabExecutor {
                 return false;
 
             Collection<Destination> destinations = DestinationStorage.getDestinations();
+            Bukkit.getLogger().info("found " + destinations.size());
             if (destinations.size() < 1) {
                 sendMessage(p, "&6CraftBahn &8» &cEs ist noch kein Ziel in der Liste. Tippe &e/destination add <name> &cum eines zu speichern.");
                 return true;
