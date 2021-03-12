@@ -43,7 +43,7 @@ public class DestinationStorage {
 
         "VALUES (" +
             "'" + destination.getName() + "', " +
-            "'" + destination.getType() + "', " +
+            "'" + destination.getType().name() + "', " +
             "'" + destination.getServer() + "', " +
             "'" + destination.getWorld() + "', " +
             (loc != null ? loc.getX() : null) + ", " +
@@ -81,7 +81,7 @@ public class DestinationStorage {
 
         MySQL.updateAsync("UPDATE `%sdestinations` SET " +
             "`name`         = '" + destination.getName() + "', " +
-            "`type`         = '" + destination.getType() + "', " +
+            "`type`         = '" + destination.getType().name() + "', " +
             "`server`       = '" + destination.getServer() + "', " +
             "`world`        = '" + destination.getWorld() + "', " +
             "`loc_x`        = " + loc.getX() + ", " +
@@ -167,7 +167,8 @@ public class DestinationStorage {
                 try {
                     while (result.next()) {
                         Destination dest = setupDestination(result);
-
+                        Bukkit.getLogger().info(dest.toString());
+                        Bukkit.getLogger().info(" ");
                         // Update cache
                         destinations.put(dest.getId(), dest);
                     }
