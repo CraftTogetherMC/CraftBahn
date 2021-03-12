@@ -3,7 +3,7 @@
 ![](https://media.tenor.com/images/b31da936191fcccadb8fc6e0fc777070/tenor.gif)
 
 **TODO:**
-- Debugging
+- Debugging (Ein Job für Ceddix)
 - ~~Bestehende Daten aus altem Plugin importieren (php)~~
 - ~~/fahrzieledit setwarp -cmd für das setzen der Teleport-Position hinzufügen (setlocation == MarkerPosition)~~
 - ~~/farhzieledit add/remove-owner -cmd für die Verwaltung weiterer Besitzer (participants) hinzufügen.~~
