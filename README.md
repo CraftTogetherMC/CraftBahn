@@ -17,7 +17,7 @@
 - Route / Destination über TrainCartsAPI setzen anstatt jeweiliges command auszuführen. (Um Rückgabe zu vermeiden)
 - ~~/fahrziele (Liste) übersichtlicher gestalten.. (Mit Pagination)~~ 
 - MarkerSystem überarbeiten
-- Befehl hinzufügen um Info's über ein bestimmtes Fahrziel anzuzeigen `/fze info <name> [server]`
+- Befehl hinzufügen um Info's über ein bestimmtes Fahrziel anzuzeigen `/fze info <name> [server]` (Perfekter Outsource-Job. Pull-Request!? ^^)
 - Ausgabe im Chat was gespawned wurde (Minecart oder Traincart) wenn man ein Minecart placed
 - Züge mit kurzer Verzögerung löschen sobald Spieler ausgestiegen ist. (Benötigt Tag-Signs an allen Bahnhöfen!)
 - ICS integrieren
