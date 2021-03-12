@@ -55,6 +55,7 @@ public final class CraftBahn extends JavaPlugin {
         registerCommand("fahrziel", commands);
         registerCommand("fahrziele", new ListCommand());
         registerCommand("fahrzieledit", commands);
+        registerCommand("fze", commands);
 
         // Setup MySQLConfig
         MySQLAdapter.MySQLConfig myCfg = new MySQLConfig();

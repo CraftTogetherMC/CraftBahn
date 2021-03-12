@@ -42,7 +42,10 @@ public class Commands implements TabExecutor {
             if (args.length > 0 && args[0].equalsIgnoreCase("all"))
                 showAll = true;
 
-            for (Destination dst : DestinationStorage.getDestinations()) {
+            List<Destination> destinations = new ArrayList<>(DestinationStorage.getDestinations());
+            destinations = DestinationStorage.filterByServer(destinations, CraftBahn.getInstance().getServerName());
+
+            for (Destination dst : destinations) {
                 if (showAll) {
                     list.add(dst);
                 } else if (dst.getType().equals(Destination.DestinationType.STATION))
@@ -50,10 +53,8 @@ public class Commands implements TabExecutor {
             }
 
             if (list.size() > 0) {
-                Destination dest = list.get(0);
-
                 Random rand = new Random();
-                dest = list.get(rand.nextInt(list.size()));
+                Destination dest = list.get(rand.nextInt(list.size()));
 
                 sendMessage(p, "&6CraftBahn &8» &cDu wurdest zum " + dest.getType() + " &f'&e" + dest.getName() + "'&f &cteleportiert.");
                 p.teleport(dest.getTeleportLocation().getBukkitLocation());
@@ -136,7 +137,7 @@ public class Commands implements TabExecutor {
             return true;
         }
 
-        else if (cmd.getName().equalsIgnoreCase("fahrzieledit")) {
+        else if (cmd.getName().equalsIgnoreCase("fahrzieledit") || cmd.getName().equalsIgnoreCase("fze")) {
             if (sender instanceof Player)
                 p = Bukkit.getPlayer(((Player)sender).getUniqueId());
 
@@ -346,6 +347,36 @@ public class Commands implements TabExecutor {
                 });
             }
 
+            else if (args[0].equalsIgnoreCase("setwarp")) {
+                if (!p.hasPermission("ctdestinations.edit.setwarp")) {
+                    sendMessage(p, "&cDazu hast du keine Berechtigung.");
+                    return true;
+                }
+
+                if (args.length < 2) {
+                    sendMessage(p, "&6CraftBahn &8» &cEs wurde kein Ziel angegeben");
+                    return true;
+                }
+
+                if (DestinationStorage.getDestination(args[1]) == null) {
+                    sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen");
+                    return true;
+                }
+
+                Destination dest = DestinationStorage.getDestination(args[1]);
+                dest.setTeleportLocation(CTLocation.fromBukkitLocation(p.getLocation()));
+
+                // Speichern
+                Player finalP = p;
+                DestinationStorage.update(dest, (err, affectedRows) -> {
+                    if (err != null)
+                        sendMessage(finalP, "&6CraftBahn &8» Es trat ein Fehler beim speichern der Änderungen auf. Bitte kontaktiere einen Administrator.");
+                    else {
+                        sendMessage(finalP, "&6CraftBahn &8» &6Du hast die Position für das Ziel: &f'&e" + dest.getName() + "&f' &6aktualisiert.");
+                    }
+                });
+            }
+
             else if (args[0].equalsIgnoreCase("setprivate")) {
                 if (!p.hasPermission("ctdestinations.edit.setprivate")) {
                     sendMessage(p, "&cDazu hast du keine Berechtigung.");
@@ -468,14 +499,7 @@ public class Commands implements TabExecutor {
             }
         }
 
-        else if (cmd.getName().equalsIgnoreCase("fahrziele")) {
-            for (Destination.DestinationType type : Destination.DestinationType.values()) {
-                if (!type.equals(Destination.DestinationType.MAIN_STATION))
-                    proposals.add(type.toString().replace("hof", "höfe"));
-            }
-        }
-
-        else if (cmd.getName().equalsIgnoreCase("fahrzieledit")) {
+        else if (cmd.getName().equalsIgnoreCase("fahrzieledit") || cmd.getName().equalsIgnoreCase("fze")) {
             if (args.length == 1) {
                 if (sender.hasPermission("ctdestinations.edit.add"))
                     proposals.add("add");
@@ -485,6 +509,8 @@ public class Commands implements TabExecutor {
                     proposals.add("setowner");
                 if (sender.hasPermission("ctdestinations.edit.setlocation"))
                     proposals.add("setlocation");
+                if (sender.hasPermission("ctdestinations.edit.setwarp"))
+                    proposals.add("setwarp");
                 if (sender.hasPermission("ctdestinations.edit.settype"))
                     proposals.add("settype");
                 if (sender.hasPermission("ctdestinations.edit.setpublic"))

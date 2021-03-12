@@ -16,6 +16,7 @@ commands:
   fahrzieledit:
     description: Fahrziele verwalten
     usage: /fahrzieledit
+    aliases: [fze]
   rbf:
     description: Teleportiere zu zufälligem Bahnhof
     usage: /rbf
