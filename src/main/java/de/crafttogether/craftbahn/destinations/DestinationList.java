@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 public class DestinationList {
 
@@ -75,12 +76,19 @@ public class DestinationList {
                 String hoverText = "/fahrziel " + dest.getName();
                 if ((dest.getType().equals(Destination.DestinationType.PLAYER_STATION) || dest.getType().equals(Destination.DestinationType.PUBLIC_STATION)) && dest.getOwner() != null && this.showOwner) {
                     OfflinePlayer owner = Bukkit.getOfflinePlayer(dest.getOwner());
-                    if (owner.hasPlayedBefore())
-                        hoverText += "\n&6Besitzer: &e" + owner.getName();
+
+                    String strOwner = (owner.hasPlayedBefore() ? owner.getName() : "Unbekannt") + ", ";
+                    for (UUID uuid : dest.getParticipants()) {
+                        OfflinePlayer participant = Bukkit.getOfflinePlayer(uuid);
+                        if (!participant.hasPlayedBefore()) continue;
+                        strOwner += participant.getName() + ", ";
+                    }
+
+                    hoverText += "\n&6Besitzer: &e" + strOwner.substring(0, strOwner.length()-2);
                 }
 
                 if (dest.getLocation() != null && this.showLocation)
-                    hoverText += "\n&6Koordinaten: &e" + dest.getLocation().getX() + ", " + dest.getLocation().getY() + ", " + dest.getLocation().getZ();
+                    hoverText += "\n&6Koordinaten: &e" + Math.round(dest.getLocation().getX()) + ", " + Math.round(dest.getLocation().getY()) + ", " + Math.round(dest.getLocation().getZ());
 
                 btnFahrziel.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/fahrziel " + dest.getName()));
                 btnFahrziel.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format(hoverText))).create()));

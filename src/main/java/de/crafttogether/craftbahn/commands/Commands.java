@@ -18,10 +18,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class Commands implements TabExecutor {
     private CraftBahn plugin = CraftBahn.getInstance();
@@ -130,6 +127,11 @@ public class Commands implements TabExecutor {
 
             if (!dest.isPublic().booleanValue() && !p.hasPermission("ctdestinations.see.private")) {
                 sendMessage(p, "&6CraftBahn &8» &cAuf dieses Ziel hast du keinen Zugriff.");
+                return true;
+            }
+
+            if (!CraftBahn.getInstance().getServerName().equalsIgnoreCase(dest.getServer())) {
+                sendMessage(p, "&6CraftBahn &8» &cDas Ziel befindet sich auf einem anderen Server.");
                 return true;
             }
 
@@ -269,6 +271,86 @@ public class Commands implements TabExecutor {
                         sendMessage(finalP, "&6CraftBahn &8» Es trat ein Fehler beim speichern der Änderungen auf. Bitte kontaktiere einen Administrator.");
                     else
                         sendMessage(finalP, "&6CraftBahn &8» &f'&e" + dest.getName() + "&f' &6gehört nun &e" + owner.getName());
+                });
+            }
+
+            else if (args[0].equalsIgnoreCase("addmember")) {
+                if (!p.hasPermission("ctdestinations.edit.addmember")) {
+                    sendMessage(p, "&cDazu hast du keine Berechtigung.");
+                    return true;
+                }
+
+                if (args.length < 2) {
+                    sendMessage(p, "&6CraftBahn &8» &6CraftBahn &8&cEs wurde kein Ziel angegeben.");
+                    return true;
+                }
+
+                if (DestinationStorage.getDestination(args[1]) == null) {
+                    sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen");
+                    return true;
+                }
+
+                if (args.length < 3) {
+                    sendMessage(p, "&6CraftBahn &8» &cEs wurde kein Spieler angegeben");
+                    return true;
+                }
+
+                OfflinePlayer owner = Bukkit.getOfflinePlayer(args[2]);
+                if (owner == null || !owner.hasPlayedBefore()) {
+                    sendMessage(p, "&6CraftBahn &8» &cEs wurde kein Spieler mit dem Namen &e" + args[2] + " &cgefunden");
+                    return true;
+                }
+
+                Destination dest = DestinationStorage.getDestination(args[1]);
+                dest.addParticipant(owner.getUniqueId());
+
+                // Speichern
+                Player finalP = p;
+                DestinationStorage.update(dest, (err, affectedRows) -> {
+                    if (err != null)
+                        sendMessage(finalP, "&6CraftBahn &8» Es trat ein Fehler beim speichern der Änderungen auf. Bitte kontaktiere einen Administrator.");
+                    else
+                        sendMessage(finalP, "&6CraftBahn &8» &6Du hast &e" + owner.getName() + " &6als Besitzer des Fahrziel &f'&e" + dest.getName() + " &2hinzugefügt.");
+                });
+            }
+
+            else if (args[0].equalsIgnoreCase("removemember")) {
+                if (!p.hasPermission("ctdestinations.edit.removemember")) {
+                    sendMessage(p, "&cDazu hast du keine Berechtigung.");
+                    return true;
+                }
+
+                if (args.length < 2) {
+                    sendMessage(p, "&6CraftBahn &8» &6CraftBahn &8&cEs wurde kein Ziel angegeben.");
+                    return true;
+                }
+
+                if (DestinationStorage.getDestination(args[1]) == null) {
+                    sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen");
+                    return true;
+                }
+
+                if (args.length < 3) {
+                    sendMessage(p, "&6CraftBahn &8» &cEs wurde kein Spieler angegeben");
+                    return true;
+                }
+
+                OfflinePlayer owner = Bukkit.getOfflinePlayer(args[2]);
+                if (owner == null || !owner.hasPlayedBefore()) {
+                    sendMessage(p, "&6CraftBahn &8» &cEs wurde kein Spieler mit dem Namen &e" + args[2] + " &cgefunden");
+                    return true;
+                }
+
+                Destination dest = DestinationStorage.getDestination(args[1]);
+                dest.removeParticipant(owner.getUniqueId());
+
+                // Speichern
+                Player finalP = p;
+                DestinationStorage.update(dest, (err, affectedRows) -> {
+                    if (err != null)
+                        sendMessage(finalP, "&6CraftBahn &8» Es trat ein Fehler beim speichern der Änderungen auf. Bitte kontaktiere einen Administrator.");
+                    else
+                        sendMessage(finalP, "&6CraftBahn &8» &6Du hast &e" + owner.getName() + " &6als Besitzer des Fahrziel &f'&e" + dest.getName() + " &centfernt.");
                 });
             }
 
@@ -469,13 +551,13 @@ public class Commands implements TabExecutor {
 
                 Destination dest = DestinationStorage.getDestination(args[1]);
 
-                if (dest.getTeleportLocation().getServer() == CraftBahn.getInstance().getServerName()) {
+                if (dest.getTeleportLocation().getServer().equalsIgnoreCase(CraftBahn.getInstance().getServerName())) {
                     Location loc = dest.getTeleportLocation().getBukkitLocation();
                     p.teleport(loc);
                     sendMessage(p, "&6CraftBahn &8» &6Du wurdest zum Ziel: &f'&e" + dest.getName() + "&f' &6teleportiert.");
                 }
                 else
-                    sendMessage(p, "&6CraftBahn &8» &cDas Ziel befindet sich auf einem anderen Server");
+                    sendMessage(p, "&6CraftBahn &8» &cDas Ziel befindet sich auf einem anderen Server.");
             }
         }
         return true;
@@ -507,6 +589,10 @@ public class Commands implements TabExecutor {
                     proposals.add("remove");
                 if (sender.hasPermission("ctdestinations.edit.setowner"))
                     proposals.add("setowner");
+                if (sender.hasPermission("ctdestinations.edit.addmember"))
+                    proposals.add("addmember");
+                if (sender.hasPermission("ctdestinations.edit.removemember"))
+                    proposals.add("removemember");
                 if (sender.hasPermission("ctdestinations.edit.setlocation"))
                     proposals.add("setlocation");
                 if (sender.hasPermission("ctdestinations.edit.setwarp"))
@@ -540,9 +626,21 @@ public class Commands implements TabExecutor {
                     }
                 }
             } else if (args.length == 3) {
-                if (args[0].equalsIgnoreCase("setowner") && sender.hasPermission("ctdestinations.edit.setowner")) {
+                if ((args[0].equalsIgnoreCase("setowner") && sender.hasPermission("ctdestinations.edit.setowner")) ||
+                        args[0].equalsIgnoreCase("addmember") && sender.hasPermission("ctdestinations.edit.addmember")) {
                     for (Player p : Bukkit.getOnlinePlayers())
                         proposals.add(p.getName());
+
+                } else if (args[0].equalsIgnoreCase("removemember") && sender.hasPermission("ctdestinations.edit.removemember")) {
+                    Destination dest = DestinationStorage.getDestination(args[1]);
+                    if (dest != null) {
+                        for (UUID uuid : dest.getParticipants()) {
+                            OfflinePlayer participant = Bukkit.getOfflinePlayer(uuid);
+                            if (!participant.hasPlayedBefore()) continue;
+                            proposals.add(participant.getName());
+                        }
+                    }
+
                 } else if ((args[0].equalsIgnoreCase("add") || args[0].equalsIgnoreCase("settype")) && (
                         sender.hasPermission("ctdestinations.edit.add") || sender.hasPermission("ctdestinations.edit.settype"))) {
                     proposals.add("STATION");

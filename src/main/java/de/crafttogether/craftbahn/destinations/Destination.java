@@ -167,7 +167,7 @@ public class Destination {
     public String toString() {
         String strParticipants = "";
         for (UUID participant : participants) strParticipants += participant.toString() + ",";
-        if (strParticipants.length() > 1) strParticipants = strParticipants.substring(-1);
+        if (strParticipants.length() > 1) strParticipants = strParticipants.substring(0, strParticipants.length() - 1);
         return "id=" + id + ", name=" + name + ", server=" + server + ", world=" + world + ", type=" + (type == null ? null : type.toString()) + ", owner=" + owner + ", participants=[" + strParticipants + "], isPrivate=" + isPublic + ", location=[" + (location == null ? null : location.toString()) + "], teleportLocation=[" + (teleportLocation == null ? null : teleportLocation.toString()) + "]";
     }
 }
