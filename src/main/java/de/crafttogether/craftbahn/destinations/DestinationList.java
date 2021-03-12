@@ -87,8 +87,10 @@ public class DestinationList {
                     hoverText += "\n&6Besitzer: &e" + strOwner.substring(0, strOwner.length()-2);
                 }
 
-                if (dest.getLocation() != null && this.showLocation)
+                if (dest.getLocation() != null && this.showLocation) {
                     hoverText += "\n&6Koordinaten: &e" + Math.round(dest.getLocation().getX()) + ", " + Math.round(dest.getLocation().getY()) + ", " + Math.round(dest.getLocation().getZ());
+                    hoverText += "\n&6Welt: &e" + dest.getWorld();
+                }
 
                 btnFahrziel.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/fahrziel " + dest.getName()));
                 btnFahrziel.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format(hoverText))).create()));
