@@ -125,12 +125,6 @@ public class DestinationList {
         TextComponent output = new TextComponent();
         TextComponent page = this.pages.get(pageIndex - 1);
 
-        if (pages.size() > 1) {
-            output.addExtra(Message.newLine());
-            output.addExtra(Message.format("&6Seite: &e" + pageIndex + "&6/&e" + pages.size()));
-            output.addExtra(Message.newLine());
-        }
-
         if (pageIndex > 1)
             output.addExtra(Message.newLine());
 
@@ -139,22 +133,22 @@ public class DestinationList {
 
         TextComponent btnPrevious;
         if (pageIndex > 1) {
-            btnPrevious = Message.format("&6 << &eZurück");
+            btnPrevious = Message.format("&a----<< &6Zurück");
             btnPrevious.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele " + (filterType == null ? "" : filterType.name() + " ") + (pageIndex - 1)));
             btnPrevious.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (
                 new ComponentBuilder(Message.format("&6Vorherige Seite: &e" + (pageIndex - 1)))
             ).create()));
         }
         else
-            btnPrevious = Message.format("&6 << &8Zurück");
+            btnPrevious = Message.format("&2----<< &7Zurück");
 
         output.addExtra(btnPrevious);
 
-        output.addExtra(Message.format(" &6| "));
+        output.addExtra(Message.format(" &2" + pageIndex +  "&7/&2" + pages.size() + " "));
 
         TextComponent btnForward;
         if (pageIndex < this.pages.size()) {
-            btnForward = Message.format("&eWeiter &6>>");
+            btnForward = Message.format("&6Nächste &2>>----");
             btnForward.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele " + (filterType == null ? "" : filterType.name() + " ") + (pageIndex + 1)));
             btnForward.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (
                 new ComponentBuilder(Message.format("&6Nächste Seite: &e" + (pageIndex + 1)))
@@ -209,8 +203,6 @@ public class DestinationList {
             return;
         }
 
-        player.sendMessage(Message.newLine());
-        player.sendMessage(Message.format("&6####################"));
         player.sendMessage(renderPage(pageIndex));
     }
 
