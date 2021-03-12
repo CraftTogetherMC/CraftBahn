@@ -11,8 +11,9 @@
 - ~~TrainListener wieder einfügen (Für EnterMessages und weitere CraftBahn features)~~
 - Per-Server-Auswahl bei der Auflistung der Fahrziele mit: /fahrziele 
 - PluginMessage: Andere server im Netzwerk bei Änderungen benachrichtigen
-- Bei /fahrziel Route setzen wenn Ziel sich auf anderem Server befindet
-- ~~/fahrziele (Liste) übersichtlicher gestalten.. (Mit Pagination)~~
+- ~~Bei /fahrziel Route setzen wenn Ziel sich auf anderem Server befindet~~ 
+- Route / Destination über TrainCartsAPI setzen anstatt jeweiliges command auszuführen. (Um Rückgabe zu vermeiden)
+- ~~/fahrziele (Liste) übersichtlicher gestalten.. (Mit Pagination)~~ 
 - MarkerSystem überarbeiten
 - Ausgabe im Chat was gespawned wurde (Minecart oder Traincart) wenn man ein Minecart placed
 - Züge mit kurzer Verzögerung löschen sobald Spieler ausgestiegen ist. (Benötigt Tag-Signs an allen Bahnhöfen!)
