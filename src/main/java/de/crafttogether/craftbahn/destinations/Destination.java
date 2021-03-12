@@ -40,7 +40,7 @@ public class Destination {
         PUBLIC_STATION {
             @Override
             public String toString() {
-                return "Öffentliches Ziel";
+                return "Öffentlich";
             }
         },
 

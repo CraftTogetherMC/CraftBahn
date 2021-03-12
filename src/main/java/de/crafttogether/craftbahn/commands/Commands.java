@@ -11,6 +11,7 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -133,62 +134,6 @@ public class Commands implements TabExecutor {
 
             Bukkit.getServer().dispatchCommand(p, "train destination " + dest.getName());
             return true;
-        }
-
-        else if (cmd.getName().equalsIgnoreCase("fahrziele")) {
-            if (sender instanceof Player)
-                p = Bukkit.getPlayer(((Player)sender).getUniqueId());
-
-            if (p == null)
-                return false;
-
-            Collection<Destination> destinations = DestinationStorage.getDestinations();
-            Bukkit.getLogger().info("found " + destinations.size());
-            if (destinations.size() < 1) {
-                sendMessage(p, "&6CraftBahn &8» &cEs ist noch kein Ziel in der Liste. Tippe &e/destination add <name> &cum eines zu speichern.");
-                return true;
-            }
-
-            sendMessage(p, "&e-------- &c&lCraftBahn &e| &6&lFahrziele &e--------");
-            sendMessage(p, "");
-
-            if (args.length < 1) {
-                sendDestinationList(p, Destination.DestinationType.MAIN_STATION);
-                sendDestinationList(p, Destination.DestinationType.STATION);
-                sendDestinationList(p, Destination.DestinationType.PUBLIC_STATION);
-                sendDestinationList(p, Destination.DestinationType.PLAYER_STATION);
-
-                if (p.hasPermission("ctdestinations.see.private"))
-                    sendDestinationList(p, null, true);
-            }
-
-            else {
-                if (args[0].equalsIgnoreCase("privat") || args[0].equalsIgnoreCase("private")) {
-                    sendDestinationList(p, null, true);
-                    sendMessage(p, "");
-                    sendMessage(p, "&e---------------------------------------");
-                    return true;
-                }
-
-                String _type = args[0].replace("h", "hof");
-                Destination.DestinationType type = Destination.findType(_type);
-
-                if (type == null) {
-                    try {
-                        type = Destination.DestinationType.valueOf(_type);
-                    } catch (Exception exception) {
-                    }
-                }
-
-                if (type == null) {
-                    sendMessage(p, "&6CraftBahn &8» &cDie Kategorie '" + _type + "' existiert nicht.");
-                } else {
-                    sendDestinationList(p, type);
-                }
-            }
-
-            sendMessage(p, "");
-            sendMessage(p, "&e----------------------------------------");
         }
 
         else if (cmd.getName().equalsIgnoreCase("fahrzieledit")) {
@@ -492,51 +437,17 @@ public class Commands implements TabExecutor {
                 }
 
                 Destination dest = DestinationStorage.getDestination(args[1]);
-                p.teleport(dest.getTeleportLocation().getBukkitLocation());
 
-                sendMessage(p, "&6CraftBahn &8» &6Du wurdest zum Ziel: &f'&e" + dest.getName() + "&f' &6teleportiert.");
+                if (dest.getTeleportLocation().getServer() == CraftBahn.getInstance().getServerName()) {
+                    Location loc = dest.getTeleportLocation().getBukkitLocation();
+                    p.teleport(loc);
+                    sendMessage(p, "&6CraftBahn &8» &6Du wurdest zum Ziel: &f'&e" + dest.getName() + "&f' &6teleportiert.");
+                }
+                else
+                    sendMessage(p, "&6CraftBahn &8» &cDas Ziel befindet sich auf einem anderen Server");
             }
         }
         return true;
-    }
-
-    private void sendDestinationList(Player p, Destination.DestinationType type) {
-        sendDestinationList(p, type, false);
-    }
-
-    private void sendDestinationList(Player p, Destination.DestinationType type, boolean onlyPrivate) {
-        String listName = "";
-        sendMessage(p, "&6&l" + (onlyPrivate ? "Private Bahnhöfe:" : (type.equals(Destination.DestinationType.MAIN_STATION) ? type.toString() : type.toString().replace("hof", "höfe").toString().replace("Öffentlicher", "Öffentliche"))) + "&f:");
-
-        for (Destination dest : DestinationStorage.getDestinations()) {
-            if (onlyPrivate ? dest.isPublic().booleanValue() : (dest.getType() != type || (!dest.isPublic().booleanValue() && !p.hasPermission("ctdestinations.see.private"))))
-                continue;
-
-            String hoverText = "/fahrziel " + dest.getName();
-            if ((dest.getType().equals(Destination.DestinationType.PLAYER_STATION) || dest.getType().equals(Destination.DestinationType.PUBLIC_STATION)) && dest.getOwner() != null && p.hasPermission("ctdestinations.see.owner")) {
-                OfflinePlayer owner = Bukkit.getOfflinePlayer(dest.getOwner());
-                if (owner.hasPlayedBefore())
-                    hoverText += "\n&6Besitzer: &e" + owner.getName();
-            }
-
-            if (dest.getLocation() != null && p.hasPermission("ctdestinations.see.location"))
-                hoverText += "\n&6Koordinaten: &e" + dest.getLocation().getX() + ", " + dest.getLocation().getY() + ", " + dest.getLocation().getZ();
-
-            TextComponent message = new TextComponent();
-            message.addExtra(Message.format("&7 > &e" + dest.getName()));
-            message.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/fahrziel " + dest.getName()));
-            message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format(hoverText))).create()));
-
-            if (dest.getLocation() != null && p.hasPermission("ctdestinations.see.location")) {
-                TextComponent tpBtn = new TextComponent();
-                tpBtn.addExtra(Message.format(" &7[&fTP&7]"));
-                tpBtn.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrzieledit tp " + dest.getName()));
-                tpBtn.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format("&6Teleportiere zum Zielort"))).create()));
-                message.addExtra(tpBtn);
-            }
-
-            p.spigot().sendMessage(message);
-        }
     }
 
     private void sendMessage(Player p, String message) {

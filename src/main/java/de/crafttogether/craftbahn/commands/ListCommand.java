@@ -2,6 +2,9 @@ package de.crafttogether.craftbahn.commands;
 
 import de.crafttogether.craftbahn.CraftBahn;
 import de.crafttogether.craftbahn.destinations.Destination;
+import de.crafttogether.craftbahn.destinations.DestinationList;
+import de.crafttogether.craftbahn.destinations.DestinationStorage;
+import de.crafttogether.craftbahn.util.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -17,13 +20,37 @@ public class ListCommand implements TabExecutor {
     private CraftBahn plugin = CraftBahn.getInstance();
 
     public boolean onCommand(CommandSender sender, Command cmd, String st, String[] args) {
-        Player p = null;
-
         if (cmd.getName().equalsIgnoreCase("fahrziele")) {
-            if (sender instanceof Player)
-                p = Bukkit.getPlayer(((Player) sender).getUniqueId());
+            if (sender instanceof Player) {
+                Player p = Bukkit.getPlayer(((Player) sender).getUniqueId());
+                Destination.DestinationType filterType = null;
+                int pageIndex = 1;
 
-            else {
+                if (args.length > 0) {
+                    String _type = args[0].replace("höfe", "hof");
+                    filterType = Destination.findType(_type);
+
+                    if (filterType == null) {
+                        try {
+                            filterType = Destination.DestinationType.valueOf(_type);
+                        } catch (Exception exception) { }
+                    }
+
+                    try {
+                        if (filterType == null)
+                            pageIndex = Integer.parseInt(args[0]);
+                        else
+                            pageIndex = Integer.parseInt(args[1]);
+                    } catch (Exception exception) { }
+                }
+
+                DestinationList list = new DestinationList();
+                list.setFilterType(filterType);
+                list.setOwnerVisible(true);
+                list.setLocationVisible(true);
+                list.setItemsPerPage(10);
+                list.sendPage(p, pageIndex);
+            } else {
                 Bukkit.getLogger().info("Dieser Befehl kann nicht von der Konsole ausgeführt werden.");
                 return true;
             }
@@ -35,6 +62,21 @@ public class ListCommand implements TabExecutor {
     @Nullable
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
-        return null;
+        ArrayList<String> newList = new ArrayList<>();
+        ArrayList<String> proposals = new ArrayList<>();
+
+        for (Destination.DestinationType type : Destination.DestinationType.values())
+            proposals.add(type.toString().replace("hof", "höfe"));
+
+        if (args.length < 1 || args[args.length - 1].equals("")) {
+            newList = proposals;
+        } else {
+            for (String value : proposals) {
+                if (value.toLowerCase().startsWith(args[args.length - 1].toLowerCase()))
+                    newList.add(value);
+            }
+        }
+
+        return newList;
     }
 }

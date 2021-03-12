@@ -195,6 +195,28 @@ public class DestinationStorage {
         return null;
     }
 
+    public static List<Destination> filterByServer(List<Destination> destinations, String serverName) {
+        List<Destination> list = new ArrayList<>();
+
+        for (Destination dest : destinations) {
+            if (dest.getServer().equalsIgnoreCase(serverName))
+                list.add(dest);
+        }
+
+        return list;
+    }
+
+    public static List<Destination> filterByType(List<Destination> destinations, Destination.DestinationType type) {
+        List<Destination> list = new ArrayList<>();
+
+        for (Destination dest : destinations) {
+            if (dest.getType().equals(type))
+                list.add(dest);
+        }
+
+        return list;
+    }
+
     public static void addDestination(String name, UUID owner, Destination.DestinationType type, Location loc, Boolean isPublic, Destination.Callback<SQLException, Integer> callback) {
         String serverName = CraftBahn.getInstance().getServerName();
         CTLocation ctLoc = CTLocation.fromBukkitLocation(loc);
@@ -222,13 +244,14 @@ public class DestinationStorage {
                 Bukkit.getLogger().warning("Error: Unable to read participants for '" + name + "'");
             }
 
+            Destination.DestinationType destinationType = Destination.DestinationType.valueOf(result.getString("type"));
             dest = new Destination(name);
             dest.setId(result.getInt("id"));
             dest.setServer(server);
             dest.setWorld(world);
             dest.setOwner(UUID.fromString(result.getString("owner")));
             dest.setParticipants(participants);
-            dest.setType(Destination.findType(result.getString("type")));
+            dest.setType(destinationType);
             dest.setLocation(loc);
             dest.setTeleportLocation(tpLoc);
             dest.setPublic(result.getBoolean("public"));
