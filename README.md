@@ -4,13 +4,14 @@
 
 **TODO:**
 - Debugging (Ein Job für Ceddix)- 
-- /fze -> Destination jeweils anhand des verbundenen Server auswählen (wenn kein anderer angegeben) -> /fze <action> <destination> [server]
-- /fahrziel <destination> -> Alle gefundenen Fahrziele mit dem angegebenen Namen sortiert nach server auflisten
+- `/fze` -> Destination jeweils anhand des verbundenen Server auswählen (wenn kein anderer angegeben) -> `/fze <action> <destination> [server]`
+- `/fahrziel` <destination> -> Alle gefundenen Fahrziele mit dem angegebenen Namen sortiert nach server auflisten
 - ~~Bestehende Daten aus altem Plugin importieren (php)~~
 - ~~/fahrzieledit setwarp -cmd für das setzen der Teleport-Position hinzufügen (setlocation == MarkerPosition)~~
 - ~~/farhzieledit add/remove-owner -cmd für die Verwaltung weiterer Besitzer (participants) hinzufügen.~~
 - ~~TrainListener wieder einfügen (Für EnterMessages und weitere CraftBahn features)~~
-- Per-Server-Auswahl bei der Auflistung der Fahrziele mit: /fahrziele 
+- Per-Server-Auswahl bei der Auflistung der Fahrziele mit: `/fahrziele `
+- `/fahrziele [chat|book]` -> Auflistung standartmäßig als direkt angezeigtes Buch mit Inhaltsverzeichnis wenn permission `craftbahn.book` (?) vorhanden
 - PluginMessage: Andere server im Netzwerk bei Änderungen benachrichtigen
 - ~~Bei /fahrziel Route setzen wenn Ziel sich auf anderem Server befindet~~ 
 - Route / Destination über TrainCartsAPI setzen anstatt jeweiliges command auszuführen. (Um Rückgabe zu vermeiden)
