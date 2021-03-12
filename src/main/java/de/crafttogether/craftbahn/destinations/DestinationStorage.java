@@ -2,6 +2,7 @@ package de.crafttogether.craftbahn.destinations;
 
 import de.crafttogether.craftbahn.CraftBahn;
 import de.crafttogether.craftbahn.util.CTLocation;
+import de.crafttogether.craftbahn.util.Callback;
 import de.crafttogether.craftbahn.util.MySQLAdapter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -13,8 +14,8 @@ import java.util.*;
 
 public class DestinationStorage {
     private static TreeMap<Integer, Destination> destinations = new TreeMap<>();
-
-    private static void insert(Destination destination, Destination.Callback<SQLException, Integer> callback) {
+    
+    private static void insert(Destination destination, Callback<SQLException, Integer> callback) {
         MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         CTLocation loc = destination.getLocation();
@@ -69,7 +70,7 @@ public class DestinationStorage {
         });
     }
 
-    public static void update(Destination destination, Destination.Callback<SQLException, Integer> callback) {
+    public static void update(Destination destination, Callback<SQLException, Integer> callback) {
         MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         CTLocation loc = destination.getLocation();
@@ -105,7 +106,7 @@ public class DestinationStorage {
     }
 
     // TODO: Trigger if other server updates a destination
-    public static void load(int destinationId, Destination.Callback<SQLException, Destination> callback) {
+    public static void load(int destinationId, Callback<SQLException, Destination> callback) {
         MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         MySQL.queryAsync("SELECT * FROM `%sdestinations` WHERE `id` = %s", (err, result) -> {
@@ -136,7 +137,7 @@ public class DestinationStorage {
         }, MySQL.getTablePrefix(), destinationId);
     }
 
-    public static void delete(int destinationId, Destination.Callback<SQLException, Integer> callback) {
+    public static void delete(int destinationId, Callback<SQLException, Integer> callback) {
         MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         MySQL.updateAsync("DELETE FROM `%sdestinations` WHERE `id` = %s", (err, affectedRows) -> {
@@ -154,7 +155,7 @@ public class DestinationStorage {
         }, MySQL.getTablePrefix(), destinationId);
     }
 
-    public static void loadAll(Destination.Callback<SQLException, Collection<Destination>> callback) {
+    public static void loadAll(Callback<SQLException, Collection<Destination>> callback) {
         MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         MySQL.queryAsync("SELECT * FROM `%sdestinations`", (err, result) -> {
@@ -225,7 +226,7 @@ public class DestinationStorage {
         return list;
     }
 
-    public static void addDestination(String name, UUID owner, Destination.DestinationType type, Location loc, Boolean isPublic, Destination.Callback<SQLException, Integer> callback) {
+    public static void addDestination(String name, UUID owner, Destination.DestinationType type, Location loc, Boolean isPublic, Callback<SQLException, Integer> callback) {
         String serverName = CraftBahn.getInstance().getServerName();
         CTLocation ctLoc = CTLocation.fromBukkitLocation(loc);
 

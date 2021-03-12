@@ -18,10 +18,6 @@ public class Destination {
     private CTLocation teleportLocation = null;
     private Boolean isPublic = null;
 
-    public interface Callback<E extends Throwable, V extends Object> {
-        void call(E exception, V result);
-    }
-
     public enum DestinationType {
         STATION {
             @Override
