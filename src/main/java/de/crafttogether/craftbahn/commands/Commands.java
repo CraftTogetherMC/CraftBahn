@@ -533,6 +533,21 @@ public class Commands implements TabExecutor {
                 sendMessage(p, "&6CraftBahn &8» &6Es wurden &e" + destinations.size() + " &6Marker erneuert.");
             }
 
+            else if (args[0].equalsIgnoreCase("reload")) {
+                if (!p.hasPermission("ctdestinations.edit.reload")) {
+                    sendMessage(p, "&cDazu hast du keine Berechtigung.");
+                    return true;
+                }
+
+                Player finalP = p;
+                DestinationStorage.loadAll((err, destinations) -> {
+                    if (err != null)
+                        sendMessage(finalP, "&6CraftBahn &8» &cBeim laden der Fahrziele ist ein Fehler aufgetreten");
+                    else
+                        sendMessage(finalP, "&6CraftBahn &8» &2Es wurden &a" + destinations.size() + " &2Fahrziele geladen.");
+                });
+            }
+
             else if (args[0].equalsIgnoreCase("tp")) {
                 if (!p.hasPermission("ctdestinations.teleport")) {
                     sendMessage(p, "&cDazu hast du keine Berechtigung.");
@@ -605,6 +620,8 @@ public class Commands implements TabExecutor {
                     proposals.add("setprivate");
                 if (sender.hasPermission("ctdestinations.edit.updatemarker"))
                     proposals.add("updatemarker");
+                if (sender.hasPermission("ctdestinations.edit.reload"))
+                    proposals.add("reload");
                 if (sender.hasPermission("ctdestinations.teleport"))
                     proposals.add("tp");
             }
