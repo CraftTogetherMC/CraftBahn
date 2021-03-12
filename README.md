@@ -16,6 +16,11 @@
 - MarkerSystem überarbeiten
 - Ausgabe im Chat was gespawned wurde (Minecart oder Traincart) wenn man ein Minecart placed
 - Züge mit kurzer Verzögerung löschen sobald Spieler ausgestiegen ist. (Benötigt Tag-Signs an allen Bahnhöfen!)
+- ICS integrieren
+
+**Ideen:**
+- ICS: LinkRegistry (MySQL) Für einfachere Syntax für ActionSigns
+- ICS: Zug nach teleport für eine kurze konfigurierbare Zeit anhalten. (Für sauberes Chunkloading)
 
 **Tabelle:**
 ![](https://craft-together.de/~irgendsoeintyp/chrome_42JbdTaOft.png)
