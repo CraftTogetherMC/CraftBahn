@@ -14,6 +14,8 @@
 - Bei /fahrziel Route setzen wenn Ziel sich auf anderem Server befindet
 - ~~/fahrziele (Liste) übersichtlicher gestalten.. (Mit Pagination)~~
 - MarkerSystem überarbeiten
+- Ausgabe im Chat was gespawned wurde (Minecart oder Traincart) wenn man ein Minecart placed
+- Züge mit kurzer Verzögerung löschen sobald Spieler ausgestiegen ist. (Benötigt Tag-Signs an allen Bahnhöfen!)
 
 **Tabelle:**
 ![](https://craft-together.de/~irgendsoeintyp/chrome_42JbdTaOft.png)
