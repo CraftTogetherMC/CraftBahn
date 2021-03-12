@@ -189,9 +189,16 @@ public class DestinationStorage {
         return destinations.values();
     }
 
-    public static Destination getDestination(String destinationName) {
+    public static Destination getDestination(int id) {
         for (Destination dest : destinations.values())
-            if (dest.getName().equalsIgnoreCase(destinationName)) return dest;
+            if (dest.getId() == id) return dest;
+
+        return null;
+    }
+
+    public static Destination getDestination(String destinationName, String serverName) {
+        for (Destination dest : destinations.values())
+            if (dest.getName().equalsIgnoreCase(destinationName) && dest.getServer().equalsIgnoreCase(serverName)) return dest;
 
         return null;
     }
