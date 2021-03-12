@@ -8,10 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class DestinationList {
 
@@ -36,7 +33,7 @@ public class DestinationList {
         if (this.filterType != null) Bukkit.getLogger().info("Applied Filter: + " + this.filterType.name());
         Bukkit.getLogger().info("Destinations: " + this.destinations.size());
 
-        HashMap<String, List<Destination>> serverMap = new HashMap<>();
+        TreeMap<String, List<Destination>> serverMap = new TreeMap<>();
 
         for (Destination dest : this.destinations) {
             if (this.filterType != null && !dest.getType().equals(this.filterType))

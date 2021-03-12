@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class DestinationStorage {
-    private static HashMap<Integer, Destination> destinations = new HashMap<>();
+    private static TreeMap<Integer, Destination> destinations = new TreeMap<>();
 
     private static void insert(Destination destination, Destination.Callback<SQLException, Integer> callback) {
         MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
