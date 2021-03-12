@@ -10,7 +10,7 @@
 - ~~TrainListener wieder einfügen (Für EnterMessages und weitere CraftBahn features)~~
 - PluginMessage: Andere server im Netzwerk bei Änderungen benachrichtigen
 - Bei /fahrziel Route setzen wenn Ziel sich auf anderem Server befindet
-- /fahrziele (Liste) übersichtlicher gestalten.. (Mit Pagination)
+- ~~/fahrziele (Liste) übersichtlicher gestalten.. (Mit Pagination)~~
 - MarkerSystem überarbeiten
 
 **Tabelle:**
