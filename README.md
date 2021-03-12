@@ -25,6 +25,7 @@
 **Ideen:**
 - ICS: LinkRegistry (MySQL) Für einfachere Syntax auf ActionSigns (receive & link)
 - ICS: Zug nach teleport für eine kurze konfigurierbare Zeit anhalten. (Für sauberes Chunkloading)
+- ICS: "Besserer" Übergang (z.B. durch Blindness-Effekt)
 
 **Tabelle:**
 ![](https://craft-together.de/~irgendsoeintyp/chrome_42JbdTaOft.png)
