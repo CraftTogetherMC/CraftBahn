@@ -4,7 +4,8 @@
 
 **TODO:**
 - Debugging (Ein Job für Ceddix)- 
-- Alle Befehle updaten. Destination jeweils anhand des verbundenen Server auswählen (wenn kein anderer angegeben) :facepalm: 
+- Alle Befehle updaten. Bei /fze: Destination jeweils anhand des verbundenen Server auswählen (wenn kein anderer angegeben) -> /fze <action> <destination> [server]
+- /fahrziel <destination> -> Alle gefundenen Fahrziele mit dem angegebenen Namen sortiert nach server auflisten
 - ~~Bestehende Daten aus altem Plugin importieren (php)~~
 - ~~/fahrzieledit setwarp -cmd für das setzen der Teleport-Position hinzufügen (setlocation == MarkerPosition)~~
 - ~~/farhzieledit add/remove-owner -cmd für die Verwaltung weiterer Besitzer (participants) hinzufügen.~~
@@ -21,7 +22,7 @@
 - ICS integrieren
 
 **Ideen:**
-- ICS: LinkRegistry (MySQL) Für einfachere Syntax für ActionSigns
+- ICS: LinkRegistry (MySQL) Für einfachere Syntax auf ActionSigns (receive & link)
 - ICS: Zug nach teleport für eine kurze konfigurierbare Zeit anhalten. (Für sauberes Chunkloading)
 
 **Tabelle:**
