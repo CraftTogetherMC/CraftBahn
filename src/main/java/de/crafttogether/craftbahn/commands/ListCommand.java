@@ -44,9 +44,9 @@ public class ListCommand implements TabExecutor {
 
                 DestinationList list = new DestinationList();
                 list.setFilterType(filterType);
-                list.setOwnerVisible(true);
-                list.setLocationVisible(true);
-                list.setItemsPerPage(10);
+                list.suggestCommands(true);
+                list.showOwner(true);
+                list.showLocation(true);
                 list.sendPage(p, pageIndex);
             } else {
                 Bukkit.getLogger().info("Dieser Befehl kann nicht von der Konsole ausgeführt werden.");

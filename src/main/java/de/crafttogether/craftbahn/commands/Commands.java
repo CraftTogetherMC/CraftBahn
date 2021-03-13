@@ -2,6 +2,7 @@ package de.crafttogether.craftbahn.commands;
 
 import de.crafttogether.craftbahn.CraftBahn;
 import de.crafttogether.craftbahn.destinations.Destination;
+import de.crafttogether.craftbahn.destinations.DestinationList;
 import de.crafttogether.craftbahn.destinations.DestinationStorage;
 import de.crafttogether.craftbahn.util.CTLocation;
 import de.crafttogether.craftbahn.util.MarkerManager;
@@ -119,14 +120,30 @@ public class Commands implements TabExecutor {
                 return true;
             }
 
-            String serverName = CraftBahn.getInstance().getServerName();
+            String serverName = null;
+            List<Destination> found = new ArrayList<>();
             if (args.length == 2) serverName = args[1];
 
-            Destination dest = DestinationStorage.getDestination(args[0], serverName);
-            if (dest == null) {
-                sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel dem Namen &f'&e" + args[0] + "&f' &cauf diesem Server &6(&e" + serverName + "&6)");
+            if (serverName != null)
+                found.add(DestinationStorage.getDestination(args[0], serverName));
+            else
+                found = new ArrayList<>(DestinationStorage.getDestinations(args[0]));
+
+            if (found.size() < 1) {
+                sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel dem Namen &f'&e" + args[0] + "&f'" + (serverName != null ? " &cauf dem angegebenen Server." : ""));
                 return true;
             }
+
+            else if (found.size() > 1) {
+                DestinationList list = new DestinationList(found);
+                list.showOwner(true);
+                list.showLocation(true);
+                p.sendMessage(Message.format("&6CraftBahn &8» &6Es wurden mehrere mögliche Ziele gefunden:"));
+                list.sendPage(p, 1);
+                return true;
+            }
+
+            Destination dest = found.get(0);
 
             if (!dest.isPublic().booleanValue() && !p.hasPermission("ctdestinations.see.private")) {
                 sendMessage(p, "&6CraftBahn &8» &cAuf dieses Ziel hast du keinen Zugriff.");

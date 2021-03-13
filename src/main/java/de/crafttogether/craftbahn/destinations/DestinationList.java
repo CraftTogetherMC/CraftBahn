@@ -19,9 +19,16 @@ public class DestinationList {
     private int itemsPerPage = 8;
     private boolean showOwner = false;
     private boolean showLocation = false;
+    private boolean suggestCommands = false;
 
     public DestinationList() {
         this.destinations = new ArrayList<>(DestinationStorage.getDestinations());
+        this.pages = new ArrayList<>();
+        this.filterType = null;
+    }
+
+    public DestinationList(List<Destination> destinations) {
+        this.destinations = destinations;
         this.pages = new ArrayList<>();
         this.filterType = null;
     }
@@ -70,7 +77,10 @@ public class DestinationList {
                 else
                     btnFahrziel = Message.format("&8» &6" + dest.getName());
 
-                String hoverText = "/fahrziel " + dest.getName();
+                Collection<Destination> duplicates = DestinationStorage.getDestinations(dest.getName());
+                Bukkit.getLogger().info("showServer? => " + (duplicates.size() > 1));
+
+                String hoverText = "&e/fahrziel " + dest.getName() + (duplicates.size() > 1 ? (" &7" + dest.getServer()) : "");
                 if ((dest.getType().equals(Destination.DestinationType.PLAYER_STATION) || dest.getType().equals(Destination.DestinationType.PUBLIC_STATION)) && dest.getOwner() != null && this.showOwner) {
                     OfflinePlayer owner = Bukkit.getOfflinePlayer(dest.getOwner());
 
@@ -89,7 +99,11 @@ public class DestinationList {
                     hoverText += "\n&6Welt: &e" + dest.getWorld();
                 }
 
-                btnFahrziel.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/fahrziel " + dest.getName()));
+                if (this.suggestCommands)
+                    btnFahrziel.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/fahrziel " + dest.getName() + (duplicates.size() > 1 ? (" " + dest.getServer()) : "")));
+                else
+                    btnFahrziel.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziel " + dest.getName() + (duplicates.size() > 1 ? (" " + dest.getServer()) : "")));
+
                 btnFahrziel.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format(hoverText))).create()));
 
                 if (dest.getLocation() != null && this.showLocation) {
@@ -128,33 +142,33 @@ public class DestinationList {
         output.addExtra(page);
         output.addExtra(Message.newLine());
 
-        TextComponent btnPrevious;
-        if (pageIndex > 1) {
-            btnPrevious = Message.format("&a----<< &6Zurück");
-            btnPrevious.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele " + (filterType == null ? "" : filterType.name() + " ") + (pageIndex - 1)));
-            btnPrevious.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (
-                new ComponentBuilder(Message.format("&6Vorherige Seite: &e" + (pageIndex - 1)))
-            ).create()));
+        if (pages.size() > 1) {
+            TextComponent btnPrevious;
+            if (pageIndex > 1) {
+                btnPrevious = Message.format("&a----<< &6Zurück");
+                btnPrevious.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele " + (filterType == null ? "" : filterType.name() + " ") + (pageIndex - 1)));
+                btnPrevious.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (
+                        new ComponentBuilder(Message.format("&6Vorherige Seite: &e" + (pageIndex - 1)))
+                ).create()));
+            } else
+                btnPrevious = Message.format("&2----<< &7Zurück");
+
+            output.addExtra(btnPrevious);
+
+            output.addExtra(Message.format(" &2" + pageIndex + "&7/&2" + pages.size() + " "));
+
+            TextComponent btnForward;
+            if (pageIndex < this.pages.size()) {
+                btnForward = Message.format("&6Nächste &2>>----");
+                btnForward.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele " + (filterType == null ? "" : filterType.name() + " ") + (pageIndex + 1)));
+                btnForward.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (
+                        new ComponentBuilder(Message.format("&6Nächste Seite: &e" + (pageIndex + 1)))
+                ).create()));
+            } else
+                btnForward = Message.format("&7Weiter &6>>");
+
+            output.addExtra(btnForward);
         }
-        else
-            btnPrevious = Message.format("&2----<< &7Zurück");
-
-        output.addExtra(btnPrevious);
-
-        output.addExtra(Message.format(" &2" + pageIndex +  "&7/&2" + pages.size() + " "));
-
-        TextComponent btnForward;
-        if (pageIndex < this.pages.size()) {
-            btnForward = Message.format("&6Nächste &2>>----");
-            btnForward.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele " + (filterType == null ? "" : filterType.name() + " ") + (pageIndex + 1)));
-            btnForward.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (
-                new ComponentBuilder(Message.format("&6Nächste Seite: &e" + (pageIndex + 1)))
-            ).create()));
-        }
-        else
-            btnForward = Message.format("&8Weiter &6>>");
-
-        output.addExtra(btnForward);
 
         return output;
     }
@@ -210,11 +224,15 @@ public class DestinationList {
         return firstLetter + remainingLetters;
     }
 
-    public void setOwnerVisible(boolean show) {
+    public void showOwner(boolean show) {
         this.showOwner = show;
     }
 
-    public void setLocationVisible(boolean show) {
+    public void showLocation(boolean show) {
         this.showLocation = show;
+    }
+
+    public void suggestCommands(boolean suggest) {
+        this.suggestCommands = suggest;
     }
 }

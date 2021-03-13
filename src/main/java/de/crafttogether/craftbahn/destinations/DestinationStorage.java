@@ -190,6 +190,17 @@ public class DestinationStorage {
         return destinations.values();
     }
 
+    public static Collection<Destination> getDestinations(String name) {
+        List<Destination> list = new ArrayList<>();
+
+        for (Destination dest : destinations.values()) {
+            if (dest.getName().equalsIgnoreCase(name))
+                list.add(dest);
+        }
+
+        return list;
+    }
+
     public static Destination getDestination(int id) {
         for (Destination dest : destinations.values())
             if (dest.getId() == id) return dest;
