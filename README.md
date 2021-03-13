@@ -4,8 +4,8 @@
 
 **TODO:**
 - Debugging (Ein Job für Ceddix)- 
-- `/fze` -> Destination jeweils anhand des verbundenen Server auswählen (wenn kein anderer angegeben) -> `/fze <action> <destination> [server]`
-- `/fahrziel` <destination> -> Alle gefundenen Fahrziele mit dem angegebenen Namen sortiert nach server auflisten
+- ~~`/fze` -> Destination jeweils anhand des verbundenen Server auswählen (wenn kein anderer angegeben) -> `/fze <action> <destination> [server]`~~
+- ~~`/fahrziel` <destination> -> Alle gefundenen Fahrziele mit dem angegebenen Namen sortiert nach server auflisten~~
 - ~~Bestehende Daten aus altem Plugin importieren (php)~~
 - ~~/fahrzieledit setwarp -cmd für das setzen der Teleport-Position hinzufügen (setlocation == MarkerPosition)~~
 - ~~/farhzieledit add/remove-owner -cmd für die Verwaltung weiterer Besitzer (participants) hinzufügen.~~
