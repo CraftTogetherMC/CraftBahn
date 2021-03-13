@@ -4,24 +4,28 @@
 
 **TODO:**
 - Debugging (Ein Job für Ceddix)- 
-- Alle Befehle updaten. Destination jeweils anhand des verbundenen Server auswählen (wenn kein anderer angegeben) :facepalm: 
+- `/fze` -> Destination jeweils anhand des verbundenen Server auswählen (wenn kein anderer angegeben) -> `/fze <action> <destination> [server]`
+- `/fahrziel` <destination> -> Alle gefundenen Fahrziele mit dem angegebenen Namen sortiert nach server auflisten
 - ~~Bestehende Daten aus altem Plugin importieren (php)~~
 - ~~/fahrzieledit setwarp -cmd für das setzen der Teleport-Position hinzufügen (setlocation == MarkerPosition)~~
 - ~~/farhzieledit add/remove-owner -cmd für die Verwaltung weiterer Besitzer (participants) hinzufügen.~~
 - ~~TrainListener wieder einfügen (Für EnterMessages und weitere CraftBahn features)~~
-- Per-Server-Auswahl bei der Auflistung der Fahrziele mit: /fahrziele 
+- Per-Server-Auswahl bei der Auflistung der Fahrziele mit: `/fahrziele `
+- `/fahrziele [chat|book]` -> Auflistung standartmäßig als direkt angezeigtes Buch mit Inhaltsverzeichnis wenn permission `craftbahn.book` (?) vorhanden
 - PluginMessage: Andere server im Netzwerk bei Änderungen benachrichtigen
 - ~~Bei /fahrziel Route setzen wenn Ziel sich auf anderem Server befindet~~ 
 - Route / Destination über TrainCartsAPI setzen anstatt jeweiliges command auszuführen. (Um Rückgabe zu vermeiden)
 - ~~/fahrziele (Liste) übersichtlicher gestalten.. (Mit Pagination)~~ 
 - MarkerSystem überarbeiten
+- Befehl hinzufügen um Info's über ein bestimmtes Fahrziel anzuzeigen `/fze info <name> [server]` (Perfekter Outsource-Job. Pull-Request!? ^^)
 - Ausgabe im Chat was gespawned wurde (Minecart oder Traincart) wenn man ein Minecart placed
 - Züge mit kurzer Verzögerung löschen sobald Spieler ausgestiegen ist. (Benötigt Tag-Signs an allen Bahnhöfen!)
 - ICS integrieren
 
 **Ideen:**
-- ICS: LinkRegistry (MySQL) Für einfachere Syntax für ActionSigns
+- ICS: LinkRegistry (MySQL) Für einfachere Syntax auf ActionSigns (receive & link)
 - ICS: Zug nach teleport für eine kurze konfigurierbare Zeit anhalten. (Für sauberes Chunkloading)
+- ICS: "Besserer" Übergang (z.B. durch Blindness-Effekt)
 
 **Tabelle:**
 ![](https://craft-together.de/~irgendsoeintyp/chrome_42JbdTaOft.png)
