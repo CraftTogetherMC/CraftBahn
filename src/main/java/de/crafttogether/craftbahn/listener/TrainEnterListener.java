@@ -49,7 +49,7 @@ public class TrainEnterListener implements Listener {
         message.addExtra(Message.format("&c/bahnhof&e?"));
 
         message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/bahnhof"));
-        message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format("&6Informationen zum Schienennetz"))).create()));
+        message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format("&2Informationen zum Schienennetz"))).create()));
         p.spigot().sendMessage(message);
 
         if (cart.getProperties().getDestination().isBlank()) {

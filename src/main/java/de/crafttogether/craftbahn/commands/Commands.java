@@ -138,7 +138,7 @@ public class Commands implements TabExecutor {
                 DestinationList list = new DestinationList(found);
                 list.showOwner(true);
                 list.showLocation(true);
-                p.sendMessage(Message.format("&6CraftBahn &8» &6Es wurden mehrere mögliche Ziele gefunden:"));
+                p.sendMessage(Message.format("&6CraftBahn &8» &cEs wurden mehrere mögliche Ziele gefunden:"));
                 list.sendPage(p, 1);
                 return true;
             }

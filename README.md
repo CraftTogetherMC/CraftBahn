@@ -10,17 +10,20 @@
 - ~~/fahrzieledit setwarp -cmd für das setzen der Teleport-Position hinzufügen (setlocation == MarkerPosition)~~
 - ~~/farhzieledit add/remove-owner -cmd für die Verwaltung weiterer Besitzer (participants) hinzufügen.~~
 - ~~TrainListener wieder einfügen (Für EnterMessages und weitere CraftBahn features)~~
-- Per-Server-Auswahl bei der Auflistung der Fahrziele mit: `/fahrziele `
-- `/fahrziele [chat|book]` -> Auflistung standartmäßig als direkt angezeigtes Buch mit Inhaltsverzeichnis wenn permission `craftbahn.book` (?) vorhanden
-- PluginMessage: Andere server im Netzwerk bei Änderungen benachrichtigen
+- ~~Inhaltsverzeichnis für `/fahrziele` mit klickbaren Links~~
 - ~~Bei /fahrziel Route setzen wenn Ziel sich auf anderem Server befindet~~ 
-- Route / Destination über TrainCartsAPI setzen anstatt jeweiliges command auszuführen. (Um Rückgabe zu vermeiden)
-- ~~/fahrziele (Liste) übersichtlicher gestalten.. (Mit Pagination)~~ 
-- MarkerSystem überarbeiten
+- ~~/fahrziele (Liste) übersichtlicher gestalten.. (Mit Pagination)~~
 - Befehl hinzufügen um Info's über ein bestimmtes Fahrziel anzuzeigen `/fze info <name> [server]` (Perfekter Outsource-Job. Pull-Request!? ^^)
+- Route / Destination über TrainCartsAPI setzen anstatt jeweiliges command auszuführen. (Um Rückgabe zu vermeiden)
 - Ausgabe im Chat was gespawned wurde (Minecart oder Traincart) wenn man ein Minecart placed
-- Züge mit kurzer Verzögerung löschen sobald Spieler ausgestiegen ist. (Benötigt Tag-Signs an allen Bahnhöfen!)
+- MarkerSystem überarbeiten
+- PluginMessage: Andere server im Netzwerk bei Änderungen benachrichtigen
 - ICS integrieren
+- Züge mit kurzer Verzögerung löschen wenn Spieler ausgestiegen ist. (Benötigt Tag-Signs an allen Bahnhöfen!)
+
+**Probleme:**
+- Direktes anzeigen von Büchern bedarf weiterer recherche.
+- Sämtliche Texte im Buch müssen mit anderen Farben dargestellt werden.
 
 **Ideen:**
 - ICS: LinkRegistry (MySQL) Für einfachere Syntax auf ActionSigns (receive & link)

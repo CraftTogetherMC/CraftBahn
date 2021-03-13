@@ -1,12 +1,12 @@
 package de.crafttogether.craftbahn.destinations;
 import de.crafttogether.craftbahn.util.Message;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.*;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
 
 import java.util.*;
 
@@ -20,6 +20,8 @@ public class DestinationList {
     private boolean showOwner = false;
     private boolean showLocation = false;
     private boolean suggestCommands = false;
+    private boolean showContents = false;
+    private boolean showFooter = false;
 
     public DestinationList() {
         this.destinations = new ArrayList<>(DestinationStorage.getDestinations());
@@ -33,9 +35,63 @@ public class DestinationList {
         this.filterType = null;
     }
 
+    public TextComponent getContentsPage() {
+        TextComponent contents = new TextComponent();
+
+        TextComponent info = Message.format("&e-------------- &c&lCraftBahn &e--------------");
+        info.addExtra(Message.newLine());
+        info.addExtra(Message.newLine());
+        info.addExtra(Message.format("&6CraftBahn &8» &eGuten Tag, Reisender!"));
+        info.addExtra(Message.newLine());
+        info.addExtra(Message.format("&6CraftBahn &8» &eVerstehst du nur "));
+        info.addExtra(Message.format("&c/bahnhof&e?"));
+        info.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/bahnhof"));
+        info.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format("&2Informationen zum Schienennetz"))).create()));
+
+        contents.addExtra(info);
+        contents.addExtra(Message.newLine());
+
+        contents.addExtra(Message.format("&6CraftBahn &8»"));
+        contents.addExtra(Message.newLine());
+        contents.addExtra(Message.format("&6CraftBahn &8» &6&lMögliche Fahrziele:"));
+        contents.addExtra(Message.newLine());
+        contents.addExtra(Message.format("&6CraftBahn &8»"));
+        contents.addExtra(Message.newLine());
+
+        TextComponent btnMainStations = Message.format("&6CraftBahn &8» &2> &eHauptbahnhöfe");
+        btnMainStations.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele MAIN_STATION"));
+        btnMainStations.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format("&2Hauptbahnhöfe"))).create()));
+        contents.addExtra(btnMainStations);
+        contents.addExtra(Message.newLine());
+
+        TextComponent btnStations = Message.format("&6CraftBahn &8» &2> &eSystem-Bahnhöfe");
+        btnStations.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele STATION"));
+        btnStations.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format("&2Bahnhöfe"))).create()));
+        contents.addExtra(btnStations);
+        contents.addExtra(Message.newLine());
+
+        TextComponent btnPublicStations = Message.format("&6CraftBahn &8» &2> &eÖffentliche Bahnhöfe");
+        btnPublicStations.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele PUBLIC_STATION"));
+        btnPublicStations.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format("&2Öffentlich"))).create()));
+        contents.addExtra(btnPublicStations);
+        contents.addExtra(Message.newLine());
+
+        TextComponent btnPlayerStations = Message.format("&6CraftBahn &8» &2> &eSpieler-Bahnhöfe");
+        btnPlayerStations.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele PLAYER_STATION"));
+        btnPlayerStations.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format("&2Spielerbahnhöfe"))).create()));
+        contents.addExtra(btnPlayerStations);
+        contents.addExtra(Message.newLine());
+
+        return contents;
+    }
+
     public void build() {
         TextComponent page = new TextComponent();
         int row = 0;
+
+        // Add contents-page
+        if (this.showContents)
+            this.pages.add(this.getContentsPage());
 
         if (this.filterType != null) Bukkit.getLogger().info("Applied Filter: + " + this.filterType.name());
         Bukkit.getLogger().info("Destinations: " + this.destinations.size());
@@ -53,21 +109,26 @@ public class DestinationList {
         }
 
         for (String serverName : serverMap.keySet()) {
-            if ((this.itemsPerPage - row) < 3) {
+            if ((this.itemsPerPage - row) < 4) {
                 // New Page
                 this.pages.add(page);
                 page = new TextComponent();
                 row = 0;
             }
 
-            if (row == 0 && pages.size() < 1)
+            if (row != 0) {
                 page.addExtra(Message.newLine());
+                page.addExtra(Message.newLine());
+                row++;
+            }
 
             page.addExtra(Message.format("&7# &6&l" + capitalize(serverName) + ":"));
             page.addExtra(Message.newLine());
+            page.addExtra(Message.newLine());
 
-            row++;
+            row = row + 2;
 
+            int items = 0;
             for (Destination dest : serverMap.get(serverName)) {
                 row++;
 
@@ -78,7 +139,6 @@ public class DestinationList {
                     btnFahrziel = Message.format("&8» &6" + dest.getName());
 
                 Collection<Destination> duplicates = DestinationStorage.getDestinations(dest.getName());
-                Bukkit.getLogger().info("showServer? => " + (duplicates.size() > 1));
 
                 String hoverText = "&e/fahrziel " + dest.getName() + (duplicates.size() > 1 ? (" &7" + dest.getServer()) : "");
                 if ((dest.getType().equals(Destination.DestinationType.PLAYER_STATION) || dest.getType().equals(Destination.DestinationType.PUBLIC_STATION)) && dest.getOwner() != null && this.showOwner) {
@@ -117,7 +177,9 @@ public class DestinationList {
                 page.addExtra(btnFahrziel);
                 page.addExtra(Message.newLine());
 
-                if (row >= this.itemsPerPage) {
+                items++;
+
+                if (row >= this.itemsPerPage && serverMap.get(serverName).size() > items) {
                     // New Page
                     this.pages.add(page);
                     page = new TextComponent();
@@ -136,13 +198,11 @@ public class DestinationList {
         TextComponent output = new TextComponent();
         TextComponent page = this.pages.get(pageIndex - 1);
 
-        if (pageIndex > 1)
-            output.addExtra(Message.newLine());
-
-        output.addExtra(page);
         output.addExtra(Message.newLine());
+        output.addExtra(page);
 
         if (pages.size() > 1) {
+            output.addExtra(Message.newLine());
             TextComponent btnPrevious;
             if (pageIndex > 1) {
                 btnPrevious = Message.format("&a----<< &6Zurück");
@@ -168,6 +228,7 @@ public class DestinationList {
                 btnForward = Message.format("&7Weiter &6>>");
 
             output.addExtra(btnForward);
+            output.addExtra(Message.newLine());
         }
 
         return output;
@@ -193,11 +254,29 @@ public class DestinationList {
         return pages.size();
     }
 
-    public void getBook(Player player) {
+    public ItemStack getBook() {
         if (itemsPerPage > 8) // Set maximum items per book page
             itemsPerPage = 8;
 
+        // Suggesting commands don't work in books
+        suggestCommands(false);
+
+        // Generate pages
         build();
+
+        ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
+        BookMeta bookMeta = (BookMeta) book.getItemMeta();
+
+        for (TextComponent page : this.pages) {
+            BaseComponent[] component = new ComponentBuilder().append(page).create();
+            bookMeta.spigot().addPage(component);
+        }
+
+        bookMeta.setTitle("Fahrziele");
+        bookMeta.setAuthor("CraftBahn");
+        book.setItemMeta(bookMeta);
+
+        return book;
     }
 
     public void sendPage(Player player, int pageIndex) {
@@ -214,7 +293,14 @@ public class DestinationList {
             return;
         }
 
-        player.sendMessage(renderPage(pageIndex));
+        TextComponent message = renderPage(pageIndex);
+
+        if (this.showFooter) {
+            message.addExtra(Message.newLine());
+            message.addExtra(Message.format("&e----------------------------------------"));
+        }
+
+        player.sendMessage(message);
     }
 
     private String capitalize(String name) {
@@ -234,5 +320,13 @@ public class DestinationList {
 
     public void suggestCommands(boolean suggest) {
         this.suggestCommands = suggest;
+    }
+
+    public void showContents(boolean show) {
+        this.showContents = show;
+    }
+
+    public void showFooter(boolean show) {
+        this.showFooter = show;
     }
 }

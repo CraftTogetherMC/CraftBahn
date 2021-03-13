@@ -3,15 +3,19 @@ package de.crafttogether.craftbahn.commands;
 import de.crafttogether.craftbahn.CraftBahn;
 import de.crafttogether.craftbahn.destinations.Destination;
 import de.crafttogether.craftbahn.destinations.DestinationList;
+import de.crafttogether.craftbahn.util.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.print.Book;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ListCommand implements TabExecutor {
@@ -44,10 +48,25 @@ public class ListCommand implements TabExecutor {
 
                 DestinationList list = new DestinationList();
                 list.setFilterType(filterType);
+                list.showContents(false);
                 list.suggestCommands(true);
                 list.showOwner(true);
                 list.showLocation(true);
-                list.sendPage(p, pageIndex);
+                list.showFooter(true);
+
+                if (filterType == null)
+                    list.showContents(true);
+
+                List<String> argList = Arrays.asList(args);
+                if (argList.contains("--book")) {
+                    Bukkit.getLogger().info("OPEN BOOK");
+                    ItemStack book = list.getBook();
+                    p.getInventory().setItem(0, book);
+                    //Message.openBook(list.getBook(), p);
+                }
+                else
+                    list.sendPage(p, pageIndex);
+
             } else {
                 Bukkit.getLogger().info("Dieser Befehl kann nicht von der Konsole ausgeführt werden.");
                 return true;
