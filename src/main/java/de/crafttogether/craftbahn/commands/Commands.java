@@ -350,7 +350,7 @@ public class Commands implements TabExecutor {
                     if (err != null)
                         sendMessage(finalP, "&6CraftBahn &8» Es trat ein Fehler beim speichern der Änderungen auf. Bitte kontaktiere einen Administrator.");
                     else
-                        sendMessage(finalP, "&6CraftBahn &8» &6Du hast &e" + owner.getName() + " &6als Besitzer des Fahrziel &f'&e" + dest.getName() + " &2hinzugefügt.");
+                        sendMessage(finalP, "&6CraftBahn &8» &6Du hast &e" + owner.getName() + " &6als Besitzer des Fahrziel &f'&e" + dest.getName() + "&f' &2hinzugefügt.");
                 });
             }
 
@@ -390,7 +390,7 @@ public class Commands implements TabExecutor {
                     if (err != null)
                         sendMessage(finalP, "&6CraftBahn &8» Es trat ein Fehler beim speichern der Änderungen auf. Bitte kontaktiere einen Administrator.");
                     else
-                        sendMessage(finalP, "&6CraftBahn &8» &6Du hast &e" + owner.getName() + " &6als Besitzer des Fahrziel &f'&e" + dest.getName() + " &centfernt.");
+                        sendMessage(finalP, "&6CraftBahn &8» &6Du hast &e" + owner.getName() + " &6als Besitzer des Fahrziel &f'&e" + dest.getName() + "&f' &centfernt.");
                 });
             }
 
