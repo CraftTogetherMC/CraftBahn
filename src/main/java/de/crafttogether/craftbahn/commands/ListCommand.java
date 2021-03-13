@@ -26,7 +26,7 @@ public class ListCommand implements TabExecutor {
             if (sender instanceof Player) {
                 Player p = Bukkit.getPlayer(((Player) sender).getUniqueId());
                 Destination.DestinationType filterType = null;
-                int pageIndex = 1;
+                Integer pageIndex = null;
 
                 if (args.length > 0) {
                     String _type = args[0].replace("höfe", "hof");
@@ -53,11 +53,14 @@ public class ListCommand implements TabExecutor {
                 list.showOwner(true);
                 list.showLocation(true);
                 list.showFooter(true);
-
-                if (filterType == null)
-                    list.showContents(true);
+                list.showContents(true);
 
                 List<String> argList = Arrays.asList(args);
+
+                if (pageIndex == null)
+                    pageIndex = (filterType == null) ? 1 : 2;
+
+
                 if (argList.contains("--book")) {
                     Bukkit.getLogger().info("OPEN BOOK");
                     ItemStack book = list.getBook();

@@ -1,5 +1,7 @@
 package de.crafttogether.craftbahn.commands;
 
+import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
+import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import de.crafttogether.craftbahn.CraftBahn;
 import de.crafttogether.craftbahn.destinations.Destination;
 import de.crafttogether.craftbahn.destinations.DestinationList;
@@ -7,6 +9,7 @@ import de.crafttogether.craftbahn.destinations.DestinationStorage;
 import de.crafttogether.craftbahn.util.CTLocation;
 import de.crafttogether.craftbahn.util.MarkerManager;
 import de.crafttogether.craftbahn.util.Message;
+import de.crafttogether.craftbahn.util.TCHelper;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -150,14 +153,28 @@ public class Commands implements TabExecutor {
                 return true;
             }
 
-            if (!CraftBahn.getInstance().getServerName().equalsIgnoreCase(dest.getServer())) {
-                Bukkit.getServer().dispatchCommand(p, "train route set " + dest.getServer() + " " + dest.getName());
-                Bukkit.getServer().dispatchCommand(p, "train destination " + dest.getServer());
-                sendMessage(p, "&6CraftBahn &8» &3Set route: " + dest.getServer() + " -> " + dest.getName());
-            } else {
-                sendMessage(p, "&6CraftBahn &8» Set destination: " + dest.getName());
-                Bukkit.getServer().dispatchCommand(p, "train destination " + dest.getName());
+            MinecartGroup train = TCHelper.getTrain(p);
+
+            if (train == null) {
+                sendMessage(p, "&6CraftBahn &8» &cBitte setze dich zuerst in einen Zug.");
+                return true;
             }
+
+            train.getProperties().setDestination("train destination " + dest.getServer());
+
+            if (!CraftBahn.getInstance().getServerName().equalsIgnoreCase(dest.getServer())) {
+                // Create a route first
+                List<String> route = new ArrayList<>();
+                route.add(dest.getServer());
+                route.add(dest.getName());
+
+                train.getProperties().setDestinationRoute(route);
+                train.getProperties().setDestination(dest.getServer());
+            } else {
+                train.getProperties().setDestination(dest.getName());
+            }
+
+            sendMessage(p, "&6CraftBahn &8» &eFahrziel gesetzt!");
 
             return true;
         }

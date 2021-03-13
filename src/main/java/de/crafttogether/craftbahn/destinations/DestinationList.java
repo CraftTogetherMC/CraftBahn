@@ -22,6 +22,7 @@ public class DestinationList {
     private boolean suggestCommands = false;
     private boolean showContents = false;
     private boolean showFooter = false;
+    private boolean showType = true;
 
     public DestinationList() {
         this.destinations = new ArrayList<>(DestinationStorage.getDestinations());
@@ -59,25 +60,25 @@ public class DestinationList {
         contents.addExtra(Message.newLine());
 
         TextComponent btnMainStations = Message.format("&6CraftBahn &8» &2> &eHauptbahnhöfe");
-        btnMainStations.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele MAIN_STATION"));
+        btnMainStations.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele MAIN_STATION 2"));
         btnMainStations.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format("&2Hauptbahnhöfe"))).create()));
         contents.addExtra(btnMainStations);
         contents.addExtra(Message.newLine());
 
         TextComponent btnStations = Message.format("&6CraftBahn &8» &2> &eSystem-Bahnhöfe");
-        btnStations.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele STATION"));
+        btnStations.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele STATION 2"));
         btnStations.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format("&2Bahnhöfe"))).create()));
         contents.addExtra(btnStations);
         contents.addExtra(Message.newLine());
 
         TextComponent btnPublicStations = Message.format("&6CraftBahn &8» &2> &eÖffentliche Bahnhöfe");
-        btnPublicStations.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele PUBLIC_STATION"));
+        btnPublicStations.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele PUBLIC_STATION 2"));
         btnPublicStations.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format("&2Öffentlich"))).create()));
         contents.addExtra(btnPublicStations);
         contents.addExtra(Message.newLine());
 
         TextComponent btnPlayerStations = Message.format("&6CraftBahn &8» &2> &eSpieler-Bahnhöfe");
-        btnPlayerStations.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele PLAYER_STATION"));
+        btnPlayerStations.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele PLAYER_STATION 2"));
         btnPlayerStations.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format("&2Spielerbahnhöfe"))).create()));
         contents.addExtra(btnPlayerStations);
         contents.addExtra(Message.newLine());
@@ -140,7 +141,11 @@ public class DestinationList {
 
                 Collection<Destination> duplicates = DestinationStorage.getDestinations(dest.getName());
 
-                String hoverText = "&e/fahrziel " + dest.getName() + (duplicates.size() > 1 ? (" &7" + dest.getServer()) : "");
+                String hoverText = "&2/fahrziel " + dest.getName() + (duplicates.size() > 1 ? (" &7" + dest.getServer()) : "");
+
+                if (this.showType)
+                    hoverText += "\n&6Stations-Typ: &e" + dest.getType().toString();
+
                 if ((dest.getType().equals(Destination.DestinationType.PLAYER_STATION) || dest.getType().equals(Destination.DestinationType.PUBLIC_STATION)) && dest.getOwner() != null && this.showOwner) {
                     OfflinePlayer owner = Bukkit.getOfflinePlayer(dest.getOwner());
 
@@ -328,5 +333,9 @@ public class DestinationList {
 
     public void showFooter(boolean show) {
         this.showFooter = show;
+    }
+
+    public void showType(boolean show) {
+        this.showType = show;
     }
 }
