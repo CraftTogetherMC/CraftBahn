@@ -75,7 +75,7 @@ public class MySQLAdapter {
             }
             catch (SQLException e) {
                 if (e.getMessage().contains("link failure"))
-                    Bukkit.getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
+                    CraftBahn.getInstance().getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
                 else
                     throw e;
             }
@@ -99,7 +99,7 @@ public class MySQLAdapter {
             }
             catch (SQLException e) {
                 if (e.getMessage().contains("link failure"))
-                    Bukkit.getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
+                    CraftBahn.getInstance().getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
                 else
                     throw e;
             }
@@ -119,7 +119,7 @@ public class MySQLAdapter {
             }
             catch (SQLException e) {
                 if (e.getMessage().contains("link failure"))
-                    Bukkit.getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
+                    CraftBahn.getInstance().getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
                 else
                     throw e;
             }
@@ -139,7 +139,7 @@ public class MySQLAdapter {
             }
             catch (SQLException e) {
                 if (e.getMessage().contains("link failure"))
-                    Bukkit.getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
+                    CraftBahn.getInstance().getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
                 else
                     throw e;
             }
@@ -157,7 +157,7 @@ public class MySQLAdapter {
                     callback.call(null, resultSet);
                 } catch (SQLException e) {
                     if (e.getMessage().contains("link failure"))
-                        Bukkit.getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
+                        CraftBahn.getInstance().getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
                     else
                         callback.call(e, null);
                 }
@@ -176,7 +176,7 @@ public class MySQLAdapter {
                     callback.call(null, lastInsertedId);
                 } catch (SQLException e) {
                     if (e.getMessage().contains("link failure"))
-                        Bukkit.getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
+                        CraftBahn.getInstance().getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
                     else
                         callback.call(e, 0);
                 }
@@ -195,7 +195,7 @@ public class MySQLAdapter {
                     callback.call(null, rows);
                 } catch (SQLException e) {
                     if (e.getMessage().contains("link failure"))
-                        Bukkit.getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
+                        CraftBahn.getInstance().getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
                     else
                         callback.call(e, 0);
                 }
@@ -214,7 +214,7 @@ public class MySQLAdapter {
                     callback.call(null, result);
                 } catch (SQLException e) {
                     if (e.getMessage().contains("link failure"))
-                        Bukkit.getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
+                        CraftBahn.getInstance().getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
                     else
                         callback.call(e, false);
                 }

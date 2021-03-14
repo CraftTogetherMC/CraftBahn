@@ -1,4 +1,5 @@
 package de.crafttogether.craftbahn.destinations;
+import de.crafttogether.craftbahn.CraftBahn;
 import de.crafttogether.craftbahn.util.Message;
 import net.md_5.bungee.api.chat.*;
 import org.bukkit.Bukkit;
@@ -15,6 +16,7 @@ public class DestinationList {
     private List<Destination> destinations;
     private List<TextComponent> pages;
     private Destination.DestinationType filterType;
+    private ClickEvent clickEvent;
 
     private int itemsPerPage = 8;
     private boolean showOwner = false;
@@ -94,8 +96,8 @@ public class DestinationList {
         if (this.showContents)
             this.pages.add(this.getContentsPage());
 
-        if (this.filterType != null) Bukkit.getLogger().info("Applied Filter: + " + this.filterType.name());
-        Bukkit.getLogger().info("Destinations: " + this.destinations.size());
+        if (this.filterType != null) CraftBahn.getInstance().getLogger().info("Applied Filter: + " + this.filterType.name());
+        CraftBahn.getInstance().getLogger().info("Destinations: " + this.destinations.size());
 
         TreeMap<String, List<Destination>> serverMap = new TreeMap<>();
 

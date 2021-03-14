@@ -187,17 +187,75 @@ public class Commands implements TabExecutor {
                 return false;
 
             if (args.length == 0) {
-                sendMessage(p, "&e/fahrziel &7<name> &f- &6Fahrziel festlegen");
-                sendMessage(p, "&e/fahrziele &7[kategorie] &f- &6Fahrziele auflisten");
-                sendMessage(p, "&e/fahrzieledit add &7<> &f- &6Neues Fahrziel anlegen");
-                sendMessage(p, "&e/fahrzieledit remove &7<name> &f- &6Fahrziel entfernen");
-                sendMessage(p, "&e/fahrzieledit settype &7<name> <typ> &f- &6Kategorie aktualisieren");
-                sendMessage(p, "&e/fahrzieledit setowner &7<name> &f- &6Besitzer aktualisieren");
-                sendMessage(p, "&e/fahrzieledit setlocation &7<name> &f- &6Position / Marker aktualisieren");
-                sendMessage(p, "&e/fahrzieledit setprivate &7<name> &f- &6Fahrziel verstecken");
-                sendMessage(p, "&e/fahrzieledit setpublic &7<name> &f- &6Fahrziel wieder anzeigen");
-                sendMessage(p, "&e/fahrzieledit tp &7<name> &f- &6Teleportiere zu Fahrziel");
-                sendMessage(p, "&e/fahrzieledit updatemarker &7<name> &f- &6Update alle Dynmap-Marker");
+                sendMessage(p, "&e/fahrziel &7<name> [server]&f- &6Fahrziel festlegen");
+                sendMessage(p, "&e/fahrziele &7[kategorie] [seite] &f- &6Fahrziele auflisten");
+                sendMessage(p, "&e/fze info &7<name> [server] &f- &6Details zu Fahrziel anzeigen");
+                sendMessage(p, "&e/fze add &7<name> [server] &f- &6Neues Fahrziel anlegen");
+                sendMessage(p, "&e/fze remove &7<name> [server] &f- &6Fahrziel entfernen");
+                sendMessage(p, "&e/fze settype &7<name> [server] <typ> &f- &6Kategorie aktualisieren");
+                sendMessage(p, "&e/fze setowner &7<name> [server] &f- &6Besitzer aktualisieren");
+                sendMessage(p, "&e/fze addmember &7<name> [server] &f- &6Weitere Besitzer hinzufügen");
+                sendMessage(p, "&e/fze removemember &7<name> [server] &f- &6Weitere Besitzer entfernen");
+                sendMessage(p, "&e/fze setlocation &7<name> [server] &f- &6(Marker-)Position aktualisieren");
+                sendMessage(p, "&e/fze settplocation &7<name> [server] &f- &6Teleport-Position aktualisieren");
+                sendMessage(p, "&e/fze setprivate &7<name> [server] &f- &6Fahrziel verstecken");
+                sendMessage(p, "&e/fze setpublic &7<name> [server] &f- &6Fahrziel wieder anzeigen");
+                sendMessage(p, "&e/fze tp &7<name> [server] &f- &6Teleportiere zu Fahrziel");
+                sendMessage(p, "&e/fze updatemarker &7<name> [server] &f- &6Update Dynmap-Marker");
+            }
+
+            else if (args[0].equalsIgnoreCase("info")) {
+                if (!p.hasPermission("ctdestinations.edit.remove")) {
+                    sendMessage(p, "&cDazu hast du keine Berechtigung.");
+                    return true;
+                }
+
+                if (args.length < 2 || args[1].equals("") || args[1].length() < 1) {
+                    sendMessage(p, "&6CraftBahn &8» &cBitte gebe den Namen des Ziel ein.");
+                    return true;
+                }
+
+                String serverName = CraftBahn.getInstance().getServerName();
+                if (args.length >= 3)
+                    serverName = args[2];
+
+                Destination dest = DestinationStorage.getDestination(args[1], serverName);
+                if (dest == null) {
+                    sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen.");
+                    return true;
+                }
+
+                String strParticipants = "";
+                for (UUID uuid : dest.getParticipants()) {
+                    OfflinePlayer participant = Bukkit.getOfflinePlayer(uuid);
+                    if (!participant.hasPlayedBefore()) continue;
+                    strParticipants += participant.getName() + ", ";
+                }
+
+                if (strParticipants.length() > 1)
+                    strParticipants = strParticipants.substring(0, strParticipants.length()-2);
+
+                TextComponent message = Message.format("&e-------------- &c&lCraftBahn &e--------------");
+                message.addExtra(Message.newLine());
+                message.addExtra(Message.format("&6CraftBahn &8» &6Fahrziel: &e" + dest.getName()));
+                message.addExtra(Message.newLine());
+                message.addExtra(Message.format("&6CraftBahn &8» &6ID: &e" + dest.getId()));
+                message.addExtra(Message.newLine());
+                message.addExtra(Message.format("&6CraftBahn &8» &6Typ: &e" + dest.getType()));
+                message.addExtra(Message.newLine());
+                message.addExtra(Message.format("&6CraftBahn &8» &6Besitzer: &e" + dest.getType()));
+                message.addExtra(Message.newLine());
+                message.addExtra(Message.format("&6CraftBahn &8» &6Mitwirkend: &e" + strParticipants));
+                message.addExtra(Message.newLine());
+                message.addExtra(Message.format("&6CraftBahn &8» &6Server: &e" + dest.getServer()));
+                message.addExtra(Message.newLine());
+                message.addExtra(Message.format("&6CraftBahn &8» &6Welt: &e" + dest.getWorld()));
+                message.addExtra(Message.newLine());
+                message.addExtra(Message.format("&6CraftBahn &8» &eX: &6" + dest.getLocation().getX() + "&e, Y: &6" + dest.getLocation().getY() + "&e, Z: &6" + dest.getLocation().getZ()));
+                message.addExtra(Message.newLine());
+                message.addExtra(Message.format("&e----------------------------------------"));
+
+                p.sendMessage(message);
             }
 
             else if (args[0].equalsIgnoreCase("add")) {
@@ -238,11 +296,13 @@ public class Commands implements TabExecutor {
                 }
 
                 Player finalP = p;
-                DestinationStorage.addDestination(args[1], p.getUniqueId(), type, p.getLocation(), Boolean.valueOf(isPublic), (err, id) -> {
+                DestinationStorage.addDestination(args[1], p.getUniqueId(), type, p.getLocation(), Boolean.valueOf(isPublic), (err, dest) -> {
                     if (err != null)
                         sendMessage(finalP, "&6CraftBahn &8» Es trat ein Fehler beim speichern des Fahrziel auf. Bitte kontaktiere einen Administrator.");
-                    else
-                        sendMessage(finalP, "&6CraftBahn &8» &aFahrziel wurde erstellt. ID: " + id);
+                    else {
+                        MarkerManager.addMarker(dest);
+                        sendMessage(finalP, "&6CraftBahn &8» &aFahrziel wurde erstellt. ID: " + dest.getId());
+                    }
                 });
             }
 
@@ -463,7 +523,7 @@ public class Commands implements TabExecutor {
                     if (err != null)
                         sendMessage(finalP, "&6CraftBahn &8» Es trat ein Fehler beim speichern der Änderungen auf. Bitte kontaktiere einen Administrator.");
                     else {
-                        MarkerManager.setMarker(dest);
+                        MarkerManager.addMarker(dest);
                         sendMessage(finalP, "&6CraftBahn &8» &6Du hast die Position für das Ziel: &f'&e" + dest.getName() + "&f' &6aktualisiert.");
                     }
                 });
@@ -568,7 +628,7 @@ public class Commands implements TabExecutor {
                 Collection<Destination> destinations = DestinationStorage.getDestinations();
 
                 for (Destination dest : destinations)
-                    MarkerManager.setMarker(dest, true);
+                    MarkerManager.addMarker(dest, true);
 
                 sendMessage(p, "&6CraftBahn &8» &6Es wurden &e" + destinations.size() + " &6Marker erneuert.");
             }
@@ -638,6 +698,8 @@ public class Commands implements TabExecutor {
 
         else if (cmd.getName().equalsIgnoreCase("fahrzieledit") || cmd.getName().equalsIgnoreCase("fze")) {
             if (args.length == 1) {
+                if (sender.hasPermission("ctdestinations.edit.info"))
+                    proposals.add("info");
                 if (sender.hasPermission("ctdestinations.edit.add"))
                     proposals.add("add");
                 if (sender.hasPermission("ctdestinations.edit.remove"))

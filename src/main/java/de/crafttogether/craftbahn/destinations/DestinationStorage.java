@@ -15,7 +15,7 @@ import java.util.*;
 public class DestinationStorage {
     private static TreeMap<Integer, Destination> destinations = new TreeMap<>();
     
-    private static void insert(Destination destination, Callback<SQLException, Integer> callback) {
+    private static void insert(Destination destination, Callback<SQLException, Destination> callback) {
         MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         CTLocation loc = destination.getLocation();
@@ -60,13 +60,13 @@ public class DestinationStorage {
 
         (err, lastInsertedId) -> {
             if (err != null)
-                Bukkit.getLogger().warning("[MySQL:] Error: " + err.getMessage());
+                CraftBahn.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
 
             // Add to cache
             destination.setId(lastInsertedId);
             destinations.put(lastInsertedId, destination);
 
-            callback.call(err, lastInsertedId);
+            callback.call(err, destination);
         });
     }
 
@@ -98,7 +98,7 @@ public class DestinationStorage {
 
         (err, affectedRows) -> {
             if (err != null)
-                Bukkit.getLogger().warning("[MySQL:] Error: " + err.getMessage());
+                CraftBahn.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
 
             callback.call(err, affectedRows);
             MySQL.close();
@@ -111,7 +111,7 @@ public class DestinationStorage {
 
         MySQL.queryAsync("SELECT * FROM `%sdestinations` WHERE `id` = %s", (err, result) -> {
             if (err != null) {
-                Bukkit.getLogger().warning("[MySQL:] Error: " + err.getMessage());
+                CraftBahn.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
             }
 
             else {
@@ -126,7 +126,7 @@ public class DestinationStorage {
                     }
                 } catch (SQLException ex) {
                     err = ex;
-                    Bukkit.getLogger().warning("[MySQL:] Error: " + err.getMessage());
+                    CraftBahn.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
                 }
                 finally {
                     MySQL.close();
@@ -142,7 +142,7 @@ public class DestinationStorage {
 
         MySQL.updateAsync("DELETE FROM `%sdestinations` WHERE `id` = %s", (err, affectedRows) -> {
             if (err != null) {
-                Bukkit.getLogger().warning("[MySQL:] Error: " + err.getMessage());
+                CraftBahn.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
                 callback.call(err, null);
             }
             else {
@@ -160,7 +160,7 @@ public class DestinationStorage {
 
         MySQL.queryAsync("SELECT * FROM `%sdestinations`", (err, result) -> {
             if (err != null) {
-                Bukkit.getLogger().warning("[MySQL:] Error: " + err.getMessage());
+                CraftBahn.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
                 callback.call(err, null);
             }
 
@@ -168,19 +168,18 @@ public class DestinationStorage {
                 try {
                     while (result.next()) {
                         Destination dest = setupDestination(result);
-                        Bukkit.getLogger().info(dest.toString());
-                        Bukkit.getLogger().info(" ");
+
                         // Update cache
                         destinations.put(dest.getId(), dest);
                     }
                 } catch (SQLException ex) {
                     err = ex;
-                    Bukkit.getLogger().warning("[MySQL:] Error: " + ex.getMessage());
+                    CraftBahn.getInstance().getLogger().warning("[MySQL:] Error: " + ex.getMessage());
                 }
                 finally {
                     MySQL.close();
                 }
-                Bukkit.getLogger().info("loaded " + destinations.values().size());
+
                 callback.call(err, destinations.values());
             }
         }, MySQL.getTablePrefix());
@@ -237,7 +236,7 @@ public class DestinationStorage {
         return list;
     }
 
-    public static void addDestination(String name, UUID owner, Destination.DestinationType type, Location loc, Boolean isPublic, Callback<SQLException, Integer> callback) {
+    public static void addDestination(String name, UUID owner, Destination.DestinationType type, Location loc, Boolean isPublic, Callback<SQLException, Destination> callback) {
         String serverName = CraftBahn.getInstance().getServerName();
         CTLocation ctLoc = CTLocation.fromBukkitLocation(loc);
 
@@ -261,7 +260,7 @@ public class DestinationStorage {
                 JSONArray jsonArray = new JSONArray(result.getString("participants"));
                 for (Object uuid : jsonArray) participants.add(UUID.fromString((String) uuid));
             } catch (Exception e) {
-                Bukkit.getLogger().warning("Error: Unable to read participants for '" + name + "'");
+                CraftBahn.getInstance().getLogger().warning("Error: Unable to read participants for '" + name + "'");
             }
 
             Destination.DestinationType destinationType = Destination.DestinationType.valueOf(result.getString("type"));
@@ -277,7 +276,7 @@ public class DestinationStorage {
             dest.setPublic(result.getBoolean("public"));
         }
         catch (Exception err) {
-            Bukkit.getLogger().warning("[MySQL:] Error: " + err.getMessage());
+            CraftBahn.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
         }
 
         return dest;

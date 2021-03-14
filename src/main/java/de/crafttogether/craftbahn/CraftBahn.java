@@ -2,8 +2,10 @@ package de.crafttogether.craftbahn;
 
 import de.crafttogether.craftbahn.commands.Commands;
 import de.crafttogether.craftbahn.commands.ListCommand;
+import de.crafttogether.craftbahn.destinations.Destination;
 import de.crafttogether.craftbahn.destinations.DestinationStorage;
 import de.crafttogether.craftbahn.listener.TrainEnterListener;
+import de.crafttogether.craftbahn.util.MarkerManager;
 import de.crafttogether.craftbahn.util.MySQLAdapter;
 import de.crafttogether.craftbahn.util.MySQLAdapter.MySQLConfig;
 import de.crafttogether.craftbahn.util.MySQLAdapter.MySQLConnection;
@@ -15,6 +17,8 @@ import org.dynmap.DynmapAPI;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.TreeMap;
 
 public final class CraftBahn extends JavaPlugin {
     private static CraftBahn plugin;
@@ -120,8 +124,30 @@ public final class CraftBahn extends JavaPlugin {
             mySQL.close();
         }
 
-        // Load all destinations from database into our cache
-        DestinationStorage.loadAll((err, destinations) -> Bukkit.getLogger().info("Loaded " + destinations.size() + " destinations"));
+        Bukkit.getServer().getScheduler().runTask(this, new Runnable() {
+            public void run() {
+                // Load all destinations from database into our cache
+                DestinationStorage.loadAll((err, destinations) -> {
+                    getLogger().info("Loaded " + destinations.size() + " destinations");
+
+                    getLogger().info("Setup MarkerSets...");
+                    MarkerManager.createMarkerSets();
+                    getLogger().info("Setup Markers...");
+
+                    int markersCreated = 0;
+                    for (Destination dest : destinations) {
+                        if (!getServerName().equalsIgnoreCase(dest.getServer()))
+                            continue;
+
+                        MarkerManager.addMarker(dest, true);
+                        markersCreated++;
+                    }
+
+                    getLogger().info("Created " + markersCreated + " markers.");
+                    getLogger().info("Marker-Setup completed.");
+                });
+            }
+        });
     }
 
     private void registerCommand(String cmd, TabExecutor executor) {

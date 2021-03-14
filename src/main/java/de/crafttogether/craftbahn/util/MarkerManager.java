@@ -4,14 +4,20 @@ import de.crafttogether.craftbahn.CraftBahn;
 import de.crafttogether.craftbahn.destinations.Destination;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.dynmap.DynmapAPI;
 import org.dynmap.markers.Marker;
 import org.dynmap.markers.MarkerAPI;
 import org.dynmap.markers.MarkerIcon;
 import org.dynmap.markers.MarkerSet;
 
+import java.util.UUID;
+
 public class MarkerManager {
     public static void deleteMarker(Destination dest) {
+        if (!dest.getServer().equalsIgnoreCase(CraftBahn.getInstance().getServerName()))
+            return;
+
         CraftBahn plugin = CraftBahn.getInstance();
         DynmapAPI dynmap = plugin.getDynmap();
 
@@ -61,11 +67,14 @@ public class MarkerManager {
         }
     }
 
-    public static void setMarker(Destination dest) {
-        setMarker(dest, false);
+    public static void addMarker(Destination dest) {
+        addMarker(dest, false);
     }
 
-    public static void setMarker(Destination dest, boolean updateOnly) {
+    public static void addMarker(Destination dest, boolean updateOnly) {
+        if (!dest.getServer().equalsIgnoreCase(CraftBahn.getInstance().getServerName()))
+            return;
+
         CraftBahn plugin = CraftBahn.getInstance();
         DynmapAPI dynmap = plugin.getDynmap();
 
@@ -77,42 +86,46 @@ public class MarkerManager {
         if (!updateOnly)
             createMarkerSets();
 
-        plugin.getLogger().info("Create Marker for '" + dest.getName() + "' updateOnly: " + updateOnly);
-
         MarkerSet set = dynmap.getMarkerAPI().getMarkerSet("CT_" + dest.getType().name());
         MarkerIcon icon = null;
         String label = null;
-        String owner = Bukkit.getOfflinePlayer(dest.getOwner()).getName();
+        String color = null;
         Boolean showOwner = Boolean.valueOf(true);
+        String strParticipants = Bukkit.getOfflinePlayer(dest.getOwner()).getName() + ", ";
+
+        for (UUID uuid : dest.getParticipants()) {
+            OfflinePlayer participant = Bukkit.getOfflinePlayer(uuid);
+            if (!participant.hasPlayedBefore()) continue;
+            strParticipants += participant.getName() + ", ";
+        }
+
+        if (strParticipants.length() > 1)
+            strParticipants = strParticipants.substring(0, strParticipants.length()-2);
 
         switch (dest.getType().name()) {
-            case "STATION":
+            case "STATION": case "MAIN_STATION": case "PUBLIC_STATION":
+                color = "#ffaa00";
                 icon = markerApi.getMarkerIcon("ct-rail");
-                label = "Bahnhof";
-                showOwner = Boolean.valueOf(false);
-                break;
-            case "MAIN_STATION":
-                icon = markerApi.getMarkerIcon("ct-rail");
-                label = "Hauptbahnhof";
-                showOwner = Boolean.valueOf(false);
-                break;
-            case "PUBLIC_STATION":
-                icon = markerApi.getMarkerIcon("ct-rail");
-                label = "Öffentlicher Bahnhof";
                 showOwner = Boolean.valueOf(false);
                 break;
             case "PLAYER_STATION":
+                color = "#ffff55";
                 icon = markerApi.getMarkerIcon("ct-minecart");
-                label = "Spielerbahnhof";
                 showOwner = Boolean.valueOf(true);
                 break;
         }
 
-        if (owner == null)
-            showOwner = Boolean.valueOf(false);
+        label = "<div class=\"ctdestination\" data-id=\"" + dest.getName() + "\" style=\"z-index:99999\">" +
+                    "<div style=\"padding:6px\">" +
+                        "<h3 style=\"padding:0px;margin:0px;color:" + color + "\">" + dest.getName() + "</h3>" +
+                        "<span style=\"font-weight:bold;color:#aaaaaa;\">Stations-Typ:</span> " + dest.getType() + "<br>" +
+                        (showOwner.booleanValue() ? ("<span style=\"font-weight:bold;color:#aaaaaa;\">Besitzer:</span> " + strParticipants + "<br>") : "") +
+                        "<span style=\"font-style:italic;font-weight:bold;color:#ffaa00\">/fahrziel <span style=\"color:#ffff55\">" + dest.getName() + "</span></span>" +
+                    "</div>" +
+                "</div>";
 
-        label = "<div class=\"ctdestination\" id=\"" + dest.getName() + "\"><div style=\"padding:6px\"><h3 style=\"padding:0px;margin:0px;color:#ffaa00\">" + dest.getName() + " <span style=\"color:#aaaaaa\">(" + label + ")</span></h3>" + (showOwner.booleanValue() ? ("<span style=\"font-weight:bold;color:#aaaaaa;\">Besitzer:</span> " + owner + "<br>") : "") + "<span style=\"font-style:italic;font-weight:bold;color:#ff5555\">/fahrziel " + dest.getName() + "</span></div></div>";
         deleteMarker(dest);
+
         Location loc = dest.getLocation().getBukkitLocation();
         set.createMarker(dest.getName(), label, true, loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ(), icon, false);
     }
