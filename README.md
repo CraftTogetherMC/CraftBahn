@@ -13,10 +13,10 @@
 - ~~Inhaltsverzeichnis für `/fahrziele` mit klickbaren Links~~
 - ~~Bei /fahrziel Route setzen wenn Ziel sich auf anderem Server befindet~~ 
 - ~~/fahrziele (Liste) übersichtlicher gestalten.. (Mit Pagination)~~
-- Befehl hinzufügen um Info's über ein bestimmtes Fahrziel anzuzeigen `/fze info <name> [server]` (Perfekter Outsource-Job. Pull-Request!? ^^)
+- ~~Befehl hinzufügen um Info's über ein bestimmtes Fahrziel anzuzeigen `/fze info <name> [server]`~~
 - ~~Route / Destination über TrainCartsAPI setzen anstatt jeweiliges command auszuführen. (Um Rückgabe zu vermeiden)~~
 - Ausgabe im Chat was gespawned wurde (Minecart oder Traincart) wenn man ein Minecart placed
-- MarkerSystem überarbeiten
+- ~~MarkerSystem überarbeiten~~
 - PluginMessage: Andere server im Netzwerk bei Änderungen benachrichtigen
 - ICS integrieren
 - Züge mit kurzer Verzögerung löschen wenn Spieler ausgestiegen ist. (Benötigt Tag-Signs an allen Bahnhöfen!)
