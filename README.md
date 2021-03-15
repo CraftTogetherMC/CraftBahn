@@ -20,7 +20,7 @@
 - PluginMessage: Andere server im Netzwerk bei Änderungen benachrichtigen
 - ICS integrieren
 - Züge mit kurzer Verzögerung löschen wenn Spieler ausgestiegen ist. (Benötigt Tag-Signs an allen Bahnhöfen!)
-- ViewDistance bei der Zugfahrt für mitfahrende Spieler senken
+- ViewDistance bei der Zugfahrt für mitfahrende Spieler senken (1ed460a26b4266b9573d7f28202ca4022784c5d9)
 
 **Probleme:**
 - Direktes anzeigen von Büchern bedarf weiterer recherche.
