@@ -39,7 +39,7 @@ public final class CraftBahn extends JavaPlugin {
             return;
         }
 
-        if (!getServer().getPluginManager().isPluginEnabled("Dynmap")) {
+        if (!getServer().getPluginManager().isPluginEnabled("dynmap")) {
             plugin.getLogger().warning("Couln't find Dynmap");
             Bukkit.getServer().getPluginManager().disablePlugin(plugin);
             return;
@@ -139,8 +139,8 @@ public final class CraftBahn extends JavaPlugin {
                         if (!getServerName().equalsIgnoreCase(dest.getServer()))
                             continue;
 
-                        MarkerManager.addMarker(dest, true);
-                        markersCreated++;
+                        if(MarkerManager.addMarker(dest, true))
+                            markersCreated++;
                     }
 
                     getLogger().info("Created " + markersCreated + " markers.");

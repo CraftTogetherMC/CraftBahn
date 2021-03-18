@@ -67,19 +67,19 @@ public class MarkerManager {
         }
     }
 
-    public static void addMarker(Destination dest) {
-        addMarker(dest, false);
+    public static boolean addMarker(Destination dest) {
+        return addMarker(dest, false);
     }
 
-    public static void addMarker(Destination dest, boolean updateOnly) {
+    public static boolean addMarker(Destination dest, boolean updateOnly) {
         if (!dest.getServer().equalsIgnoreCase(CraftBahn.getInstance().getServerName()))
-            return;
+            return false;
 
         CraftBahn plugin = CraftBahn.getInstance();
         DynmapAPI dynmap = plugin.getDynmap();
 
         if (dynmap == null)
-            return;
+            return false;
 
         MarkerAPI markerApi = dynmap.getMarkerAPI();
 
@@ -87,6 +87,17 @@ public class MarkerManager {
             createMarkerSets();
 
         MarkerSet set = dynmap.getMarkerAPI().getMarkerSet("CT_" + dest.getType().name());
+
+        if (Bukkit.getServer().getWorld(dest.getLocation().getWorld()) == null) {
+            plugin.getLogger().warning("Error: Unable to create marker for '" + dest.getName() + "'. World '" + dest.getWorld() + "' is not loaded");
+            return false;
+        }
+
+        if (dest.getLocation() == null) {
+            plugin.getLogger().warning("Error: Destination '" + dest.getName() + "' has no location set!");
+            return false;
+        }
+
         MarkerIcon icon = null;
         String label = null;
         String color = null;
@@ -115,7 +126,7 @@ public class MarkerManager {
                 break;
         }
 
-        label = "<div class=\"ctdestination\" data-id=\"" + dest.getName() + "\" style=\"z-index:99999\">" +
+        label = "<div style=\"z-index:99999\">" +
                     "<div style=\"padding:6px\">" +
                         "<h3 style=\"padding:0px;margin:0px;color:" + color + "\">" + dest.getName() + "</h3>" +
                         "<span style=\"font-weight:bold;color:#aaaaaa;\">Stations-Typ:</span> " + dest.getType() + "<br>" +
@@ -128,5 +139,7 @@ public class MarkerManager {
 
         Location loc = dest.getLocation().getBukkitLocation();
         set.createMarker(dest.getName(), label, true, loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ(), icon, false);
+
+        return true;
     }
 }
