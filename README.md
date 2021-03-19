@@ -3,6 +3,7 @@
 ![](https://media.tenor.com/images/b31da936191fcccadb8fc6e0fc777070/tenor.gif)
 
 **TODO:**
+- `/fze settype` / `/fze updatemarker` prüfen
 - Debugging (Ein Job für Ceddix)- 
 - ~~`/fze <action> <destination> [server]`~ -> Destination jeweils anhand des verbundenen Server auswählen (wenn kein anderer angegeben)`~~
 - ~~`/fahrziel` <destination> -> Alle gefundenen Fahrziele mit dem angegebenen Namen sortiert nach server auflisten~~
