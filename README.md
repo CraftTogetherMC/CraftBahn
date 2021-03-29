@@ -20,6 +20,7 @@
 - ~~Route / Destination über TrainCartsAPI setzen anstatt jeweiliges command auszuführen. (Um Rückgabe zu vermeiden)~~
 - Ausgabe im Chat was gespawned wurde (Minecart oder Traincart) wenn man ein Minecart placed
 - ~~MarkerSystem überarbeiten~~
+- /tprelative-Befehl Beispiel: `/tpr 300 north`
 - PluginMessage: Andere server im Netzwerk bei Änderungen benachrichtigen
 - ICS integrieren
 - Züge mit kurzer Verzögerung löschen wenn Spieler ausgestiegen ist. (Benötigt Tag-Signs an allen Bahnhöfen!)
