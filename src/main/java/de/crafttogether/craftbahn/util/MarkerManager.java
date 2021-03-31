@@ -65,9 +65,8 @@ public class MarkerManager {
         CraftBahn plugin = CraftBahn.getInstance();
         DynmapAPI dynmap = plugin.getDynmap();
 
-        if (dynmap == null || dest.getType() == null)
+        if (dynmap == null)
             return false;
-
 
         MarkerAPI markerApi = dynmap.getMarkerAPI();
 
