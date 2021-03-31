@@ -123,8 +123,9 @@ public class Destination {
     public void removeParticipant(UUID uuid) { this.participants.remove(uuid); }
 
     public void setType(Enum<?> type) {
-        if (type != DestinationType.MAIN_STATION && type != DestinationType.PLAYER_STATION && type != DestinationType.STATION)
+        if (type != DestinationType.MAIN_STATION && type != DestinationType.PLAYER_STATION && type != DestinationType.STATION && type != DestinationType.PUBLIC_STATION)
             return;
+
         this.type = type;
     }
 

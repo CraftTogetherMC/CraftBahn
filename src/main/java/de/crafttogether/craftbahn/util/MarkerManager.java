@@ -39,19 +39,6 @@ public class MarkerManager {
         if (dynmap == null)
             return;
 
-        MarkerIcon iconRail = markerApi.getMarkerIcon("ct-rail");
-        MarkerIcon iconMinecart = markerApi.getMarkerIcon("ct-minecart");
-
-        if (iconRail == null) {
-            iconRail = dynmap.getMarkerAPI().createMarkerIcon("ct-rail", "ct-rail", plugin.getResource("rail.png"));
-            dynmap.getMarkerAPI().getMarkerIcons().add(iconRail);
-        }
-
-        if (iconMinecart == null) {
-            iconMinecart = dynmap.getMarkerAPI().createMarkerIcon("ct-minecart", "ct-minecart", plugin.getResource("minecart.png"));
-            dynmap.getMarkerAPI().getMarkerIcons().add(iconMinecart);
-        }
-
         for (Destination.DestinationType type : Destination.DestinationType.values()) {
             MarkerSet set = dynmap.getMarkerAPI().getMarkerSet("CT_" + type.name());
             String label = "Bahnhof";
@@ -78,8 +65,9 @@ public class MarkerManager {
         CraftBahn plugin = CraftBahn.getInstance();
         DynmapAPI dynmap = plugin.getDynmap();
 
-        if (dynmap == null)
+        if (dynmap == null || dest.getType() == null)
             return false;
+
 
         MarkerAPI markerApi = dynmap.getMarkerAPI();
 

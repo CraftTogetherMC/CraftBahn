@@ -144,7 +144,8 @@ public class DestinationList {
                 Collection<Destination> duplicates = DestinationStorage.getDestinations(dest.getName());
 
                 String hoverText = "&2/fahrziel " + dest.getName() + (duplicates.size() > 1 ? (" &7" + dest.getServer()) : "");
-
+                CraftBahn.getInstance().getLogger().warning(dest.getName());
+                CraftBahn.getInstance().getLogger().warning(dest.getType().name());
                 if (this.showType)
                     hoverText += "\n&6Stations-Typ: &e" + dest.getType().toString();
 
