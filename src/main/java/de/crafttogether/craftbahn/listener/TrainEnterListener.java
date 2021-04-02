@@ -2,42 +2,70 @@ package de.crafttogether.craftbahn.listener;
 
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.controller.MinecartMemberStore;
+import de.crafttogether.craftbahn.CraftBahn;
 import de.crafttogether.craftbahn.util.Message;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
+import org.bukkit.event.vehicle.VehicleExitEvent;
 
 public class TrainEnterListener implements Listener {
+
     @EventHandler
-    void onVehicleEnter(VehicleEnterEvent e) {
+    public void onVehicleEnter(VehicleEnterEvent e) {
+        Player p = null;
+
         if (!(e.getEntered() instanceof Player))
             return;
 
-        if (!(e.getVehicle() instanceof Minecart))
+        p = (Player) e.getEntered();
+
+        MinecartMember<?> cart = getEnteredCart(p, e.getVehicle());
+        if (cart == null)
             return;
 
-        Player p = (Player) e.getEntered();
-        Minecart minecart = (Minecart) e.getVehicle();
-        MinecartMember<?> cart = MinecartMemberStore.getFromEntity(minecart);
+        // Set new enterMessage
+        String enterMessage = cart.getProperties().getEnterMessage();
+        if (enterMessage == null || enterMessage.equalsIgnoreCase("cbDefault")) {
+            // Clear enterMessage-property
+            cart.getProperties().setEnterMessage(null);
 
-        if (cart != null) {
-            String enterMessage = cart.getProperties().getEnterMessage();
-
-            if (enterMessage == null || enterMessage.equalsIgnoreCase("cbDefault")) {
-                // Clear enterMessage-property
-                cart.getProperties().setEnterMessage(null);
-
-                // Send custom enterMessage
-                sendEnterMessage(p, cart);
-            }
+            // Send custom enterMessage
+            sendEnterMessage(p, cart);
         }
+
+        p.setNoTickViewDistance(6);
+        p.setViewDistance(6);
+    }
+
+    @EventHandler
+    public void onVehicleExit(VehicleExitEvent e) {
+        Player p = null;
+
+        if (!(e.getExited() instanceof Player))
+            return;
+
+        p = (Player) e.getExited();
+
+        MinecartMember<?> cart = getEnteredCart(p, e.getVehicle());
+        if (cart == null)
+            return;
+
+        p.setNoTickViewDistance(p.getWorld().getNoTickViewDistance());
+        p.setViewDistance(p.getWorld().getViewDistance());
+    }
+
+    public MinecartMember<?> getEnteredCart(Entity passenger, Entity vehicle) {
+        if (!(vehicle instanceof Minecart)) return null;
+        return MinecartMemberStore.getFromEntity(vehicle);
     }
 
     private void sendEnterMessage(Player p, MinecartMember cart) {

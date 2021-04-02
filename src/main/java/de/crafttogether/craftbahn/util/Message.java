@@ -26,31 +26,4 @@ public class Message {
         for (Player p : players)
             p.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
     }
-
-    public static void openBook(ItemStack book, Player p) {
-        int slot = p.getInventory().getHeldItemSlot();
-        ItemStack old = p.getInventory().getItem(slot);
-        p.getInventory().setItem(slot, book);
-
-        ByteBuf buf = Unpooled.buffer(256);
-        buf.setByte(0, (byte)0);
-        buf.writerIndex(1);
-
-        try {
-            Constructor<?> serializerConstructor = NMSUtils.getNMSClass("PacketDataSerializer").getConstructor(ByteBuf.class);
-            Object packetDataSerializer = serializerConstructor.newInstance(buf);
-
-            Constructor<?> keyConstructor = NMSUtils.getNMSClass("MinecraftKey").getConstructor(String.class);
-            Object bookKey = keyConstructor.newInstance("minecraft:book_open");
-
-            Constructor<?> titleConstructor = NMSUtils.getNMSClass("PacketPlayOutCustomPayload").getConstructor(bookKey.getClass(), NMSUtils.getNMSClass("PacketDataSerializer"));
-            Object payload = titleConstructor.newInstance(bookKey, packetDataSerializer);
-
-            NMSUtils.sendPacket(p, payload);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        p.getInventory().setItem(slot, old);
-    }
 }

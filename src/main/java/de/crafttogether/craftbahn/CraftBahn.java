@@ -10,15 +10,15 @@ import de.crafttogether.craftbahn.util.MySQLAdapter;
 import de.crafttogether.craftbahn.util.MySQLAdapter.MySQLConfig;
 import de.crafttogether.craftbahn.util.MySQLAdapter.MySQLConnection;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dynmap.DynmapAPI;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.TreeMap;
 
 public final class CraftBahn extends JavaPlugin {
     private static CraftBahn plugin;
@@ -148,6 +148,15 @@ public final class CraftBahn extends JavaPlugin {
                 });
             }
         });
+    }
+
+    public static void debug(Player p, String message) {
+        if (!p.hasPermission("craftbahn.debug")) return;
+        p.sendMessage(ChatColor.translateAlternateColorCodes('&', "&4&l[Debug]: &e" + message));
+    }
+
+    public static void debug(String message) {
+        System.out.println("[CraftBahn][Debug]: " + message);
     }
 
     private void registerCommand(String cmd, TabExecutor executor) {
