@@ -3,8 +3,8 @@
 ![](https://media.tenor.com/images/b31da936191fcccadb8fc6e0fc777070/tenor.gif)
 
 **TODO:**
-- WICHTIG: ICS: Items löschen beim Port in die Creative-Welt (Doppelte Pluginsicherheit, die über Schilder ist natürlich nicht 100% sicher ^^)
-- type PUBLIC_STATION Icon(Chest_Minecard) //Livemap
+- ~~ICS: Items löschen beim Port in die Creative-Welt~~
+- Eigenes Icon für StationType: PUBLIC_STATION (Chest_Minecard)
 - `/fze settype` / `/fze updatemarker` prüfen
 - Debugging (Ein Job für Ceddix)- 
 - ~~`/fze <action> <destination> [server]`~ -> Destination jeweils anhand des verbundenen Server auswählen (wenn kein anderer angegeben)`~~
