@@ -58,6 +58,8 @@ public final class CraftBahn extends JavaPlugin {
         registerCommand("rbf", commands);
         registerCommand("fahrziel", commands);
         registerCommand("fahrziele", new ListCommand());
+        registerCommand("setroute", new ListCommand());
+        registerCommand("setdestination", new ListCommand());
         registerCommand("fahrzieledit", commands);
         registerCommand("fze", commands);
 

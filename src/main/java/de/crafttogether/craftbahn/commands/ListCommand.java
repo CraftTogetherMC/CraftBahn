@@ -1,8 +1,11 @@
 package de.crafttogether.craftbahn.commands;
 
+import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import de.crafttogether.craftbahn.CraftBahn;
 import de.crafttogether.craftbahn.destinations.Destination;
 import de.crafttogether.craftbahn.destinations.DestinationList;
+import de.crafttogether.craftbahn.util.Message;
+import de.crafttogether.craftbahn.util.TCHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -20,6 +23,48 @@ public class ListCommand implements TabExecutor {
     private CraftBahn plugin = CraftBahn.getInstance();
 
     public boolean onCommand(CommandSender sender, Command cmd, String st, String[] args) {
+        if (cmd.getName().equalsIgnoreCase("setdestination")) {
+            if (!(sender instanceof Player))
+                return true;
+
+            Player p = (Player) sender;
+            MinecartGroup train = TCHelper.getTrain(p);
+
+            if (train == null) {
+                p.sendMessage(Message.format("&6CraftBahn &8» &cBitte setze dich zuerst in einen Zug."));
+                return true;
+            }
+
+            train.getProperties().setDestination(args[0]);
+        }
+
+        if (cmd.getName().equalsIgnoreCase("setroute")) {
+            if (!(sender instanceof Player))
+                return true;
+
+            Player p = (Player) sender;
+            MinecartGroup train = TCHelper.getTrain(p);
+
+            if (train == null) {
+                p.sendMessage(Message.format("&6CraftBahn &8» &cBitte setze dich zuerst in einen Zug."));
+                return true;
+            }
+
+            List<String> route = new ArrayList<>();
+            String destination = null;
+            for (int i = 0; i < args.length; i++) {
+                if (i == 0)
+                    destination = args[i];
+                else
+                    route.add(args[i]);
+            }
+
+            if (route.size() > 0)
+                train.getProperties().setDestinationRoute(route);
+
+            train.getProperties().setDestination(destination);
+        }
+
         if (cmd.getName().equalsIgnoreCase("fahrziele")) {
             if (sender instanceof Player) {
                 Player p = Bukkit.getPlayer(((Player) sender).getUniqueId());

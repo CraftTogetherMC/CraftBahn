@@ -27,19 +27,16 @@ public class MySQLAdapter {
 
     private void setupHikari() {
         this.dataSource = new HikariDataSource();
-        this.dataSource.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
+        this.dataSource.setDataSourceClassName("org.mariadb.jdbc.MariaDbDataSource");
         this.dataSource.addDataSourceProperty("serverName", config.getHost());
         this.dataSource.addDataSourceProperty("port", config.getPort());
 
         if (config.getDatabase() != null)
-        this.dataSource.addDataSourceProperty("databaseName", config.getDatabase());
+            this.dataSource.addDataSourceProperty("databaseName", config.getDatabase());
 
         this.dataSource.addDataSourceProperty("user", config.getUsername());
         this.dataSource.addDataSourceProperty("password", config.getPassword());
-
-        this.dataSource.addDataSourceProperty("cachePrepStmts", "true");
-        this.dataSource.addDataSourceProperty("prepStmtCacheSize", "250");
-        this.dataSource.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        this.dataSource.setAutoCommit(true);
     }
 
     public static MySQLAdapter getAdapter() {

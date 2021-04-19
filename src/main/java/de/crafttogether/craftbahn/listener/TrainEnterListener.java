@@ -42,8 +42,8 @@ public class TrainEnterListener implements Listener {
             sendEnterMessage(p, cart);
         }
 
-        p.setNoTickViewDistance(6);
-        p.setViewDistance(6);
+        //p.setNoTickViewDistance(6);
+        //p.setViewDistance(6);
     }
 
     @EventHandler
@@ -59,8 +59,8 @@ public class TrainEnterListener implements Listener {
         if (cart == null)
             return;
 
-        p.setNoTickViewDistance(p.getWorld().getNoTickViewDistance());
-        p.setViewDistance(p.getWorld().getViewDistance());
+        //p.setNoTickViewDistance(p.getWorld().getNoTickViewDistance());
+        //p.setViewDistance(p.getWorld().getViewDistance());
     }
 
     public MinecartMember<?> getEnteredCart(Entity passenger, Entity vehicle) {

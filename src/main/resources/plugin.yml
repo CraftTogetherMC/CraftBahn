@@ -21,3 +21,9 @@ commands:
     description: Teleportiere zu zufälligem Bahnhof
     usage: /rbf
     aliases: [rt, rtp]
+  setroute:
+    description: Destination silent setzen
+    usage: /setroute
+  setdestination:
+    description: Destination silent setzen
+    usage: /setdestination

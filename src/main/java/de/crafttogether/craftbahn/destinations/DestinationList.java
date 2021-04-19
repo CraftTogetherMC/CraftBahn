@@ -16,7 +16,7 @@ public class DestinationList {
     private List<Destination> destinations;
     private List<TextComponent> pages;
     private Destination.DestinationType filterType;
-    private ClickEvent clickEvent;
+    private String filterName;
 
     private int itemsPerPage = 8;
     private boolean showOwner = false;
@@ -30,6 +30,7 @@ public class DestinationList {
         this.destinations = new ArrayList<>(DestinationStorage.getDestinations());
         this.pages = new ArrayList<>();
         this.filterType = null;
+        this.filterName = null;
     }
 
     public DestinationList(List<Destination> destinations) {
@@ -96,9 +97,6 @@ public class DestinationList {
         if (this.showContents)
             this.pages.add(this.getContentsPage());
 
-        if (this.filterType != null) CraftBahn.getInstance().getLogger().info("Applied Filter: + " + this.filterType.name());
-        CraftBahn.getInstance().getLogger().info("Destinations: " + this.destinations.size());
-
         TreeMap<String, List<Destination>> serverMap = new TreeMap<>();
 
         for (Destination dest : this.destinations) {
@@ -111,7 +109,34 @@ public class DestinationList {
             serverMap.get(dest.getServer()).add(dest);
         }
 
-        for (String serverName : serverMap.keySet()) {
+        List<String> keys = new ArrayList(serverMap.keySet());
+        List<String> sortedList = new ArrayList<>();
+
+        String firstKey = null;
+        String lastKey = null;
+
+        for (String key : keys) {
+            CraftBahn.debug(key + " - " + CraftBahn.getInstance().getServerName());
+            if (key.equalsIgnoreCase(CraftBahn.getInstance().getServerName()))
+                firstKey = key;
+            else if (key.equalsIgnoreCase("creative"))
+                lastKey = key;
+            else
+                sortedList.add(key);
+        }
+
+        if (firstKey != null)
+            sortedList.add(0, firstKey);
+
+        if (lastKey != null)
+            sortedList.add(sortedList.size(), lastKey);
+
+        for (String bla : sortedList) {
+            CraftBahn.debug("SORTED: ");
+            CraftBahn.debug(bla);
+        }
+
+        for (String serverName : sortedList) {
             if ((this.itemsPerPage - row) < 4) {
                 // New Page
                 this.pages.add(page);
@@ -121,12 +146,10 @@ public class DestinationList {
 
             if (row != 0) {
                 page.addExtra(Message.newLine());
-                page.addExtra(Message.newLine());
                 row++;
             }
 
-            page.addExtra(Message.format("&7# &6&l" + capitalize(serverName) + ":"));
-            page.addExtra(Message.newLine());
+            page.addExtra(Message.format("&6CraftBahn &8» &7# &6&l" + capitalize(serverName) + ":"));
             page.addExtra(Message.newLine());
 
             row = row + 2;
@@ -137,9 +160,9 @@ public class DestinationList {
 
                 TextComponent btnFahrziel;
                 if (dest.getType() == Destination.DestinationType.PLAYER_STATION)
-                    btnFahrziel = Message.format("&8» &e" + dest.getName());
+                    btnFahrziel = Message.format("&6CraftBahn &8» &e" + dest.getName());
                 else
-                    btnFahrziel = Message.format("&8» &6" + dest.getName());
+                    btnFahrziel = Message.format("&6CraftBahn &8» &6" + dest.getName());
 
                 Collection<Destination> duplicates = DestinationStorage.getDestinations(dest.getName());
 
@@ -208,12 +231,20 @@ public class DestinationList {
         output.addExtra(Message.newLine());
         output.addExtra(page);
 
+        String filter = (filterType == null ? "" : filterType.name() + " ");
+        filter = (filterName == null ? filter : filterName + " ");
+
+        String command = "/fahrziele";
+
+        if (filterName != null)
+            command = "/fahrziel";
+
         if (pages.size() > 1) {
             output.addExtra(Message.newLine());
             TextComponent btnPrevious;
             if (pageIndex > 1) {
                 btnPrevious = Message.format("&a----<< &6Zurück");
-                btnPrevious.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele " + (filterType == null ? "" : filterType.name() + " ") + (pageIndex - 1)));
+                btnPrevious.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command + " " + filter + (pageIndex - 1)));
                 btnPrevious.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (
                         new ComponentBuilder(Message.format("&6Vorherige Seite: &e" + (pageIndex - 1)))
                 ).create()));
@@ -226,13 +257,13 @@ public class DestinationList {
 
             TextComponent btnForward;
             if (pageIndex < this.pages.size()) {
-                btnForward = Message.format("&6Nächste &2>>----");
-                btnForward.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele " + (filterType == null ? "" : filterType.name() + " ") + (pageIndex + 1)));
+                btnForward = Message.format("&6Weiter &2>>----");
+                btnForward.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command + " " + filter + (pageIndex + 1)));
                 btnForward.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (
                         new ComponentBuilder(Message.format("&6Nächste Seite: &e" + (pageIndex + 1)))
                 ).create()));
             } else
-                btnForward = Message.format("&7Weiter &6>>");
+                btnForward = Message.format("&7Weiter >>----");
 
             output.addExtra(btnForward);
             output.addExtra(Message.newLine());
@@ -249,9 +280,11 @@ public class DestinationList {
         this.itemsPerPage = itemsPerPage;
     }
 
-    public void setFilterType(Destination.DestinationType filterType) {
-        this.filterType = filterType;
+    public void setFilterType(Destination.DestinationType destinationType) {
+        this.filterType = destinationType;
     }
+
+    public void setFilterName(String destinationName) { this.filterName = destinationName; }
 
     public TextComponent getPage(int i) {
         return this.pages.get(i);

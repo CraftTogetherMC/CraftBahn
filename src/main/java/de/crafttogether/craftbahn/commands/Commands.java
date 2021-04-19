@@ -124,8 +124,18 @@ public class Commands implements TabExecutor {
             }
 
             String serverName = null;
+            Integer page = null;
+
             List<Destination> found = new ArrayList<>();
-            if (args.length == 2) serverName = args[1];
+            if (args.length == 2) {
+                try {
+                    page = Integer.parseInt(args[1]);
+                }
+                catch(Exception ex) {}
+
+                if (page == null)
+                    serverName = args[1];
+            }
 
             if (serverName != null)
                 found.add(DestinationStorage.getDestination(args[0], serverName));
@@ -139,10 +149,19 @@ public class Commands implements TabExecutor {
 
             else if (found.size() > 1) {
                 DestinationList list = new DestinationList(found);
+                list.setFilterName(args[0]);
                 list.showOwner(true);
                 list.showLocation(true);
-                p.sendMessage(Message.format("&6CraftBahn &8» &cEs wurden mehrere mögliche Ziele gefunden:"));
-                list.sendPage(p, 1);
+                list.showFooter(true);
+
+                sendMessage(p, "&e-------------- &c&lCraftBahn &e--------------");
+
+                if (page == null) {
+                    p.sendMessage(Message.newLine());
+                    sendMessage(p, "&6CraftBahn &8» &eEs wurden mehrere mögliche Ziele gefunden:");
+                }
+
+                list.sendPage(p, (page == null ? 1 : page));
                 return true;
             }
 
