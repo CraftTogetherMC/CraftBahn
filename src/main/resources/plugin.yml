@@ -27,3 +27,6 @@ commands:
   setdestination:
     description: Destination silent setzen
     usage: /setdestination
+  mobenter:
+    description: Setzt Mobs in den Zug
+    usage: /mobenter

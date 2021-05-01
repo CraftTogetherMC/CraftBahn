@@ -2,6 +2,7 @@ package de.crafttogether.craftbahn;
 
 import de.crafttogether.craftbahn.commands.Commands;
 import de.crafttogether.craftbahn.commands.ListCommand;
+import de.crafttogether.craftbahn.commands.MobEnterCommand;
 import de.crafttogether.craftbahn.destinations.Destination;
 import de.crafttogether.craftbahn.destinations.DestinationStorage;
 import de.crafttogether.craftbahn.listener.TrainEnterListener;
@@ -62,6 +63,7 @@ public final class CraftBahn extends JavaPlugin {
         registerCommand("setdestination", new ListCommand());
         registerCommand("fahrzieledit", commands);
         registerCommand("fze", commands);
+        registerCommand("mobenter", new MobEnterCommand());
 
         // Setup MySQLConfig
         MySQLAdapter.MySQLConfig myCfg = new MySQLConfig();
