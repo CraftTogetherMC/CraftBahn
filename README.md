@@ -9,7 +9,7 @@
 - Debugging (Ein Job für Ceddix)- 
 - ~~`/fze <action> <destination> [server]`~ -> Destination jeweils anhand des verbundenen Server auswählen (wenn kein anderer angegeben)`~~
 - ~~`/fahrziel` <destination> -> Alle gefundenen Fahrziele mit dem angegebenen Namen sortiert nach server auflisten~~
-  ~~/mobeject~~
+- /mobeject
 - ~~Bestehende Daten aus altem Plugin importieren (php)~~
 - ~~/fahrzieledit setwarp -cmd für das setzen der Teleport-Position hinzufügen (setlocation == MarkerPosition)~~
 - ~~/farhzieledit add/remove-owner -cmd für die Verwaltung weiterer Besitzer (participants) hinzufügen.~~
