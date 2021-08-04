@@ -132,7 +132,7 @@
         <dependency>
             <groupId>us.dynmap</groupId>
             <artifactId>dynmap-api</artifactId>
-            <version>3.2-SNAPSHOT</version>
+            <version>3.1-beta4</version>
             <scope>provided</scope>
         </dependency>
 
