@@ -2,7 +2,6 @@ package de.crafttogether.craftbahn.listener;
 
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.controller.MinecartMemberStore;
-import de.crafttogether.craftbahn.CraftBahn;
 import de.crafttogether.craftbahn.util.Message;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -21,7 +20,7 @@ public class TrainEnterListener implements Listener {
 
     @EventHandler
     public void onVehicleEnter(VehicleEnterEvent e) {
-        Player p = null;
+        Player p;
 
         if (!(e.getEntered() instanceof Player))
             return;
@@ -48,6 +47,7 @@ public class TrainEnterListener implements Listener {
 
     @EventHandler
     public void onVehicleExit(VehicleExitEvent e) {
+        /*
         Player p = null;
 
         if (!(e.getExited() instanceof Player))
@@ -59,16 +59,17 @@ public class TrainEnterListener implements Listener {
         if (cart == null)
             return;
 
-        //p.setNoTickViewDistance(p.getWorld().getNoTickViewDistance());
-        //p.setViewDistance(p.getWorld().getViewDistance());
+        p.setNoTickViewDistance(p.getWorld().getNoTickViewDistance());
+        p.setViewDistance(p.getWorld().getViewDistance());
+        */
     }
 
     public MinecartMember<?> getEnteredCart(Entity passenger, Entity vehicle) {
-        if (!(vehicle instanceof Minecart)) return null;
+        if (!(vehicle instanceof Minecart) || !vehicle.getPassengers().contains(passenger)) return null;
         return MinecartMemberStore.getFromEntity(vehicle);
     }
 
-    private void sendEnterMessage(Player p, MinecartMember cart) {
+    private void sendEnterMessage(Player p, MinecartMember<?> cart) {
         TextComponent message = Message.format("&e-------------- &c&lCraftBahn &e--------------");
         message.addExtra(Message.newLine());
         message.addExtra(Message.format("&6CraftBahn &8» &eGuten Tag, Reisender!"));
