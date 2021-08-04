@@ -12,7 +12,6 @@
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <testserver.pluginfolder>C:\Users\Joscha\Desktop\CT\Testumgebungen\Server\devserver\plugins\update</testserver.pluginfolder>
     </properties>
 
     <build>
@@ -64,15 +63,6 @@
                                     <outputDirectory>${project.build.directory}</outputDirectory>
                                     <destFileName>${project.name}.${project.packaging}</destFileName>
                                 </artifactItem>
-                                <artifactItem>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>${project.artifactId}</artifactId>
-                                    <version>${project.version}</version>
-                                    <type>${project.packaging}</type>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>${testserver.pluginfolder}</outputDirectory>
-                                    <destFileName>${project.name}.${project.packaging}</destFileName>
-                                </artifactItem>
                             </artifactItems>
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>true</overWriteSnapshots>
@@ -96,18 +86,13 @@
         </repository>
 
         <repository>
+            <id>papermc</id>
+            <url>https://papermc.io/repo/repository/maven-public/</url>
+        </repository>
+
+        <repository>
             <id>sonatype-oss-snapshots</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-        </repository>
-
-        <repository>
-            <id>spigot-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
-        </repository>
-
-        <repository>
-            <id>papermc-repo</id>
-            <url>https://papermc.io/repo/repository/maven-public/</url>
         </repository>
 
         <repository>
@@ -124,30 +109,23 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.tuinity</groupId>
-            <artifactId>tuinity-api</artifactId>
-            <version>1.17.0-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-api</artifactId>
-            <version>1.16.5-R0.1-SNAPSHOT</version>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.17.1-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>com.bergerkiller.bukkit</groupId>
             <artifactId>BKCommonLib</artifactId>
-            <version>1.16.5-v1-SNAPSHOT</version>
+            <version>1.17.1-v1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>com.bergerkiller.bukkit</groupId>
             <artifactId>TrainCarts</artifactId>
-            <version>1.16.5-v1-SNAPSHOT</version>
+            <version>1.17.1-v1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
