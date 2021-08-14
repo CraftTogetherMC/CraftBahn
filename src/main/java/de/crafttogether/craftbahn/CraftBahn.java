@@ -3,13 +3,11 @@ package de.crafttogether.craftbahn;
 import de.crafttogether.craftbahn.commands.Commands;
 import de.crafttogether.craftbahn.commands.ListCommand;
 import de.crafttogether.craftbahn.commands.MobEnterCommand;
-import de.crafttogether.craftbahn.destinations.Destination;
 import de.crafttogether.craftbahn.destinations.DestinationStorage;
 import de.crafttogether.craftbahn.listener.TrainEnterListener;
-import de.crafttogether.craftbahn.util.MarkerManager;
+import de.crafttogether.craftbahn.portals.PortalStorage;
 import de.crafttogether.craftbahn.util.MySQLAdapter;
 import de.crafttogether.craftbahn.util.MySQLAdapter.MySQLConfig;
-import de.crafttogether.craftbahn.util.MySQLAdapter.MySQLConnection;
 import de.crafttogether.craftbahn.util.TCHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.command.TabExecutor;
@@ -17,8 +15,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dynmap.DynmapAPI;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Objects;
 
 public final class CraftBahn extends JavaPlugin {
@@ -27,8 +23,9 @@ public final class CraftBahn extends JavaPlugin {
     private String serverName;
     private DynmapAPI dynmap;
 
-    private FileConfiguration config;
     private MySQLAdapter MySQLAdapter;
+    private PortalStorage portalStorage;
+    private DestinationStorage destinationStorage;
 
     @Override
     public void onEnable() {
@@ -57,7 +54,7 @@ public final class CraftBahn extends JavaPlugin {
         saveDefaultConfig();
 
         // Initialize
-        config = getConfig();
+        FileConfiguration config = getConfig();
         dynmap = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("Dynmap");
         serverName = config.getString("Settings.ServerName");
 
@@ -96,74 +93,10 @@ public final class CraftBahn extends JavaPlugin {
 
         // Initialize MySQLAdapter
         MySQLAdapter = new MySQLAdapter(myCfg);
-        MySQLConnection mySQL = MySQLAdapter.getConnection();
 
-        // Create Tables
-        try {
-            ResultSet result = mySQL.query("SHOW TABLES LIKE '%sdestinations';", mySQL.getTablePrefix());
-
-            if (!result.next()) {
-                getLogger().info("[MySQL]: Create Tables ...");
-
-                mySQL.execute(
-                    "CREATE TABLE `%sdestinations` (\n" +
-                    "  `id` int(11) NOT NULL,\n" +
-                    "  `name` varchar(24) NOT NULL,\n" +
-                    "  `type` varchar(24) NOT NULL,\n" +
-                    "  `server` varchar(24) NOT NULL,\n" +
-                    "  `world` varchar(24) NOT NULL,\n" +
-                    "  `loc_x` double NOT NULL,\n" +
-                    "  `loc_y` double NOT NULL,\n" +
-                    "  `loc_z` double NOT NULL,\n" +
-                    "  `owner` varchar(36) NOT NULL,\n" +
-                    "  `participants` longtext DEFAULT NULL,\n" +
-                    "  `public` tinyint(1) NOT NULL,\n" +
-                    "  `tp_x` double DEFAULT NULL,\n" +
-                    "  `tp_y` double DEFAULT NULL,\n" +
-                    "  `tp_z` double DEFAULT NULL\n" +
-                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;\n"
-                , mySQL.getTablePrefix());
-
-                mySQL.execute(
-                    "ALTER TABLE `%sdestinations`\n" +
-                    "  ADD PRIMARY KEY (`id`);"
-                , mySQL.getTablePrefix());
-
-                mySQL.execute(
-                    "ALTER TABLE `%sdestinations`\n" +
-                    "  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;"
-                , mySQL.getTablePrefix());
-            }
-        }
-        catch (SQLException ex) {
-            getLogger().warning("[MySQL]: " + ex.getMessage());
-        }
-        finally {
-            mySQL.close();
-        }
-
-        Bukkit.getServer().getScheduler().runTask(this, () -> {
-            // Load all destinations from database into our cache
-            DestinationStorage.loadAll((err, destinations) -> {
-                getLogger().info("Loaded " + destinations.size() + " destinations");
-
-                getLogger().info("Setup MarkerSets...");
-                MarkerManager.createMarkerSets();
-                getLogger().info("Setup Markers...");
-
-                int markersCreated = 0;
-                for (Destination dest : destinations) {
-                    if (!getServerName().equalsIgnoreCase(dest.getServer()))
-                        continue;
-
-                    if(MarkerManager.addMarker(dest, true))
-                        markersCreated++;
-                }
-
-                getLogger().info("Created " + markersCreated + " markers.");
-                getLogger().info("Marker-Setup completed.");
-            });
-        });
+        // Initialize Storage-Adapter
+        portalStorage = new PortalStorage();
+        destinationStorage = new DestinationStorage();
     }
 
     public void onDisable() {
@@ -182,6 +115,10 @@ public final class CraftBahn extends JavaPlugin {
 
     public MySQLAdapter getMySQLAdapter() { return MySQLAdapter; }
     public DynmapAPI getDynmap() { return dynmap; }
+
+    public PortalStorage getPortalStorage() { return portalStorage; }
+    public DestinationStorage getDestinationStorage() { return destinationStorage; }
+
     public String getServerName() { return serverName; }
     public static CraftBahn getInstance() { return plugin; }
 }

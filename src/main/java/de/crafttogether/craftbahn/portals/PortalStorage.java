@@ -1,6 +1,7 @@
 package de.crafttogether.craftbahn.portals;
 
 import de.crafttogether.craftbahn.CraftBahn;
+import de.crafttogether.craftbahn.destinations.Destination;
 import de.crafttogether.craftbahn.util.Callback;
 import de.crafttogether.craftbahn.util.MySQLAdapter;
 
@@ -8,9 +9,10 @@ import java.sql.SQLException;
 import java.util.TreeMap;
 
 public class PortalStorage {
-    final private static TreeMap<Integer, Portal> portals = new TreeMap<>();
+    private CraftBahn plugin;
+    private TreeMap<Integer, Portal> portals = new TreeMap<>();
 
-    public static void insert(Portal portal, Callback<SQLException, Portal> callback) {
+    public void insert(Portal portal, Callback<SQLException, Portal> callback) {
         MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         MySQL.insertAsync("INSERT INTO `%sportals` " +
@@ -48,7 +50,7 @@ public class PortalStorage {
         }, MySQL.getTablePrefix());
     }
 
-    public static void update(Portal portal, Callback<SQLException, Integer> callback) {
+    public void update(Portal portal, Callback<SQLException, Integer> callback) {
         MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         MySQL.updateAsync("UPDATE `%sportals` SET " +
@@ -71,7 +73,7 @@ public class PortalStorage {
         }, MySQL.getTablePrefix(), MySQL.getTablePrefix(), portal.getId());
     }
 
-    public static void delete(int portalId, Callback<SQLException, Integer> callback) {
+    public void delete(int portalId, Callback<SQLException, Integer> callback) {
         MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         MySQL.updateAsync("DELETE FROM `%sportals` WHERE `id` = %s", (err, affectedRows) -> {

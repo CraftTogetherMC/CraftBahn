@@ -42,6 +42,17 @@ public class Passenger {
         return null;
     }
 
+    public static Collection<Passenger> get(String trainName) {
+        Collection<Passenger> passengerList = new ArrayList<>();
+
+        for (Passenger passenger : passengers.values()) {
+            if (passenger.getTrainName().equals(trainName))
+                passengerList.add(passenger);
+        }
+
+        return passengerList;
+    }
+
     public static void sendMessage(String trainName, String message) {
         Collection<Passenger> passengerList = get(trainName);
 
@@ -57,19 +68,7 @@ public class Passenger {
     public static void sendMessage(String trainName, String message, int delaySec) {
         Bukkit.getScheduler().runTaskLaterAsynchronously(CraftBahn.getInstance(), () -> {
             Message.debug("Send delayed message to all passengers of '" + trainName + "': " + message);
-
             sendMessage(trainName, message);
         }, 20L * delaySec);
-    }
-
-    public static Collection<Passenger> get(String trainName) {
-        Collection<Passenger> passengerList = new ArrayList<>();
-
-        for (Passenger passenger : passengers.values()) {
-            if (passenger.getTrainName().equals(trainName))
-                passengerList.add(passenger);
-        }
-
-        return passengerList;
     }
 }

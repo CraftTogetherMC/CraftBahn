@@ -1,9 +1,8 @@
 package de.crafttogether.craftbahn.destinations;
 
 import de.crafttogether.craftbahn.CraftBahn;
-import de.crafttogether.craftbahn.util.CTLocation;
-import de.crafttogether.craftbahn.util.Callback;
-import de.crafttogether.craftbahn.util.MySQLAdapter;
+import de.crafttogether.craftbahn.util.*;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.json.JSONArray;
 
@@ -12,9 +11,82 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class DestinationStorage {
-    final private static TreeMap<Integer, Destination> destinations = new TreeMap<>();
-    
-    private static void insert(Destination destination, Callback<SQLException, Destination> callback) {
+    private CraftBahn plugin;
+    private TreeMap<Integer, Destination> destinations = new TreeMap<>();
+
+    public DestinationStorage() {
+        plugin = CraftBahn.getInstance();
+        MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
+
+        // Create Tables if missing
+        try {
+            ResultSet result = MySQL.query("SHOW TABLES LIKE '%sdestinations';", MySQL.getTablePrefix());
+
+            if (!result.next()) {
+                plugin.getLogger().info("[MySQL]: Create Table '" + MySQL.getTablePrefix() + "destinations' ...");
+
+                MySQL.execute(
+                "CREATE TABLE `%sdestinations` (\n" +
+                        "  `id` int(11) NOT NULL,\n" +
+                        "  `name` varchar(24) NOT NULL,\n" +
+                        "  `type` varchar(24) NOT NULL,\n" +
+                        "  `server` varchar(24) NOT NULL,\n" +
+                        "  `world` varchar(24) NOT NULL,\n" +
+                        "  `loc_x` double NOT NULL,\n" +
+                        "  `loc_y` double NOT NULL,\n" +
+                        "  `loc_z` double NOT NULL,\n" +
+                        "  `owner` varchar(36) NOT NULL,\n" +
+                        "  `participants` longtext DEFAULT NULL,\n" +
+                        "  `public` tinyint(1) NOT NULL,\n" +
+                        "  `tp_x` double DEFAULT NULL,\n" +
+                        "  `tp_y` double DEFAULT NULL,\n" +
+                        "  `tp_z` double DEFAULT NULL\n" +
+                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;\n"
+                , MySQL.getTablePrefix());
+
+                MySQL.execute(
+                "ALTER TABLE `%sdestinations`\n" +
+                        "  ADD PRIMARY KEY (`id`);"
+                , MySQL.getTablePrefix());
+
+                MySQL.execute(
+                "ALTER TABLE `%sdestinations`\n" +
+                        "  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;"
+                , MySQL.getTablePrefix());
+            }
+        }
+        catch (SQLException ex) {
+            plugin.getLogger().warning("[MySQL]: " + ex.getMessage());
+        }
+        finally {
+            MySQL.close();
+        }
+
+        Bukkit.getServer().getScheduler().runTask(plugin, () -> {
+            // Load all destinations from database into our cache
+            loadAll((err, destinations) -> {
+                plugin.getLogger().info("Loaded " + destinations.size() + " destinations");
+
+                plugin.getLogger().info("Setup MarkerSets...");
+                MarkerManager.createMarkerSets();
+                plugin.getLogger().info("Setup Markers...");
+
+                int markersCreated = 0;
+                for (Destination dest : destinations) {
+                    if (!CraftBahn.getInstance().getServerName().equalsIgnoreCase(dest.getServer()))
+                        continue;
+
+                    if(MarkerManager.addMarker(dest, true))
+                        markersCreated++;
+                }
+
+                plugin.getLogger().info("Created " + markersCreated + " markers.");
+                plugin.getLogger().info("Marker-Setup completed.");
+            });
+        });
+    }
+
+    private void insert(Destination destination, Callback<SQLException, Destination> callback) {
         MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         CTLocation loc = destination.getLocation();
@@ -69,7 +141,7 @@ public class DestinationStorage {
         });
     }
 
-    public static void update(Destination destination, Callback<SQLException, Integer> callback) {
+    public void update(Destination destination, Callback<SQLException, Integer> callback) {
         MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         CTLocation loc = destination.getLocation();
@@ -105,7 +177,7 @@ public class DestinationStorage {
     }
 
     // TODO: Trigger if other server updates a destination
-    public static void load(int destinationId, Callback<SQLException, Destination> callback) {
+    public void load(int destinationId, Callback<SQLException, Destination> callback) {
         MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         MySQL.queryAsync("SELECT * FROM `%sdestinations` WHERE `id` = %s", (err, result) -> {
@@ -136,7 +208,7 @@ public class DestinationStorage {
         }, MySQL.getTablePrefix(), destinationId);
     }
 
-    public static void delete(int destinationId, Callback<SQLException, Integer> callback) {
+    public void delete(int destinationId, Callback<SQLException, Integer> callback) {
         MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         MySQL.updateAsync("DELETE FROM `%sdestinations` WHERE `id` = %s", (err, affectedRows) -> {
@@ -154,7 +226,7 @@ public class DestinationStorage {
         }, MySQL.getTablePrefix(), destinationId);
     }
 
-    public static void loadAll(Callback<SQLException, Collection<Destination>> callback) {
+    public void loadAll(Callback<SQLException, Collection<Destination>> callback) {
         MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         MySQL.queryAsync("SELECT * FROM `%sdestinations`", (err, result) -> {
@@ -184,11 +256,11 @@ public class DestinationStorage {
         }, MySQL.getTablePrefix());
     }
 
-    public static Collection<Destination> getDestinations() {
+    public Collection<Destination> getDestinations() {
         return destinations.values();
     }
 
-    public static Collection<Destination> getDestinations(String name) {
+    public Collection<Destination> getDestinations(String name) {
         List<Destination> list = new ArrayList<>();
 
         for (Destination dest : destinations.values()) {
@@ -199,21 +271,21 @@ public class DestinationStorage {
         return list;
     }
 
-    public static Destination getDestination(int id) {
+    public Destination getDestination(int id) {
         for (Destination dest : destinations.values())
             if (dest.getId() == id) return dest;
 
         return null;
     }
 
-    public static Destination getDestination(String destinationName, String serverName) {
+    public Destination getDestination(String destinationName, String serverName) {
         for (Destination dest : destinations.values())
             if (dest.getName().equalsIgnoreCase(destinationName) && dest.getServer().equalsIgnoreCase(serverName)) return dest;
 
         return null;
     }
 
-    public static List<Destination> filterByServer(List<Destination> destinations, String serverName) {
+    public List<Destination> filterByServer(List<Destination> destinations, String serverName) {
         List<Destination> list = new ArrayList<>();
 
         for (Destination dest : destinations) {
@@ -224,7 +296,7 @@ public class DestinationStorage {
         return list;
     }
 
-    public static List<Destination> filterByType(List<Destination> destinations, Destination.DestinationType type) {
+    public List<Destination> filterByType(List<Destination> destinations, Destination.DestinationType type) {
         List<Destination> list = new ArrayList<>();
 
         for (Destination dest : destinations) {
@@ -235,7 +307,7 @@ public class DestinationStorage {
         return list;
     }
 
-    public static void addDestination(String name, UUID owner, Destination.DestinationType type, Location loc, Boolean isPublic, Callback<SQLException, Destination> callback) {
+    public void addDestination(String name, UUID owner, Destination.DestinationType type, Location loc, Boolean isPublic, Callback<SQLException, Destination> callback) {
         String serverName = CraftBahn.getInstance().getServerName();
         CTLocation ctLoc = CTLocation.fromBukkitLocation(loc);
 
@@ -243,7 +315,7 @@ public class DestinationStorage {
         insert(dest, callback);
     }
 
-    private static Destination setupDestination(ResultSet result) {
+    private Destination setupDestination(ResultSet result) {
         Destination dest = null;
 
         try {
