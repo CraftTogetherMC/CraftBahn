@@ -34,6 +34,11 @@ public final class CraftBahn extends JavaPlugin {
         plugin = this;
 
         // Check dependencies
+        if (!getServer().getPluginManager().isPluginEnabled("BKCommonLib")) {
+            plugin.getLogger().warning("Couln't find BKCommonLib");
+            Bukkit.getServer().getPluginManager().disablePlugin(plugin);
+            return;
+
         if (!getServer().getPluginManager().isPluginEnabled("Train_Carts")) {
             plugin.getLogger().warning("Couln't find TrainCarts");
             Bukkit.getServer().getPluginManager().disablePlugin(plugin);

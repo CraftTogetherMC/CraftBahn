@@ -2,7 +2,7 @@ name: CraftBahn
 version: ${project.version}
 main: de.crafttogether.craftbahn.CraftBahn
 api-version: 1.13
-depend: [dynmap,Train_Carts]
+depend: [ dynmap, BKCommonLib, Train_Carts]
 authors: [J0schlZ]
 website: https://craft-together.de/
 description: Ich mag Züge
