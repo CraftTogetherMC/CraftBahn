@@ -8,8 +8,6 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -27,7 +25,8 @@ public class TrainEnterListener implements Listener {
 
         p = (Player) e.getEntered();
 
-        MinecartMember<?> cart = getEnteredCart(p, e.getVehicle());
+        MinecartMember<?> cart = MinecartMemberStore.getFromEntity(e.getVehicle());
+
         if (cart == null)
             return;
 
@@ -64,11 +63,6 @@ public class TrainEnterListener implements Listener {
         */
     }
 
-    public MinecartMember<?> getEnteredCart(Entity passenger, Entity vehicle) {
-        if (!(vehicle instanceof Minecart) || !vehicle.getPassengers().contains(passenger)) return null;
-        return MinecartMemberStore.getFromEntity(vehicle);
-    }
-
     private void sendEnterMessage(Player p, MinecartMember<?> cart) {
         TextComponent message = Message.format("&e-------------- &c&lCraftBahn &e--------------");
         message.addExtra(Message.newLine());
@@ -81,7 +75,7 @@ public class TrainEnterListener implements Listener {
         message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format("&2Informationen zum Schienennetz"))).create()));
         p.spigot().sendMessage(message);
 
-        if (cart.getProperties().getDestination().isBlank()) {
+        if (cart.getProperties().getDestination().isEmpty()) {
             message = new TextComponent(Message.format("&6CraftBahn &8»"));
             message.addExtra(Message.newLine());
             message.addExtra(Message.format("&6CraftBahn &8»&c&lHinweis:"));
