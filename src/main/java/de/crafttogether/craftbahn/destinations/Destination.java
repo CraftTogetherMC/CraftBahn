@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.UUID;
 
 public class Destination {
+    private String name;
     private Integer id = null;
-    private String name = null;
     private String server = null;
     private String world = null;
     private UUID owner = null;
-    private List<UUID> participants = new ArrayList<UUID>();
+    private List<UUID> participants = new ArrayList<>();
     private Enum<?> type = null;
     private CTLocation location = null;
     private CTLocation teleportLocation = null;
@@ -152,19 +152,19 @@ public class Destination {
     }
 
     public static DestinationType findType(String label) {
-        switch (label.toLowerCase()) {
-            case "bahnhof": return DestinationType.STATION;
-            case "hauptbahnhof": return DestinationType.MAIN_STATION;
-            case "öffentlich": return DestinationType.PUBLIC_STATION;
-            case "spielerbahnhof": return DestinationType.PLAYER_STATION;
-        }
-        return null;
+        return switch (label.toLowerCase()) {
+            case "bahnhof" -> DestinationType.STATION;
+            case "hauptbahnhof" -> DestinationType.MAIN_STATION;
+            case "öffentlich" -> DestinationType.PUBLIC_STATION;
+            case "spielerbahnhof" -> DestinationType.PLAYER_STATION;
+            default -> null;
+        };
     }
 
     public String toString() {
-        String strParticipants = "";
-        for (UUID participant : participants) strParticipants += participant.toString() + ",";
-        if (strParticipants.length() > 1) strParticipants = strParticipants.substring(0, strParticipants.length() - 1);
+        StringBuilder strParticipants = new StringBuilder();
+        for (UUID participant : participants) strParticipants.append(participant.toString()).append(",");
+        if (strParticipants.length() > 1) strParticipants = new StringBuilder(strParticipants.substring(0, strParticipants.length() - 1));
         return "id=" + id + ", name=" + name + ", server=" + server + ", world=" + world + ", type=" + (type == null ? null : type.toString()) + ", owner=" + owner + ", participants=[" + strParticipants + "], isPrivate=" + isPublic + ", location=[" + (location == null ? null : location.toString()) + "], teleportLocation=[" + (teleportLocation == null ? null : teleportLocation.toString()) + "]";
     }
 }

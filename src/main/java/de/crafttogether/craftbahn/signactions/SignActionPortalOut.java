@@ -20,11 +20,13 @@ public class SignActionPortalOut extends SignAction {
     public boolean build(SignChangeActionEvent event) {
         String[] lines = event.getLines();
 
+        // Validate third line
         if (lines[2].length() < 1) {
             event.getPlayer().sendMessage(Message.format("&c\nPlease write a name for this portal on the third line"));
             return false;
         }
 
+        // Respond
         SignBuildOptions opt = SignBuildOptions.create()
             .setName("Portal-Exit")
             .setDescription("allow trains to travel between servers");

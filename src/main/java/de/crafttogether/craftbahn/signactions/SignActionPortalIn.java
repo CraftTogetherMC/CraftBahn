@@ -30,16 +30,19 @@ public class SignActionPortalIn extends SignAction {
         String[] lines = event.getLines();
         String status;
 
+        // Validate third line
         if (lines[2].length() < 1) {
             event.getPlayer().sendMessage(Message.format("&c\nPlease write a name for this portal on the third line"));
             return false;
         }
 
+        // Check if portal-exit exists
         if (true)
             status = "\n§cCouldn't find an §rPortal-Exit §cfor §r'§e" + lines[2] + "§r'§c! Please create one";
         else
             status = "\nPortal-Exit was found";
 
+        // Respond
         SignBuildOptions opt = SignBuildOptions.create()
             .setName("Portal-Entrance")
             .setDescription("allow trains to travel between servers" + status);

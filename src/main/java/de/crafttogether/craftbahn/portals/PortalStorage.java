@@ -1,7 +1,6 @@
 package de.crafttogether.craftbahn.portals;
 
 import de.crafttogether.craftbahn.CraftBahn;
-import de.crafttogether.craftbahn.destinations.Destination;
 import de.crafttogether.craftbahn.util.Callback;
 import de.crafttogether.craftbahn.util.MySQLAdapter;
 
@@ -9,11 +8,11 @@ import java.sql.SQLException;
 import java.util.TreeMap;
 
 public class PortalStorage {
-    private CraftBahn plugin;
-    private TreeMap<Integer, Portal> portals = new TreeMap<>();
+    private final CraftBahn plugin = CraftBahn.getInstance();
+    private final TreeMap<Integer, Portal> portals = new TreeMap<>();
 
     public void insert(Portal portal, Callback<SQLException, Portal> callback) {
-        MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
+        MySQLAdapter.MySQLConnection MySQL = plugin.getMySQLAdapter().getConnection();
 
         MySQL.insertAsync("INSERT INTO `%sportals` " +
         "(" +
@@ -40,7 +39,7 @@ public class PortalStorage {
 
         (err, lastInsertedId) -> {
             if (err != null)
-                CraftBahn.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
+                plugin.getLogger().warning("[MySQL:] Error: " + err.getMessage());
 
             // Add to cache
             portal.setId(lastInsertedId);
@@ -51,7 +50,7 @@ public class PortalStorage {
     }
 
     public void update(Portal portal, Callback<SQLException, Integer> callback) {
-        MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
+        MySQLAdapter.MySQLConnection MySQL = plugin.getMySQLAdapter().getConnection();
 
         MySQL.updateAsync("UPDATE `%sportals` SET " +
             "`name`             = '" + portal.getName() + "', " +
@@ -66,7 +65,7 @@ public class PortalStorage {
 
         (err, affectedRows) -> {
             if (err != null)
-                CraftBahn.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
+                plugin.getLogger().warning("[MySQL:] Error: " + err.getMessage());
 
             callback.call(err, affectedRows);
             MySQL.close();
@@ -74,11 +73,11 @@ public class PortalStorage {
     }
 
     public void delete(int portalId, Callback<SQLException, Integer> callback) {
-        MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
+        MySQLAdapter.MySQLConnection MySQL = plugin.getMySQLAdapter().getConnection();
 
         MySQL.updateAsync("DELETE FROM `%sportals` WHERE `id` = %s", (err, affectedRows) -> {
             if (err != null) {
-                CraftBahn.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
+                plugin.getLogger().warning("[MySQL:] Error: " + err.getMessage());
                 callback.call(err, null);
             }
             else {

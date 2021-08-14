@@ -11,11 +11,10 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class DestinationStorage {
-    private CraftBahn plugin;
-    private TreeMap<Integer, Destination> destinations = new TreeMap<>();
+    private final CraftBahn plugin = CraftBahn.getInstance();
+    private final TreeMap<Integer, Destination> destinations = new TreeMap<>();
 
     public DestinationStorage() {
-        plugin = CraftBahn.getInstance();
         MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         // Create Tables if missing
@@ -26,22 +25,24 @@ public class DestinationStorage {
                 plugin.getLogger().info("[MySQL]: Create Table '" + MySQL.getTablePrefix() + "destinations' ...");
 
                 MySQL.execute(
-                "CREATE TABLE `%sdestinations` (\n" +
-                        "  `id` int(11) NOT NULL,\n" +
-                        "  `name` varchar(24) NOT NULL,\n" +
-                        "  `type` varchar(24) NOT NULL,\n" +
-                        "  `server` varchar(24) NOT NULL,\n" +
-                        "  `world` varchar(24) NOT NULL,\n" +
-                        "  `loc_x` double NOT NULL,\n" +
-                        "  `loc_y` double NOT NULL,\n" +
-                        "  `loc_z` double NOT NULL,\n" +
-                        "  `owner` varchar(36) NOT NULL,\n" +
-                        "  `participants` longtext DEFAULT NULL,\n" +
-                        "  `public` tinyint(1) NOT NULL,\n" +
-                        "  `tp_x` double DEFAULT NULL,\n" +
-                        "  `tp_y` double DEFAULT NULL,\n" +
-                        "  `tp_z` double DEFAULT NULL\n" +
-                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;\n"
+            """
+                    CREATE TABLE `%sdestinations` (
+                      `id` int(11) NOT NULL,
+                      `name` varchar(24) NOT NULL,
+                      `type` varchar(24) NOT NULL,
+                      `server` varchar(24) NOT NULL,
+                      `world` varchar(24) NOT NULL,
+                      `loc_x` double NOT NULL,
+                      `loc_y` double NOT NULL,
+                      `loc_z` double NOT NULL,
+                      `owner` varchar(36) NOT NULL,
+                      `participants` longtext DEFAULT NULL,
+                      `public` tinyint(1) NOT NULL,
+                      `tp_x` double DEFAULT NULL,
+                      `tp_y` double DEFAULT NULL,
+                      `tp_z` double DEFAULT NULL
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+                    """
                 , MySQL.getTablePrefix());
 
                 MySQL.execute(
@@ -62,28 +63,26 @@ public class DestinationStorage {
             MySQL.close();
         }
 
-        Bukkit.getServer().getScheduler().runTask(plugin, () -> {
-            // Load all destinations from database into our cache
-            loadAll((err, destinations) -> {
-                plugin.getLogger().info("Loaded " + destinations.size() + " destinations");
+        // Load all destinations from database into our cache
+        Bukkit.getServer().getScheduler().runTask(plugin, () -> loadAll((err, destinations) -> {
+            plugin.getLogger().info("Loaded " + destinations.size() + " destinations");
 
-                plugin.getLogger().info("Setup MarkerSets...");
-                MarkerManager.createMarkerSets();
-                plugin.getLogger().info("Setup Markers...");
+            plugin.getLogger().info("Setup MarkerSets...");
+            MarkerManager.createMarkerSets();
+            plugin.getLogger().info("Setup Markers...");
 
-                int markersCreated = 0;
-                for (Destination dest : destinations) {
-                    if (!CraftBahn.getInstance().getServerName().equalsIgnoreCase(dest.getServer()))
-                        continue;
+            int markersCreated = 0;
+            for (Destination dest : destinations) {
+                if (!CraftBahn.getInstance().getServerName().equalsIgnoreCase(dest.getServer()))
+                    continue;
 
-                    if(MarkerManager.addMarker(dest, true))
-                        markersCreated++;
-                }
+                if(MarkerManager.addMarker(dest, true))
+                    markersCreated++;
+            }
 
-                plugin.getLogger().info("Created " + markersCreated + " markers.");
-                plugin.getLogger().info("Marker-Setup completed.");
-            });
-        });
+            plugin.getLogger().info("Created " + markersCreated + " markers.");
+            plugin.getLogger().info("Marker-Setup completed.");
+        }));
     }
 
     private void insert(Destination destination, Callback<SQLException, Destination> callback) {

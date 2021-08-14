@@ -9,11 +9,11 @@ import org.bukkit.entity.Player;
 import java.util.*;
 
 public class Passenger {
-    private static Map<UUID, Passenger> passengers = new HashMap<UUID, Passenger>();
+    private static final Map<UUID, Passenger> passengers = new HashMap<>();
 
-    private UUID uuid;
-    private String trainName;
-    private int cartIndex;
+    private final UUID uuid;
+    private final String trainName;
+    private final int cartIndex;
 
     private Passenger(UUID uuid, String trainName, int cartIndex) {
         this.uuid = uuid;
@@ -32,8 +32,7 @@ public class Passenger {
     }
 
     public static void remove(UUID uuid) {
-        if (passengers.containsKey(uuid))
-            passengers.remove(uuid);
+        passengers.remove(uuid);
     }
 
     public static Passenger get(UUID uuid) {

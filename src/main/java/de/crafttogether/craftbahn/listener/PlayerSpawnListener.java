@@ -37,7 +37,7 @@ public class PlayerSpawnListener implements Listener {
         MinecartGroup train = TCHelper.getTrain(trainName);
 
         if (train != null) {
-            MinecartMember cart = train.get(cartIndex);
+            MinecartMember<?> cart = train.get(cartIndex);
 
             if (cart instanceof MinecartMemberRideable) {
                 if (player.isFlying())

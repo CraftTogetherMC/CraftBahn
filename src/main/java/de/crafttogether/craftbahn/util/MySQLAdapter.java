@@ -128,7 +128,7 @@ public class MySQLAdapter {
             if (args.length > 0) statement = String.format(statement, args);
             String finalStatement = statement;
 
-            Boolean result = false;
+            boolean result = false;
             try {
                 connection = dataSource.getConnection();
                 preparedStatement = connection.prepareStatement(finalStatement);
@@ -151,12 +151,15 @@ public class MySQLAdapter {
             executeAsync(() -> {
                 try {
                     ResultSet resultSet = query(finalStatement);
+                    assert callback != null;
                     callback.call(null, resultSet);
                 } catch (SQLException e) {
                     if (e.getMessage().contains("link failure"))
                         CraftBahn.getInstance().getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
-                    else
+                    else {
+                        assert callback != null;
                         callback.call(e, null);
+                    }
                 }
             });
 
@@ -170,12 +173,15 @@ public class MySQLAdapter {
             executeAsync(() -> {
                 try {
                     int lastInsertedId = insert(finalStatement);
+                    assert callback != null;
                     callback.call(null, lastInsertedId);
                 } catch (SQLException e) {
                     if (e.getMessage().contains("link failure"))
                         CraftBahn.getInstance().getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
-                    else
+                    else {
+                        assert callback != null;
                         callback.call(e, 0);
+                    }
                 }
             });
 
@@ -189,12 +195,15 @@ public class MySQLAdapter {
             executeAsync(() -> {
                 try {
                     int rows = update(finalStatement);
+                    assert callback != null;
                     callback.call(null, rows);
                 } catch (SQLException e) {
                     if (e.getMessage().contains("link failure"))
                         CraftBahn.getInstance().getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
-                    else
+                    else {
+                        assert callback != null;
                         callback.call(e, 0);
+                    }
                 }
             });
 
@@ -208,12 +217,15 @@ public class MySQLAdapter {
             executeAsync(() -> {
                 try {
                     boolean result = execute(finalStatement);
+                    assert callback != null;
                     callback.call(null, result);
                 } catch (SQLException e) {
                     if (e.getMessage().contains("link failure"))
                         CraftBahn.getInstance().getLogger().warning("[MySQL]: Couldn't connect to MySQL-Server...");
-                    else
+                    else {
+                        assert callback != null;
                         callback.call(e, false);
+                    }
                 }
             });
 
@@ -246,7 +258,7 @@ public class MySQLAdapter {
             }
 
             return this;
-        };
+        }
 
         public String getTablePrefix() {
             return config.getTablePrefix();

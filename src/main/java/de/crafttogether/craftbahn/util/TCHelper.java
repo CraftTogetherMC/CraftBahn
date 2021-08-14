@@ -13,8 +13,8 @@ import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 
 public class TCHelper {
-    private static SignActionPortalIn signActionPortalIn = new SignActionPortalIn();
-    private static SignActionPortalOut signActionPortalOut = new SignActionPortalOut();
+    private static final SignActionPortalIn signActionPortalIn = new SignActionPortalIn();
+    private static final SignActionPortalOut signActionPortalOut = new SignActionPortalOut();
 
     public static void registerActionSigns() {
         SignAction.register(signActionPortalIn);
@@ -26,15 +26,16 @@ public class TCHelper {
         SignAction.unregister(signActionPortalOut);
     }
 
+    // Get train by player
     public static MinecartGroup getTrain(Player p) {
         Entity entity = p.getVehicle();
-        MinecartMember cart = null;
+        MinecartMember<?> cart = null;
 
         if (entity == null)
             return null;
 
         if (entity instanceof Minecart)
-            cart = MinecartMemberStore.getFromEntity((Minecart) entity);
+            cart = MinecartMemberStore.getFromEntity(entity);
 
         if (cart != null)
             return cart.getGroup();
@@ -42,6 +43,7 @@ public class TCHelper {
         return null;
     }
 
+    // Get train by name
     public static MinecartGroup getTrain(String trainName) {
         for (MinecartGroup group : MinecartGroupStore.getGroups()) {
             if (group.getProperties().getTrainName().equals(trainName))
@@ -51,19 +53,19 @@ public class TCHelper {
         return null;
     }
 
+    // Send message to all passengers of a train
     public static void trainMessage(MinecartGroup group, String message) {
         for (MinecartMember<?> member : group)
             cartMessage(member, message);
     }
 
-    public static void cartMessage(MinecartMember member, String message) {
-        CommonEntity vehicle = CommonEntity.get(member.getEntity().getEntity());
+    // Send message to all passengers of a cart
+    public static void cartMessage(MinecartMember<?> member, String message) {
+        CommonEntity<?> vehicle = CommonEntity.get(member.getEntity().getEntity());
 
         for (Object passenger : vehicle.getPlayerPassengers()) {
-            if (passenger instanceof Player) {
-                Player player = (Player) passenger;
+            if (passenger instanceof Player player)
                 player.sendMessage(message);
-            }
         }
     }
 }

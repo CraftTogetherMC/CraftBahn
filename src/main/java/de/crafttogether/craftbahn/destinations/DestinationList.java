@@ -13,8 +13,8 @@ import java.util.*;
 
 public class DestinationList {
 
-    private List<Destination> destinations;
-    private List<TextComponent> pages;
+    private final List<Destination> destinations;
+    private final List<TextComponent> pages;
     private Destination.DestinationType filterType;
     private String filterName;
 
@@ -27,7 +27,7 @@ public class DestinationList {
     private boolean showType = true;
 
     public DestinationList() {
-        this.destinations = new ArrayList<>(DestinationStorage.getDestinations());
+        this.destinations = new ArrayList<>(CraftBahn.getInstance().getDestinationStorage().getDestinations());
         this.pages = new ArrayList<>();
         this.filterType = null;
         this.filterName = null;
@@ -109,7 +109,7 @@ public class DestinationList {
             serverMap.get(dest.getServer()).add(dest);
         }
 
-        List<String> keys = new ArrayList(serverMap.keySet());
+        List<String> keys = new ArrayList<>(serverMap.keySet());
         List<String> sortedList = new ArrayList<>();
 
         String firstKey = null;
@@ -164,7 +164,7 @@ public class DestinationList {
                 else
                     btnFahrziel = Message.format("&6CraftBahn &8» &6" + dest.getName());
 
-                Collection<Destination> duplicates = DestinationStorage.getDestinations(dest.getName());
+                Collection<Destination> duplicates = CraftBahn.getInstance().getDestinationStorage().getDestinations(dest.getName());
 
                 String hoverText = "&2/fahrziel " + dest.getName() + (duplicates.size() > 1 ? (" &7" + dest.getServer()) : "");
 
@@ -174,11 +174,11 @@ public class DestinationList {
                 if ((dest.getType().equals(Destination.DestinationType.PLAYER_STATION) || dest.getType().equals(Destination.DestinationType.PUBLIC_STATION)) && dest.getOwner() != null && this.showOwner) {
                     OfflinePlayer owner = Bukkit.getOfflinePlayer(dest.getOwner());
 
-                    String strOwner = (owner.hasPlayedBefore() ? owner.getName() : "Unbekannt") + ", ";
+                    StringBuilder strOwner = new StringBuilder((owner.hasPlayedBefore() ? owner.getName() : "Unbekannt") + ", ");
                     for (UUID uuid : dest.getParticipants()) {
                         OfflinePlayer participant = Bukkit.getOfflinePlayer(uuid);
                         if (!participant.hasPlayedBefore()) continue;
-                        strOwner += participant.getName() + ", ";
+                        strOwner.append(participant.getName()).append(", ");
                     }
 
                     hoverText += "\n&6Besitzer: &e" + strOwner.substring(0, strOwner.length()-2);
@@ -328,7 +328,7 @@ public class DestinationList {
             return;
         }
 
-        if (pageIndex == 0 || pageIndex > getPageCount()) {
+        if (pageIndex > getPageCount()) {
             player.sendMessage(Message.format("&6CraftBahn &8» &cEs gibt nur " + getPageCount() + " Seite" + (getPageCount() > 1 ? "n":"")));
             return;
         }
