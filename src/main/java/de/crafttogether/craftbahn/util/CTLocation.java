@@ -34,19 +34,13 @@ public class CTLocation {
     public String getServer() {
         return server;
     }
-
     public String getWorld() {
         return world;
     }
-
     public double getX() {
         return x;
     }
-
-    public double getY() {
-        return y;
-    }
-
+    public double getY() { return y; }
     public double getZ() {
         return z;
     }
@@ -54,19 +48,15 @@ public class CTLocation {
     public void setServer(String server) {
         this.server = server;
     }
-
     public void setWorld(String world) {
         this.world = world;
     }
-
     public void setX(double x) {
         this.x = x;
     }
-
     public void setY(double y) {
         this.y = y;
     }
-
     public void setZ(double z) {
         this.z = z;
     }
