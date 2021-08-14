@@ -1,4 +1,5 @@
 Settings:
+  Port: 5000
   ServerName: 'lobby'
   Debug: true
 MySQL:
