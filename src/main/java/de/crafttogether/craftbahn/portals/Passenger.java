@@ -1,5 +1,7 @@
-package de.crafttogether.craftbahn.util;
+package de.crafttogether.craftbahn.portals;
 
+import de.crafttogether.craftbahn.CraftBahn;
+import de.crafttogether.craftbahn.util.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -48,19 +50,15 @@ public class Passenger {
             Player player = Bukkit.getPlayer(uuid);
 
             if (player != null && player.isOnline())
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&', ICTS.config.getPrefix() + message));
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
         }
     }
 
     public static void sendMessage(String trainName, String message, int delaySec) {
-        Bukkit.getScheduler().runTaskLaterAsynchronously(ICTS.plugin, new Runnable() {
-            @Override
-            public void run() {
-                if (ICTS.config.isDebugEnabled())
-                    ICTS.debug("Send delayed message to all passengers of '" + trainName + "': " + message);
+        Bukkit.getScheduler().runTaskLaterAsynchronously(CraftBahn.getInstance(), () -> {
+            Message.debug("Send delayed message to all passengers of '" + trainName + "': " + message);
 
-                sendMessage(trainName, message);
-            }
+            sendMessage(trainName, message);
         }, 20L * delaySec);
     }
 

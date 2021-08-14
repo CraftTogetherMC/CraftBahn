@@ -1,6 +1,7 @@
 package de.crafttogether.craftbahn.net;
 
-import de.crafttogether.icts.ICTS;
+import de.crafttogether.craftbahn.CraftBahn;
+import de.crafttogether.craftbahn.util.Message;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -25,8 +26,8 @@ public class Client extends Thread {
             outputStream = clientSocket.getOutputStream();
         } catch (ConnectException e) {
             if (!e.getMessage().equalsIgnoreCase("connection refused")) {
-                ICTS.plugin.getLogger().warning("Couldn't connect to server");
-                ICTS.plugin.getLogger().warning("Error: " + e.getMessage());
+                Message.debug("Couldn't connect to server");
+                Message.debug("Error: " + e.getMessage());
             }
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -34,7 +35,7 @@ public class Client extends Thread {
         }
 
         if (isConnected()) {
-            ICTS.plugin.getLogger().info("ADD ACTIVE CLIENT");
+            Message.debug("ADD ACTIVE CLIENT");
             Client.activeClients.add(this);
         }
     }
@@ -61,8 +62,8 @@ public class Client extends Thread {
             pw.flush();
 
             /*if (ICTS.config.isDebugEnabled()) {
-                ICTS.plugin.getLogger().info("Sent:");
-                ICTS.plugin.getLogger().info(output);
+                CraftBahn.getInstance().debug("Sent:");
+                CraftBahn.getInstance().debug(output);
             }*/
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -98,7 +99,6 @@ public class Client extends Thread {
             stopped++;
         }
 
-        if (ICTS.config.isDebugEnabled())
-            ICTS.plugin.getLogger().info("Stopped " + stopped + " active clients.");
+        Message.debug("Stopped " + stopped + " active clients.");
     }
 }

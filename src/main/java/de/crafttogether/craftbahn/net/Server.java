@@ -5,12 +5,15 @@ import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import com.bergerkiller.bukkit.tc.controller.spawnable.SpawnableGroup;
 import com.bergerkiller.bukkit.tc.properties.CartProperties;
 import com.bergerkiller.bukkit.tc.properties.TrainProperties;
-import com.bergerkiller.bukkit.tc.properties.api.IPropertyParser;
 import com.bergerkiller.bukkit.tc.signactions.SignActionSpawn;
 import com.bergerkiller.bukkit.tc.utils.LauncherConfig;
-import de.crafttogether.icts.ICTS;
-import de.crafttogether.icts.Passenger;
-import org.bukkit.*;
+import de.crafttogether.craftbahn.CraftBahn;
+import de.crafttogether.craftbahn.util.Message;
+import de.crafttogether.craftbahn.portals.Passenger;
+import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
@@ -48,7 +51,7 @@ public class Server extends Thread {
             serverSocket = new ServerSocket(port);
             listen = true;
 
-            ICTS.plugin.getLogger().info("Server is listening on port " + port);
+            Message.debug("Server is listening on port " + port);
 
             // Handle incoming connections
             while (listen && !isInterrupted()) {
@@ -67,18 +70,18 @@ public class Server extends Thread {
                 if (connection == null)
                     continue;
 
-                // Whitelist Check
                 String ip = connection.getInetAddress().getHostAddress();
-                if (ICTS.config.isWhitelistEnabled() && !ICTS.config.getIPWhitelist().contains(ip)) {
-                    ICTS.plugin.getLogger().warning(ip + " tried to connect but is not whitelisted!");
+
+                // Whitelist Check
+                /*if (ICTS.config.isWhitelistEnabled() && !ICTS.config.getIPWhitelist().contains(ip)) {
+                    Message.debug(ip + " tried to connect but is not whitelisted!");
 
                     connection.close();
                     clients.remove(connection);
                     continue;
-                }
+                }*/
 
-                if (ICTS.config.isDebugEnabled())
-                    ICTS.plugin.getLogger().warning(ip + " connected.");
+                Message.debug(ip + " connected.");
 
                 try {
                     inputStream = connection.getInputStream();
@@ -90,10 +93,10 @@ public class Server extends Thread {
                         received.append(inputLine + "\r\n");
                     }
 
-                    /*if (ICTS.config.isDebugEnabled()) {
-                        ICTS.plugin.getLogger().info("Received:");
-                        ICTS.plugin.getLogger().info(received.toString());
-                    }*/
+                    /*
+                    Message.debug("Received:");
+                    Message.debug(received.toString());
+                    */
 
                     // Receive dataPacket
                     ConfigurationNode dataPacket = new ConfigurationNode();
@@ -122,18 +125,13 @@ public class Server extends Thread {
                     }
 
                     if (world == null) {
-                        if (ICTS.config.isDebugEnabled())
-                            ICTS.plugin.getLogger().warning("World '" + worldName + "' was not found!");
-
-                        Passenger.sendMessage(trainID, ICTS.config.getNoWorldMessage()
-                                        .replace("%world%", worldName)
-                                , 2);
-
+                        Message.debug("World '" + worldName + "' was not found!");
+                        Passenger.sendMessage(trainID, "World '" + worldName + "' was not found!", 2);
                         continue;
                     }
 
                     // Use scheduler to be sync with main-thread
-                    Bukkit.getServer().getScheduler().runTask(ICTS.plugin, () -> {
+                    Bukkit.getServer().getScheduler().runTask(CraftBahn.getInstance(), () -> {
                         // Look for "icreceive"-sign
                         Block signBlock = loc.getBlock();
                         BlockFace direction = null;
@@ -144,27 +142,15 @@ public class Server extends Thread {
                             if (blockData instanceof Rotatable) {
                                 Rotatable rotation = (Rotatable) blockData;
                                 direction = rotation.getRotation();
-                                ICTS.plugin.getLogger().info(direction.getDirection().getBlockX() + " " +
-                                        direction.getDirection().getBlockX() + " " +
-                                        direction.getDirection().getBlockX());
+                                CraftBahn.getInstance().getLogger().info(direction.getDirection().getBlockX() + " " +
+                                    direction.getDirection().getBlockX() + " " +
+                                    direction.getDirection().getBlockX());
                             } else {
-                                if (ICTS.config.isDebugEnabled())
-                                    ICTS.plugin.getLogger().warning("No Rotation found!");
-
-                                Passenger.sendMessage(trainID, ICTS.config.getNoRotationMessage(), 2);
+                                CraftBahn.getInstance().getLogger().warning("No Rotation found!");
                                 return;
                             }
                         } else {
-                            if (ICTS.config.isDebugEnabled())
-                                ICTS.plugin.getLogger().warning("No Sign found! (" + signBlock.getType().name() + ")");
-
-                            Passenger.sendMessage(trainID, ICTS.config.getNoSignMessage()
-                                            .replace("%world%", worldName)
-                                            .replace("%x%", String.valueOf(signBlock.getX()))
-                                            .replace("%y%", String.valueOf(signBlock.getY()))
-                                            .replace("%z%", String.valueOf(signBlock.getZ()))
-                                    , 3);
-
+                            Message.debug("No Sign found! (" + signBlock.getType().name() + ")");
                             return;
                         }
 
@@ -180,25 +166,23 @@ public class Server extends Thread {
                         }
 
                         if (!(railLoc.getBlock().getBlockData() instanceof Rail)) {
-                            if (ICTS.config.isDebugEnabled())
-                                ICTS.plugin.getLogger().warning("No Rail found! (" + railBlock.getType().name() + ")");
-
-                            Passenger.sendMessage(trainID, ICTS.config.getNoRailMessage());
+                            Message.debug("No Rail found! (" + railBlock.getType().name() + ")");
+                            Passenger.sendMessage(trainID, "No Rail found! (" + railBlock.getType().name() + ")");
                             return;
                         }
 
-                        if (ICTS.config.isDebugEnabled()) {
+                        if (CraftBahn.getInstance().getConfig().getBoolean("debug")) {
                             StringBuilder ownerList = new StringBuilder();
                             for (String owner : owners) ownerList.append(owner + ",");
 
-                            ICTS.plugin.getLogger().info("World: " + world.getName());
-                            ICTS.plugin.getLogger().info("Location: " + x + " " + y + " " + z);
-                            ICTS.plugin.getLogger().info("Direction: " + direction);
-                            ICTS.plugin.getLogger().info("TrainID: " + trainID);
-                            ICTS.plugin.getLogger().info("TrainName: " + trainNewName);
-                            ICTS.plugin.getLogger().info("Owners: " + ownerList.toString());
-                            ICTS.plugin.getLogger().info("Passengers: " + passengers.size());
-                            ICTS.plugin.getLogger().info("Try to spawn a train with " + train.getMembers().size() + " carts...");
+                            Message.debug("World: " + world.getName());
+                            Message.debug("Location: " + x + " " + y + " " + z);
+                            Message.debug("Direction: " + direction);
+                            Message.debug("TrainID: " + trainID);
+                            Message.debug("TrainName: " + trainNewName);
+                            Message.debug("Owners: " + ownerList.toString());
+                            Message.debug("Passengers: " + passengers.size());
+                            Message.debug("Try to spawn a train with " + train.getMembers().size() + " carts...");
                         }
 
                         List<Location> spawnLocations = SignActionSpawn.getSpawnPositions(railLoc, false, direction, train.getMembers());
@@ -230,8 +214,7 @@ public class Server extends Thread {
                 }
 
                 finally {
-                    if (ICTS.config.isDebugEnabled())
-                        ICTS.plugin.getLogger().info("Closing connection. (" + connection.getInetAddress().getAddress() + ")");
+                    Message.debug("Closing connection. (" + connection.getInetAddress().getAddress() + ")");
 
                     reader.close();
                     inputStream.close();
@@ -242,8 +225,8 @@ public class Server extends Thread {
             }
 
         } catch (BindException e) {
-            ICTS.plugin.getLogger().warning("Can't bind to " + port + ".. Port already in use!");
-            ICTS.plugin.onDisable();
+            Message.debug("Can't bind to " + port + ".. Port already in use!");
+            CraftBahn.getInstance().onDisable();
 
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -251,9 +234,7 @@ public class Server extends Thread {
 
         finally {
             close();
-
-            if (ICTS.config.isDebugEnabled())
-                ICTS.plugin.getLogger().info("Server stopped.");
+            Message.debug("Server stopped.");
         }
     }
 

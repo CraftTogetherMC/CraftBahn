@@ -3,8 +3,9 @@ package de.crafttogether.craftbahn.listener;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.controller.type.MinecartMemberRideable;
-import de.crafttogether.craftbahn.util.Passenger;
-import de.crafttogether.icts.ICTS;
+import de.crafttogether.craftbahn.util.Message;
+import de.crafttogether.craftbahn.portals.Passenger;
+import de.crafttogether.craftbahn.util.TCHelper;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -30,10 +31,10 @@ public class PlayerSpawnListener implements Listener {
         String trainName = passengerData.getTrainName();
         int cartIndex = passengerData.getCartIndex();
 
-        ICTS.debug("Try to find train '" + trainName + "' for " + player.getName() + " cartIndex: " + cartIndex);
+        Message.debug("Try to find train '" + trainName + "' for " + player.getName() + " cartIndex: " + cartIndex);
 
         // Try to find train and set player as passenger
-        MinecartGroup train = ICTS.plugin.findTrain(trainName);
+        MinecartGroup train = TCHelper.getTrain(trainName);
 
         if (train != null) {
             MinecartMember cart = train.get(cartIndex);
@@ -45,14 +46,14 @@ public class PlayerSpawnListener implements Listener {
                 e.setSpawnLocation(cart.getBlock().getLocation());
                 cart.getEntity().setPassenger(player);
 
-                ICTS.debug("Set player " + player.getName() + " as passenger of '" + trainName + "' at cartIndex: " + cartIndex);
+                Message.debug("Set player " + player.getName() + " as passenger of '" + trainName + "' at cartIndex: " + cartIndex);
                 Passenger.remove(uuid);
             }
             else
-                ICTS.debug("Cart(" + cartIndex + ") at Train '" + trainName + "' is not rideable.");
+                Message.debug("Cart(" + cartIndex + ") at Train '" + trainName + "' is not rideable.");
         }
         else
-            ICTS.debug("Train '" + trainName + "' was not found.");
+            Message.debug("Train '" + trainName + "' was not found.");
     }
 }
 

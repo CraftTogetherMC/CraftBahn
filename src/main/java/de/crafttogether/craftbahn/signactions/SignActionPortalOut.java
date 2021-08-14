@@ -1,7 +1,5 @@
 package de.crafttogether.craftbahn.signactions;
 
-package de.crafttogether.tcdebug;
-
 import com.bergerkiller.bukkit.common.entity.CommonEntity;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
@@ -16,22 +14,11 @@ import java.util.List;
 
 public class SignActionPortalOut extends SignAction {
 
-    /**
-     * Checks whether a sign action event is meant for this type of Sign Action
-     *
-     * @param info event
-     * @return True if it matched, False if not
-     */
     @Override
     public boolean match(SignActionEvent info) {
         return info.isType("portal-out");
     }
 
-    /**
-     * Fired when this sign is being executed for a certain event
-     *
-     * @param info event
-     */
     @Override
     public void execute(SignActionEvent info) {
         if (info.isAction(SignActionType.MEMBER_ENTER) && info.isPowered() && info.hasMember()) {
@@ -59,12 +46,6 @@ public class SignActionPortalOut extends SignAction {
         }
     }
 
-    /**
-     * Fired when a sign is being built
-     *
-     * @param event containing relevant Build information
-     * @return True if building is allowed, False if not
-     */
     @Override
     public boolean build(SignChangeActionEvent event) {
         String[] info = event.getLines();

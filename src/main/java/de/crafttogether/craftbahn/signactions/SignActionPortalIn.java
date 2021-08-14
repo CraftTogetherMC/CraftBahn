@@ -1,7 +1,5 @@
 package de.crafttogether.craftbahn.signactions;
 
-package de.crafttogether.tcdebug;
-
 import com.bergerkiller.bukkit.common.entity.CommonEntity;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
@@ -16,55 +14,22 @@ import java.util.List;
 
 public class SignActionPortalIn extends SignAction {
 
-    /**
-     * Checks whether a sign action event is meant for this type of Sign Action
-     *
-     * @param info event
-     * @return True if it matched, False if not
-     */
     @Override
     public boolean match(SignActionEvent info) {
         return info.isType("portal-in");
     }
 
-    /**
-     * Fired when this sign is being executed for a certain event
-     *
-     * @param info event
-     */
     @Override
     public void execute(SignActionEvent info) {
-        if (info.isAction(SignActionType.MEMBER_ENTER) && info.isPowered() && info.hasMember()) {
-            MinecartGroup group = info.getGroup();
-            MinecartMember cart = info.getMember();
+        // Train arrives sign
+        if (info.isAction(SignActionType.GROUP_ENTER) && info.isPowered() && info.hasGroup())
+            onTrainEnter(info);
 
-
-            List<Entity> passengers1 = info.getMember().getEntity().getPassengers();
-
-            List<Entity> passengers2 = info.getMember().getEntity().getEntity().getPassengers();
-
-            CommonEntity commonEntity = CommonEntity.get(info.getMember().getEntity().getEntity());
-            List<Entity> passengers3 = commonEntity.getPlayerPassengers();
-
-
-            System.out.println("TCDebug: " + passengers1.size());
-            System.out.println("TCDebug: " + passengers2.size());
-            System.out.println("TCDebug: " + passengers3.size());
-
-            // Destroy cart/group
-            if (group.size() <= 1)
-                group.destroy();
-            else
-                cart.onDie(true);
-        }
+        // Cart arrives Sign
+        if (info.isAction(SignActionType.MEMBER_ENTER) && info.isPowered() && info.hasMember())
+            onCartEnter(info);
     }
 
-    /**
-     * Fired when a sign is being built
-     *
-     * @param event containing relevant Build information
-     * @return True if building is allowed, False if not
-     */
     @Override
     public boolean build(SignChangeActionEvent event) {
         String[] info = event.getLines();
@@ -83,5 +48,13 @@ public class SignActionPortalIn extends SignAction {
                 .setDescription("allow trains to \"teleport\" between servers");
 
         return opt.handle(event.getPlayer());
+    }
+
+    private void onCartEnter(SignActionEvent info) {
+
+    }
+
+    private void onTrainEnter(SignActionEvent info) {
+
     }
 }
