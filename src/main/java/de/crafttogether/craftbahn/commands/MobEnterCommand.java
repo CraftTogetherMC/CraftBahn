@@ -4,9 +4,11 @@ import com.bergerkiller.bukkit.common.utils.EntityUtil;
 import com.bergerkiller.bukkit.common.utils.WorldUtil;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
-import de.crafttogether.craftbahn.CraftBahn;
 import de.crafttogether.craftbahn.util.Message;
 import de.crafttogether.craftbahn.util.TCHelper;
+import net.kyori.adventure.text.Component;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -19,9 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MobEnterCommand implements TabExecutor {
-    private CraftBahn plugin = CraftBahn.getInstance();
 
-    public boolean onCommand(CommandSender sender, Command cmd, String st, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, Command cmd, @NotNull String st, String[] args) {
         if (cmd.getName().equalsIgnoreCase("mobenter")) {
             if (!(sender instanceof Player))
                 return true;
@@ -36,7 +37,7 @@ public class MobEnterCommand implements TabExecutor {
 
             Location center = p.getLocation();
             int entered = 0;
-            for (Entity entity : WorldUtil.getNearbyEntities(center, 5.0, 1.0, 5.0)) {
+            for (Entity entity : WorldUtil.getNearbyEntities(center, 5.0, 3.0, 5.0)) {
                 if (entity.getVehicle() != null)
                     continue;
 
@@ -61,18 +62,6 @@ public class MobEnterCommand implements TabExecutor {
 
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
-        ArrayList<String> newList = new ArrayList<>();
-        ArrayList<String> proposals = new ArrayList<>();
-
-        if (args.length < 1 || args[args.length - 1].equals("")) {
-            newList = proposals;
-        } else {
-            for (String value : proposals) {
-                if (value.toLowerCase().startsWith(args[args.length - 1].toLowerCase()))
-                    newList.add(value);
-            }
-        }
-
-        return newList;
+        return new ArrayList<>();
     }
 }

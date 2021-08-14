@@ -1,7 +1,6 @@
 package de.crafttogether.craftbahn.commands;
 
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
-import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import de.crafttogether.craftbahn.CraftBahn;
 import de.crafttogether.craftbahn.destinations.Destination;
 import de.crafttogether.craftbahn.destinations.DestinationList;
@@ -21,17 +20,17 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 public class Commands implements TabExecutor {
-    private CraftBahn plugin = CraftBahn.getInstance();
 
-    public boolean onCommand(CommandSender sender, Command cmd, String st, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, Command cmd, @NotNull String st, String[] args) {
         Player p = null;
 
         if (cmd.getName().equalsIgnoreCase("rbf") || cmd.getName().equalsIgnoreCase("rt") || cmd.getName().equalsIgnoreCase("rtp")) {
-            List<Destination> list = new ArrayList<Destination>();
+            List<Destination> list = new ArrayList<>();
 
             if (sender instanceof Player)
                 p = Bukkit.getPlayer(((Player)sender).getUniqueId());
@@ -39,9 +38,7 @@ public class Commands implements TabExecutor {
             if (p == null)
                 return false;
 
-            boolean showAll = false;
-            if (args.length > 0 && args[0].equalsIgnoreCase("all"))
-                showAll = true;
+            boolean showAll = args.length > 0 && args[0].equalsIgnoreCase("all");
 
             List<Destination> destinations = new ArrayList<>(DestinationStorage.getDestinations());
             destinations = DestinationStorage.filterByServer(destinations, CraftBahn.getInstance().getServerName());
@@ -131,7 +128,7 @@ public class Commands implements TabExecutor {
                 try {
                     page = Integer.parseInt(args[1]);
                 }
-                catch(Exception ex) {}
+                catch(Exception ignored) {}
 
                 if (page == null)
                     serverName = args[1];
@@ -167,7 +164,7 @@ public class Commands implements TabExecutor {
 
             Destination dest = found.get(0);
 
-            if (!dest.isPublic().booleanValue() && !p.hasPermission("ctdestinations.see.private")) {
+            if (!dest.isPublic() && !p.hasPermission("ctdestinations.see.private")) {
                 sendMessage(p, "&6CraftBahn &8» &cAuf dieses Ziel hast du keinen Zugriff.");
                 return true;
             }
@@ -244,15 +241,15 @@ public class Commands implements TabExecutor {
                     return true;
                 }
 
-                String strParticipants = "";
+                StringBuilder strParticipants = new StringBuilder();
                 for (UUID uuid : dest.getParticipants()) {
                     OfflinePlayer participant = Bukkit.getOfflinePlayer(uuid);
                     if (!participant.hasPlayedBefore()) continue;
-                    strParticipants += participant.getName() + ", ";
+                    strParticipants.append(participant.getName()).append(", ");
                 }
 
                 if (strParticipants.length() > 1)
-                    strParticipants = strParticipants.substring(0, strParticipants.length()-2);
+                    strParticipants = new StringBuilder(strParticipants.substring(0, strParticipants.length() - 2));
 
                 TextComponent message = Message.format("&e-------------- &c&lCraftBahn &e--------------");
                 message.addExtra(Message.newLine());
@@ -307,7 +304,7 @@ public class Commands implements TabExecutor {
 
                 try {
                     type = Destination.DestinationType.valueOf(args[2].toUpperCase());
-                } catch (Exception exception) {}
+                } catch (Exception ignored) {}
 
                 if (type == null) {
                     sendMessage(p, "&6CraftBahn &8» &cUngültiger Stationstyp.");
@@ -315,7 +312,7 @@ public class Commands implements TabExecutor {
                 }
 
                 Player finalP = p;
-                DestinationStorage.addDestination(args[1], p.getUniqueId(), type, p.getLocation(), Boolean.valueOf(isPublic), (err, dest) -> {
+                DestinationStorage.addDestination(args[1], p.getUniqueId(), type, p.getLocation(), isPublic, (err, dest) -> {
                     if (err != null)
                         sendMessage(finalP, "&6CraftBahn &8» Es trat ein Fehler beim speichern des Fahrziel auf. Bitte kontaktiere einen Administrator.");
                     else {
@@ -708,7 +705,7 @@ public class Commands implements TabExecutor {
 
         if (cmd.getName().equalsIgnoreCase("fahrziel")) {
             for (Destination dest : DestinationStorage.getDestinations()) {
-                if (!sender.hasPermission("ctdestinations.see.private") && !dest.isPublic().booleanValue())
+                if (!sender.hasPermission("ctdestinations.see.private") && !dest.isPublic())
                     continue;
 
                 proposals.add(dest.getName());
@@ -756,8 +753,8 @@ public class Commands implements TabExecutor {
 
                     Collection<Destination> destinations = DestinationStorage.getDestinations();
                     for (Destination dest : DestinationStorage.getDestinations()) {
-                        if ((args[0].equalsIgnoreCase("setprivate") && !dest.isPublic().booleanValue()) || (
-                                args[0].equalsIgnoreCase("setpublic") && dest.isPublic().booleanValue()))
+                        if ((args[0].equalsIgnoreCase("setprivate") && !dest.isPublic()) || (
+                                args[0].equalsIgnoreCase("setpublic") && dest.isPublic()))
                             continue;
 
                         proposals.add(dest.getName());
