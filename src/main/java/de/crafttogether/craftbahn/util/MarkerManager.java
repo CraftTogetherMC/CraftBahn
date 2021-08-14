@@ -34,7 +34,6 @@ public class MarkerManager {
     public static void createMarkerSets() {
         CraftBahn plugin = CraftBahn.getInstance();
         DynmapAPI dynmap = plugin.getDynmap();
-        MarkerAPI markerApi = dynmap.getMarkerAPI();
 
         if (dynmap == null)
             return;

@@ -116,7 +116,7 @@ public class DestinationList {
         String lastKey = null;
 
         for (String key : keys) {
-            CraftBahn.debug(key + " - " + CraftBahn.getInstance().getServerName());
+            Message.debug(key + " - " + CraftBahn.getInstance().getServerName());
             if (key.equalsIgnoreCase(CraftBahn.getInstance().getServerName()))
                 firstKey = key;
             else if (key.equalsIgnoreCase("creative"))
@@ -132,8 +132,8 @@ public class DestinationList {
             sortedList.add(sortedList.size(), lastKey);
 
         for (String bla : sortedList) {
-            CraftBahn.debug("SORTED: ");
-            CraftBahn.debug(bla);
+            Message.debug("SORTED: ");
+            Message.debug(bla);
         }
 
         for (String serverName : sortedList) {
