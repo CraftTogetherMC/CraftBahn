@@ -4,7 +4,6 @@ import de.crafttogether.craftbahn.CraftBahn;
 import de.crafttogether.craftbahn.util.CTLocation;
 import de.crafttogether.craftbahn.util.Callback;
 import de.crafttogether.craftbahn.util.MySQLAdapter;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.json.JSONArray;
 
@@ -13,7 +12,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class DestinationStorage {
-    private static TreeMap<Integer, Destination> destinations = new TreeMap<>();
+    final private static TreeMap<Integer, Destination> destinations = new TreeMap<>();
     
     private static void insert(Destination destination, Callback<SQLException, Destination> callback) {
         MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
@@ -51,7 +50,7 @@ public class DestinationStorage {
             (loc != null ? loc.getY() : null) + ", " +
             (loc != null ? loc.getZ() : null) + ", " +
             "'" + destination.getOwner().toString() + "', " +
-            "'" + participants.toString() + "', " +
+            "'" + participants + "', " +
             (destination.isPublic() ? 1 : 0) + ", " +
             (tpLoc != null ? loc.getX() : null) + ", " +
             (tpLoc != null ? loc.getY() : null) + ", " +
@@ -89,7 +88,7 @@ public class DestinationStorage {
             "`loc_y`        = " + loc.getY() + ", " +
             "`loc_z`        = " + loc.getZ() + ", " +
             "`owner`        = '" + destination.getOwner().toString() + "', " +
-            "`participants` = '" + participants.toString() + "', " +
+            "`participants` = '" + participants + "', " +
             "`public`       = " + (destination.isPublic() ? 1 : 0) + ", " +
             "`tp_x`         = " + tpLoc.getX() + ", " +
             "`tp_y`         = " + tpLoc.getY() + ", " +
@@ -240,7 +239,7 @@ public class DestinationStorage {
         String serverName = CraftBahn.getInstance().getServerName();
         CTLocation ctLoc = CTLocation.fromBukkitLocation(loc);
 
-        Destination dest = new Destination(name, serverName, loc.getWorld().getName(), owner, new ArrayList<UUID>(), type, ctLoc, ctLoc, isPublic);
+        Destination dest = new Destination(name, serverName, loc.getWorld().getName(), owner, new ArrayList<>(), type, ctLoc, ctLoc, isPublic);
         insert(dest, callback);
     }
 
