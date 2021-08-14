@@ -16,7 +16,6 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dynmap.DynmapAPI;
-import org.jetbrains.annotations.NotNull;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -54,8 +53,11 @@ public final class CraftBahn extends JavaPlugin {
             return;
         }
 
+        // Create default config
+        saveDefaultConfig();
+
         // Initialize
-        config = plugin.getConfig();
+        config = getConfig();
         dynmap = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("Dynmap");
         serverName = config.getString("Settings.ServerName");
 
@@ -178,7 +180,6 @@ public final class CraftBahn extends JavaPlugin {
         Objects.requireNonNull(getCommand(cmd)).setTabCompleter(executor);
     }
 
-    public @NotNull FileConfiguration getConfig() { return config; }
     public MySQLAdapter getMySQLAdapter() { return MySQLAdapter; }
     public DynmapAPI getDynmap() { return dynmap; }
     public String getServerName() { return serverName; }

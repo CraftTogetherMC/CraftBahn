@@ -1,16 +1,11 @@
 package de.crafttogether.craftbahn.signactions;
 
-import com.bergerkiller.bukkit.common.entity.CommonEntity;
-import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
-import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.events.SignActionEvent;
 import com.bergerkiller.bukkit.tc.events.SignChangeActionEvent;
 import com.bergerkiller.bukkit.tc.signactions.SignAction;
 import com.bergerkiller.bukkit.tc.signactions.SignActionType;
 import com.bergerkiller.bukkit.tc.utils.SignBuildOptions;
-import org.bukkit.entity.Entity;
-
-import java.util.List;
+import de.crafttogether.craftbahn.util.Message;
 
 public class SignActionPortalIn extends SignAction {
 
@@ -32,20 +27,22 @@ public class SignActionPortalIn extends SignAction {
 
     @Override
     public boolean build(SignChangeActionEvent event) {
-        String[] info = event.getLines();
-        String[] coords = info[3].split(" ");
+        String[] lines = event.getLines();
+        String status;
 
-        try {
-            Double.parseDouble(coords[0]);
-            Double.parseDouble(coords[1]);
-            Double.parseDouble(coords[2]);
-        } catch (Exception ex) {
+        if (lines[2].length() < 1) {
+            event.getPlayer().sendMessage(Message.format("&c\nPlease write a name for this portal on the third line"));
             return false;
         }
 
+        if (true)
+            status = "\n§cCouldn't find an §rPortal-Exit §cfor §r'§e" + lines[2] + "§r'§c! Please create one";
+        else
+            status = "\nPortal-Exit was found";
+
         SignBuildOptions opt = SignBuildOptions.create()
-                .setName("interlink outbound")
-                .setDescription("allow trains to \"teleport\" between servers");
+            .setName("Portal-Entrance")
+            .setDescription("allow trains to travel between servers" + status);
 
         return opt.handle(event.getPlayer());
     }

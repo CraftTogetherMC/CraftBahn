@@ -13,13 +13,8 @@ import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 
 public class TCHelper {
-    private static SignActionPortalIn signActionPortalIn;
-    private static SignActionPortalOut signActionPortalOut;
-
-    public TCHelper() {
-        signActionPortalIn = new SignActionPortalIn();
-        signActionPortalOut = new SignActionPortalOut();
-    }
+    private static SignActionPortalIn signActionPortalIn = new SignActionPortalIn();
+    private static SignActionPortalOut signActionPortalOut = new SignActionPortalOut();
 
     public static void registerActionSigns() {
         SignAction.register(signActionPortalIn);
