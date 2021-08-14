@@ -22,8 +22,10 @@ public class Message {
     public void broadcast(List<Player> players, String message) {
         for (Player p : players)
             p.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
-    }    public static void debug(Player p, String message) {
-        if (!p.hasPermission("craftbahn.debug")) return;
+    }
+
+    public static void debug(Player p, String message) {
+        if (!CraftBahn.getInstance().getConfig().getBoolean("debug") || !p.hasPermission("craftbahn.debug")) return;
         p.sendMessage(ChatColor.translateAlternateColorCodes('&', "&4&l[Debug]: &e" + message));
     }
 
