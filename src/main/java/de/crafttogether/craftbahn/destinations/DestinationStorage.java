@@ -52,7 +52,7 @@ public class DestinationStorage {
 
                 MySQL.execute(
                 "ALTER TABLE `%sdestinations`\n" +
-                        "  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;"
+                    "  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;"
                 , MySQL.getTablePrefix());
             }
         }
@@ -137,6 +137,7 @@ public class DestinationStorage {
             destinations.put(lastInsertedId, destination);
 
             callback.call(err, destination);
+            MySQL.close();
         });
     }
 

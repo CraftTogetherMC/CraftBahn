@@ -56,8 +56,8 @@ public class SignActionTransform extends SignAction {
         // When not successful, display particles at the sign to indicate such
         BlockFace facingInv = info.getFacing().getOppositeFace();
         Location effectLocation = info.getSign().getLocation()
-                .add(0.5, 0.5, 0.5)
-                .add(0.3 * facingInv.getModX(), 0.0, 0.3 * facingInv.getModZ());
+            .add(0.5, 0.5, 0.5)
+            .add(0.3 * facingInv.getModX(), 0.0, 0.3 * facingInv.getModZ());
 
         Util.spawnDustParticle(effectLocation, 255.0, 255.0, 0.0);
         WorldUtil.playSound(effectLocation, SoundEffect.EXTINGUISH, 1.0f, 2.0f);
