@@ -1,5 +1,7 @@
 package de.crafttogether.craftbahn.destinations;
 
+import de.crafttogether.Callback;
+import de.crafttogether.MySQLConnection;
 import de.crafttogether.craftbahn.CraftBahn;
 import de.crafttogether.craftbahn.util.*;
 import org.bukkit.Bukkit;
@@ -15,7 +17,7 @@ public class DestinationStorage {
     private final TreeMap<Integer, Destination> destinations = new TreeMap<>();
 
     public DestinationStorage() {
-        MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
+        MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         // Create Tables if missing
         try {
@@ -86,7 +88,7 @@ public class DestinationStorage {
     }
 
     private void insert(Destination destination, Callback<SQLException, Destination> callback) {
-        MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
+        MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         CTLocation loc = destination.getLocation();
         CTLocation tpLoc = destination.getTeleportLocation();
@@ -142,7 +144,7 @@ public class DestinationStorage {
     }
 
     public void update(Destination destination, Callback<SQLException, Integer> callback) {
-        MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
+        MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         CTLocation loc = destination.getLocation();
         CTLocation tpLoc = destination.getTeleportLocation();
@@ -178,7 +180,7 @@ public class DestinationStorage {
 
     // TODO: Trigger if other server updates a destination
     public void load(int destinationId, Callback<SQLException, Destination> callback) {
-        MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
+        MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         MySQL.queryAsync("SELECT * FROM `%sdestinations` WHERE `id` = %s", (err, result) -> {
             if (err != null) {
@@ -209,7 +211,7 @@ public class DestinationStorage {
     }
 
     public void delete(int destinationId, Callback<SQLException, Integer> callback) {
-        MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
+        MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         MySQL.updateAsync("DELETE FROM `%sdestinations` WHERE `id` = %s", (err, affectedRows) -> {
             if (err != null) {
@@ -227,7 +229,7 @@ public class DestinationStorage {
     }
 
     public void loadAll(Callback<SQLException, Collection<Destination>> callback) {
-        MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
+        MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         MySQL.queryAsync("SELECT * FROM `%sdestinations`", (err, result) -> {
             if (err != null) {

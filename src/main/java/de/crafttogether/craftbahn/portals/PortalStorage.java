@@ -1,9 +1,9 @@
 package de.crafttogether.craftbahn.portals;
 
+import de.crafttogether.Callback;
+import de.crafttogether.MySQLConnection;
 import de.crafttogether.craftbahn.CraftBahn;
 import de.crafttogether.craftbahn.util.CTLocation;
-import de.crafttogether.craftbahn.util.Callback;
-import de.crafttogether.craftbahn.util.MySQLAdapter;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,11 +14,13 @@ public class PortalStorage {
     private final TreeMap<Integer, Portal> portals = new TreeMap<>();
 
     public PortalStorage() {
-        MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
+        MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
+
+        //TODO: Install Tables
     }
 
     public void getOrCreate(String portalName, Callback<SQLException, Portal> callback) {
-        MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
+        MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         try {
             ResultSet result = MySQL.query("SELECT * FROM `%sportals` WHERE `name` = '%s'", MySQL.getTablePrefix(), portalName);
@@ -59,7 +61,7 @@ public class PortalStorage {
     }
 
     public void get(String portalName, Callback<SQLException, Portal> callback) {
-        MySQLAdapter.MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
+        MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
 
         try {
             ResultSet result = MySQL.query("SELECT * FROM `%sportals` WHERE `name` = '%s'", MySQL.getTablePrefix(), portalName);
@@ -92,7 +94,7 @@ public class PortalStorage {
     }
 
     public void update(Portal portal, Callback<SQLException, Integer> callback) {
-        MySQLAdapter.MySQLConnection MySQL = plugin.getMySQLAdapter().getConnection();
+        MySQLConnection MySQL = plugin.getMySQLAdapter().getConnection();
 
         MySQL.updateAsync("UPDATE `%sportals` SET " +
             "`name`             = '" + portal.getName() + "', " +
@@ -118,7 +120,7 @@ public class PortalStorage {
     }
 
     public void delete(int portalId, Callback<SQLException, Integer> callback) {
-        MySQLAdapter.MySQLConnection MySQL = plugin.getMySQLAdapter().getConnection();
+        MySQLConnection MySQL = plugin.getMySQLAdapter().getConnection();
 
         MySQL.updateAsync("DELETE FROM `%sportals` WHERE `id` = %s", (err, affectedRows) -> {
             if (err != null) {

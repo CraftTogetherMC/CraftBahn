@@ -1,13 +1,13 @@
 package de.crafttogether.craftbahn;
 
+import de.crafttogether.MySQLAdapter;
+import de.crafttogether.MySQLConfig;
 import de.crafttogether.craftbahn.commands.Commands;
 import de.crafttogether.craftbahn.commands.ListCommand;
 import de.crafttogether.craftbahn.commands.MobEnterCommand;
 import de.crafttogether.craftbahn.destinations.DestinationStorage;
 import de.crafttogether.craftbahn.listener.TrainEnterListener;
 import de.crafttogether.craftbahn.portals.PortalStorage;
-import de.crafttogether.craftbahn.util.MySQLAdapter;
-import de.crafttogether.craftbahn.util.MySQLAdapter.MySQLConfig;
 import de.crafttogether.craftbahn.util.TCHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.command.TabExecutor;
@@ -77,7 +77,7 @@ public final class CraftBahn extends JavaPlugin {
         TCHelper.registerActionSigns();
 
         // Setup MySQLConfig
-        MySQLAdapter.MySQLConfig myCfg = new MySQLConfig();
+        MySQLConfig myCfg = new MySQLConfig();
         myCfg.setHost(config.getString("MySQL.Host"));
         myCfg.setPort(config.getInt("MySQL.Port"));
         myCfg.setUsername(config.getString("MySQL.Username"));
@@ -92,7 +92,7 @@ public final class CraftBahn extends JavaPlugin {
         }
 
         // Initialize MySQLAdapter
-        MySQLAdapter = new MySQLAdapter(myCfg);
+        MySQLAdapter = new MySQLAdapter(this, myCfg);
 
         // Initialize Storage-Adapter
         portalStorage = new PortalStorage();
