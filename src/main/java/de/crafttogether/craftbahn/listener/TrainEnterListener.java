@@ -8,6 +8,7 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -18,17 +19,11 @@ public class TrainEnterListener implements Listener {
 
     @EventHandler
     public void onVehicleEnter(VehicleEnterEvent e) {
-        Player p;
-
-        if (!(e.getEntered() instanceof Player))
-            return;
-
-        p = (Player) e.getEntered();
+        Player p = getPlayer(e.getEntered());
+        if (p == null) return;
 
         MinecartMember<?> cart = MinecartMemberStore.getFromEntity(e.getVehicle());
-
-        if (cart == null)
-            return;
+        if (cart == null) return;
 
         // Set new enterMessage
         String enterMessage = cart.getProperties().getEnterMessage();
@@ -40,6 +35,7 @@ public class TrainEnterListener implements Listener {
             sendEnterMessage(p, cart);
         }
 
+        /* Set View-Distance */
         //p.setNoTickViewDistance(6);
         //p.setViewDistance(6);
     }
@@ -47,20 +43,16 @@ public class TrainEnterListener implements Listener {
     @EventHandler
     public void onVehicleExit(VehicleExitEvent e) {
         /*
-        Player p = null;
+        Player p = getPlayer(e.getEntered());
+        if (p == null) return;
 
-        if (!(e.getExited() instanceof Player))
-            return;
-
-        p = (Player) e.getExited();
-
-        MinecartMember<?> cart = getEnteredCart(p, e.getVehicle());
-        if (cart == null)
-            return;
-
-        p.setNoTickViewDistance(p.getWorld().getNoTickViewDistance());
-        p.setViewDistance(p.getWorld().getViewDistance());
+        MinecartMember<?> cart = MinecartMemberStore.getFromEntity(e.getVehicle());
+        if (cart == null) return;
         */
+
+        /* Set View-Distance */
+        //p.setNoTickViewDistance(p.getWorld().getNoTickViewDistance());
+        //p.setViewDistance(p.getWorld().getViewDistance());
     }
 
     private void sendEnterMessage(Player p, MinecartMember<?> cart) {
@@ -100,5 +92,11 @@ public class TrainEnterListener implements Listener {
         message = new TextComponent(Message.newLine());
         message.addExtra(Message.format("&e----------------------------------------"));
         p.spigot().sendMessage(message);
+    }
+
+    private Player getPlayer(Entity entity) {
+        if (entity instanceof Player)
+            return (Player) entity;
+        return null;
     }
 }

@@ -8,14 +8,10 @@ import com.bergerkiller.bukkit.tc.events.SignChangeActionEvent;
 import com.bergerkiller.bukkit.tc.signactions.SignAction;
 import com.bergerkiller.bukkit.tc.utils.SignBuildOptions;
 import de.crafttogether.craftbahn.CraftBahn;
-import de.crafttogether.craftbahn.portals.Portal;
-import de.crafttogether.craftbahn.portals.PortalStorage;
 import de.crafttogether.craftbahn.util.CTLocation;
 import de.crafttogether.craftbahn.util.Message;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
-
-import java.sql.SQLException;
 
 public class SignActionPortalOut extends SignAction {
 

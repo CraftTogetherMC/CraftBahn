@@ -12,21 +12,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class Client extends Thread {
-    private static Collection<Client> activeClients = new ArrayList<>();
+    private static final Collection<Client> activeClients = new ArrayList<>();
 
     private Socket clientSocket;
     private OutputStream outputStream;
-    private final int port;
 
     public Client(int port) {
-        this.port = port;
 
         try {
             clientSocket = new Socket("localhost", port);
             outputStream = clientSocket.getOutputStream();
         } catch (ConnectException e) {
             if (!e.getMessage().equalsIgnoreCase("connection refused")) {
-                Message.debug("Couldn't connect to server");
+                CraftBahn.getInstance().getLogger().warning("Couldn't connect to server at 127.0.0.1:" + port);
                 Message.debug("Error: " + e.getMessage());
             }
         } catch (IOException ex) {
@@ -35,8 +33,8 @@ public class Client extends Thread {
         }
 
         if (isConnected()) {
-            Message.debug("ADD ACTIVE CLIENT");
             Client.activeClients.add(this);
+            Message.debug("Successfully connected to 127.0.0.1:" + port);
         }
     }
 
@@ -46,10 +44,7 @@ public class Client extends Thread {
     }
 
     public Boolean isConnected() {
-        if (clientSocket != null && clientSocket.isConnected() && !clientSocket.isClosed())
-            return true;
-        else
-            return false;
+        return clientSocket != null && clientSocket.isConnected() && !clientSocket.isClosed();
     }
 
     public void send(String output) {
@@ -61,10 +56,8 @@ public class Client extends Thread {
             pw.write(output);
             pw.flush();
 
-            /*if (ICTS.config.isDebugEnabled()) {
-                CraftBahn.getInstance().debug("Sent:");
-                CraftBahn.getInstance().debug(output);
-            }*/
+            Message.debug("Sent:");
+            Message.debug(output);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -80,8 +73,7 @@ public class Client extends Thread {
             if (clientSocket != null && !clientSocket.isClosed())
                 clientSocket.close();
 
-            if (activeClients.contains(this))
-                activeClients.remove(this);
+            activeClients.remove(this);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
