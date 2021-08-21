@@ -7,6 +7,8 @@ import de.crafttogether.craftbahn.commands.ListCommand;
 import de.crafttogether.craftbahn.commands.MobEnterCommand;
 import de.crafttogether.craftbahn.destinations.DestinationStorage;
 import de.crafttogether.craftbahn.listener.TrainEnterListener;
+import de.crafttogether.craftbahn.net.Client;
+import de.crafttogether.craftbahn.net.Server;
 import de.crafttogether.craftbahn.portals.PortalStorage;
 import de.crafttogether.craftbahn.util.TCHelper;
 import org.bukkit.Bukkit;
@@ -27,11 +29,14 @@ public final class CraftBahn extends JavaPlugin {
     private PortalStorage portalStorage;
     private DestinationStorage destinationStorage;
 
+    // Socket Server (CB-Portals)
+    private Server server;
+
     @Override
     public void onEnable() {
         plugin = this;
 
-        // Check dependencies
+        /* Check dependencies */
         if (!getServer().getPluginManager().isPluginEnabled("BKCommonLib")) {
             plugin.getLogger().warning("Couldn't find BKCommonLib");
             Bukkit.getServer().getPluginManager().disablePlugin(plugin);
@@ -62,6 +67,9 @@ public final class CraftBahn extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new TrainEnterListener(), this);
         //getServer().getPluginManager().registerEvents(new PlayerSpawnListener(), this);
 
+        // Register PluginChannel
+        this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+
         // Register Commands
         Commands commands = new Commands();
         registerCommand("rbf", commands);
@@ -73,9 +81,6 @@ public final class CraftBahn extends JavaPlugin {
         registerCommand("fahrzieledit", commands);
         registerCommand("fze", commands);
 
-        // Register SignActions (TrainCarts)
-        TCHelper.registerActionSigns();
-
         // Setup MySQLConfig
         MySQLConfig myCfg = new MySQLConfig();
         myCfg.setHost(config.getString("MySQL.Host"));
@@ -85,6 +90,7 @@ public final class CraftBahn extends JavaPlugin {
         myCfg.setDatabase(config.getString("MySQL.Database"));
         myCfg.setTablePrefix(config.getString("MySQL.TablePrefix"));
 
+        // Validate configuration
         if (!myCfg.checkInputs() || myCfg.getDatabase() == null) {
             getLogger().warning("[MySQL]: Invalid configuration! Please check your config.yml");
             getServer().getPluginManager().disablePlugin(this);
@@ -97,11 +103,24 @@ public final class CraftBahn extends JavaPlugin {
         // Initialize Storage-Adapter
         portalStorage = new PortalStorage();
         destinationStorage = new DestinationStorage();
+
+        // Create Server Socket
+        server = new Server();
+        server.listen(config.getInt("Settings.Port"));
+
+        // Register SignActions (TrainCarts)
+        TCHelper.registerActionSigns();
     }
 
     public void onDisable() {
         // Unregister SignActions (TrainCarts)
         TCHelper.unregisterActionSigns();
+
+        // Close server
+        server.close();
+
+        // Close all active clients
+        Client.closeAll();
 
         // Shutdown MySQL-Adapter
         if(MySQLAdapter != null)
