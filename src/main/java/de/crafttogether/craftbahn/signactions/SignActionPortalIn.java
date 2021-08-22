@@ -109,10 +109,8 @@ public class SignActionPortalIn extends SignAction {
         }
 
         // Clear Inventory if needed
-        if (event.getLine(3).equalsIgnoreCase("clear")) {
-            if (group.getWorld().getName().contains("creative"))
-                TCHelper.clearInventory(group);
-        }
+        if (event.getLine(3).equalsIgnoreCase("clear"))
+            TCHelper.clearInventory(group);
 
         // cache teleportation-infos
         pendingTeleports.put(group, portal);
