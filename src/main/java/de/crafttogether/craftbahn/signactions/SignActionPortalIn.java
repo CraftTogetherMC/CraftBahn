@@ -1,32 +1,28 @@
 package de.crafttogether.craftbahn.signactions;
 
-import com.bergerkiller.bukkit.common.config.ConfigurationNode;
-import com.bergerkiller.bukkit.common.entity.CommonEntity;
 import com.bergerkiller.bukkit.common.resources.SoundEffect;
 import com.bergerkiller.bukkit.common.utils.WorldUtil;
 import com.bergerkiller.bukkit.tc.Util;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
-import com.bergerkiller.bukkit.tc.controller.type.MinecartMemberRideable;
 import com.bergerkiller.bukkit.tc.events.SignActionEvent;
 import com.bergerkiller.bukkit.tc.events.SignChangeActionEvent;
 import com.bergerkiller.bukkit.tc.signactions.SignAction;
 import com.bergerkiller.bukkit.tc.signactions.SignActionType;
 import com.bergerkiller.bukkit.tc.utils.SignBuildOptions;
 import de.crafttogether.craftbahn.CraftBahn;
-import de.crafttogether.craftbahn.net.Client;
 import de.crafttogether.craftbahn.portals.Portal;
 import de.crafttogether.craftbahn.portals.PortalHandler;
-import de.crafttogether.craftbahn.portals.PortalStorage;
 import de.crafttogether.craftbahn.util.Message;
 import de.crafttogether.craftbahn.util.TCHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class SignActionPortalIn extends SignAction {
     private Map<MinecartGroup, Portal> pendingTeleports = new HashMap<>();
@@ -129,7 +125,7 @@ public class SignActionPortalIn extends SignAction {
 
         Portal portal = pendingTeleports.get(group);
         MinecartMember member = event.getMember();
-        List<Player> passengers = TCHelper.getPassengers(member);
+        List<Player> passengers = TCHelper.getPlayerPassengers(member);
 
         for (Player playerPassenger : passengers)
             PortalHandler.sendToServer(playerPassenger, portal.getTargetLocation().getServer());

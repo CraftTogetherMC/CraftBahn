@@ -1,6 +1,8 @@
 package de.crafttogether.craftbahn.portals;
 
 import com.bergerkiller.bukkit.common.config.ConfigurationNode;
+import com.bergerkiller.bukkit.common.entity.CommonEntity;
+import com.bergerkiller.bukkit.common.nbt.CommonTagCompound;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.controller.spawnable.SpawnableGroup;
@@ -9,6 +11,7 @@ import com.bergerkiller.bukkit.tc.properties.CartProperties;
 import com.bergerkiller.bukkit.tc.properties.TrainProperties;
 import com.bergerkiller.bukkit.tc.signactions.SignActionSpawn;
 import com.bergerkiller.bukkit.tc.utils.LauncherConfig;
+import com.bergerkiller.generated.net.minecraft.world.entity.EntityHandle;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import de.crafttogether.craftbahn.CraftBahn;
@@ -25,6 +28,7 @@ import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Rail;
 import org.bukkit.block.data.Rotatable;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 
@@ -51,15 +55,26 @@ public class PortalHandler {
         Set<String> owners = group.getProperties().getOwners();
 
         // Get passengers
-        List<Player> passengers = new ArrayList<>();
+        List<Player> playerPassengers = new ArrayList<>();
+        //List<String> mobPassengers = new ArrayList<>();
         List<String> passengerList = new ArrayList<>();
 
-        for (MinecartMember member : group) {
-            List<Player> cartPassengers = TCHelper.getPassengers(member);
+        /* Save & Load Entity NBT
+        Entity entity = member.getEntity().getEntity();
+        EntityHandle entityHandle = EntityHandle.fromBukkit(entity);
 
-            for (Player playerPassenger : cartPassengers) {
-                passengers.add(playerPassenger);
-                passengerList.add(playerPassenger.getUniqueId() + ";" + trainID + ";" + member.getIndex());
+        CommonTagCompound tagCompound = CommonTagCompound.create(entityHandle);
+        entityHandle.saveToNBT(tagCompound);
+
+        entityHandle.loadFromNBT(tagCompound);
+        */
+
+        for (MinecartMember member : group) {
+            List<Player> cartPassengers = TCHelper.getPlayerPassengers(member);
+
+            for (Player passenger : cartPassengers) {
+                playerPassengers.add(passenger);
+                passengerList.add(passenger.getUniqueId() + ";" + trainID + ";" + member.getIndex());
             }
         }
 
@@ -69,7 +84,8 @@ public class PortalHandler {
         dataPacket.set("target.x", portal.getTargetLocation().getX());
         dataPacket.set("target.y", portal.getTargetLocation().getY());
         dataPacket.set("target.z", portal.getTargetLocation().getZ());
-        dataPacket.set("train.passengers", passengers);
+        dataPacket.set("train.playerPassengers", playerPassengers);
+        //dataPacket.set("train.mobPassengers", mobPassengers);
         dataPacket.set("train.id", trainID);
         dataPacket.set("train.newName", trainName);
         dataPacket.set("train.owners", owners);
@@ -94,8 +110,7 @@ public class PortalHandler {
         String trainNewName = (String) trainData.get("train.newName");
         List<String> passengers = (List<String>) trainData.get("train.passengers");
         List<String> owners = (List<String>) trainData.get("train.owners");
-        ConfigurationNode trainProperties = trainData.getNode("train.properties");
-        SpawnableGroup train = SpawnableGroup.fromConfig(trainProperties);
+        SpawnableGroup train = SpawnableGroup.fromConfig(trainData.getNode("train.properties"));
 
         // Add players to passengerQueue
         for (String passengerData : passengers) {
@@ -139,12 +154,6 @@ public class PortalHandler {
             Location railLoc = signBlock.getLocation();
             railLoc.setY(targetLocation.getY() + 2);
             Block railBlock = railLoc.getBlock();
-            Chunk spawnChunk = railLoc.getChunk();
-
-            for (int x1 = (spawnChunk.getX() -5); x1 < (spawnChunk.getX() +5); x1++) {
-                for (int z1 = (spawnChunk.getZ() -5); z1 < (spawnChunk.getZ() +5); z1++)
-                    railLoc.getWorld().getChunkAt(x1, z1);
-            }
 
             if (!(railLoc.getBlock().getBlockData() instanceof Rail)) {
                Message.debug("No Rail found! (" + railBlock.getType().name() + ")");
@@ -173,18 +182,18 @@ public class PortalHandler {
 
             // Spawn train
             MinecartGroup spawnedTrain = MinecartGroup.spawn(train, spawnLocations);
-            TrainProperties trainProperties1 = spawnedTrain.getProperties();
+            TrainProperties trainProperties = spawnedTrain.getProperties();
 
             // Set properties
             spawnedTrain.getProperties().setTrainName(trainID);
             System.out.println("TRAINNAME: " + trainID);
 
-            Set<String> ownerSet = new HashSet<String>(owners);
+            Set<String> ownerSet = new HashSet<>(owners);
             for (CartProperties cartProp : spawnedTrain.getProperties())
                 cartProp.setOwners(ownerSet);
 
             // Launch train
-            double launchSpeed = (trainProperties1.getSpeedLimit() > 0) ? trainProperties1.getSpeedLimit() : 0.4;
+            double launchSpeed = (trainProperties.getSpeedLimit() > 0) ? trainProperties.getSpeedLimit() : 0.4;
             spawnedTrain.head().getActions().addActionLaunch(facing, LauncherConfig.parse("10b"), launchSpeed);
         });
     }

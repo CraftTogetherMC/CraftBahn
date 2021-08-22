@@ -66,7 +66,7 @@ public class TCHelper {
         return null;
     }
 
-    public static List<Player> getPassengers(MinecartMember<?> member) {
+    public static List<Player> getPlayerPassengers(MinecartMember<?> member) {
         List<Player> passengers = new ArrayList<>();
         CommonEntity entity = CommonEntity.get(member.getEntity().getEntity());
 
@@ -79,11 +79,11 @@ public class TCHelper {
         return passengers;
     }
 
-    public static List<Player> getPassengers(MinecartGroup group) {
+    public static List<Player> getPlayerPassengers(MinecartGroup group) {
         List<Player> passengers = new ArrayList<>();
 
         for (MinecartMember member : group)
-            passengers.addAll(getPassengers(member));
+            passengers.addAll(getPlayerPassengers(member));
 
         return passengers;
     }
