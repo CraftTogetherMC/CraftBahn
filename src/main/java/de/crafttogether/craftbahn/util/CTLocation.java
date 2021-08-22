@@ -5,7 +5,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
 public class CTLocation {
-
     private String server;
     private String world;
     private double x;
