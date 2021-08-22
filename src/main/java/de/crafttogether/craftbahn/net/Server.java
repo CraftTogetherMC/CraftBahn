@@ -74,7 +74,7 @@ public class Server extends Thread {
                     data.loadFromString(received.toString()); // Deserialize received ConfigurationNode
 
                     // Process received information
-                    PortalHandler.handleInput(data);
+                    PortalHandler.receiveTrain(data);
                 }
 
                 catch (Exception ex) {

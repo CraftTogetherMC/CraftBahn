@@ -3,10 +3,14 @@ package de.crafttogether.craftbahn.portals;
 import de.crafttogether.Callback;
 import de.crafttogether.MySQLConnection;
 import de.crafttogether.craftbahn.CraftBahn;
+import de.crafttogether.craftbahn.destinations.Destination;
 import de.crafttogether.craftbahn.util.CTLocation;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.TreeMap;
 
 public class PortalStorage {
@@ -31,11 +35,11 @@ public class PortalStorage {
                 portal.setTargetPort(result.getInt("target_port"));
                 portal.setTargetHost(result.getString("target_host"));
                 portal.setTargetLocation(new CTLocation(
-                        result.getString("target_server"),
-                        result.getString("target_world"),
-                        result.getDouble("target_x"),
-                        result.getDouble("target_y"),
-                        result.getDouble("target_z")
+                    result.getString("target_server"),
+                    result.getString("target_world"),
+                    result.getDouble("target_x"),
+                    result.getDouble("target_y"),
+                    result.getDouble("target_z")
                 ));
 
                 // Update cache
@@ -137,5 +141,25 @@ public class PortalStorage {
 
             MySQL.close();
         }, MySQL.getTablePrefix(), portalId);
+    }
+
+    public Collection<Portal> getPortals() {
+        return portals.values();
+    }
+
+    public Portal getPortal(String name) {
+        for (Portal portal : portals.values()) {
+            if (portal.getName().equalsIgnoreCase(name))
+                return portal;
+        }
+
+        return null;
+    }
+
+    public Portal getPortal(int id) {
+        for (Portal portal : portals.values())
+            if (portal.getId() == id) return portal;
+
+        return null;
     }
 }

@@ -3,12 +3,12 @@ package de.crafttogether.craftbahn.listener;
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.controller.MinecartMemberStore;
 import de.crafttogether.craftbahn.util.Message;
+import de.crafttogether.craftbahn.util.TCHelper;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,7 +19,7 @@ public class TrainEnterListener implements Listener {
 
     @EventHandler
     public void onVehicleEnter(VehicleEnterEvent e) {
-        Player p = getPlayer(e.getEntered());
+        Player p = TCHelper.getPlayer(e.getEntered());
         if (p == null) return;
 
         MinecartMember<?> cart = MinecartMemberStore.getFromEntity(e.getVehicle());
@@ -43,7 +43,7 @@ public class TrainEnterListener implements Listener {
     @EventHandler
     public void onVehicleExit(VehicleExitEvent e) {
         /*
-        Player p = getPlayer(e.getEntered());
+        Player p = TCHelper.getPlayer(e.getEntered());
         if (p == null) return;
 
         MinecartMember<?> cart = MinecartMemberStore.getFromEntity(e.getVehicle());
@@ -92,11 +92,5 @@ public class TrainEnterListener implements Listener {
         message = new TextComponent(Message.newLine());
         message.addExtra(Message.format("&e----------------------------------------"));
         p.spigot().sendMessage(message);
-    }
-
-    private Player getPlayer(Entity entity) {
-        if (entity instanceof Player)
-            return (Player) entity;
-        return null;
     }
 }

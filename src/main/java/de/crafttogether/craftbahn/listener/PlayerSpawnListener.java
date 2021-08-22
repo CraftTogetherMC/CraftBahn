@@ -16,7 +16,7 @@ public class PlayerSpawnListener implements Listener {
 
         // This player is not our passenger
         if (passenger != null)
-            PortalHandler.handlePassenger(passenger, e);
+            PortalHandler.reEnterPassenger(passenger, e);
     }
 }
 
