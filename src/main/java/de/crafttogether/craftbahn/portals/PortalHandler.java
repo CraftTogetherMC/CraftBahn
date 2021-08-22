@@ -33,11 +33,6 @@ import java.util.*;
 public class PortalHandler {
 
     public static void transmitTrain(MinecartGroup group, Portal portal) {
-        // Clear Inventory
-        // TODO: Make worlds where chest-minecarts should be cleared configurable
-        if (group.getWorld().getName().contains("creative"))
-            TCHelper.clearInventory(group);
-
         // Save train and get properties
         ConfigurationNode trainProperties = group.saveConfig();
 
