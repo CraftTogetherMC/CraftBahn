@@ -64,7 +64,7 @@ public class PortalHandler {
         entityHandle.loadFromNBT(tagCompound);
         */
 
-        for (MinecartMember member : group) {
+        for (MinecartMember<?> member : group) {
             List<Player> cartPassengers = TCHelper.getPlayerPassengers(member);
 
             for (Player passenger : cartPassengers) {
@@ -79,12 +79,13 @@ public class PortalHandler {
         dataPacket.set("target.x", portal.getTargetLocation().getX());
         dataPacket.set("target.y", portal.getTargetLocation().getY());
         dataPacket.set("target.z", portal.getTargetLocation().getZ());
-        dataPacket.set("train.playerPassengers", playerPassengers);
-        //dataPacket.set("train.mobPassengers", mobPassengers);
         dataPacket.set("train.id", trainID);
         dataPacket.set("train.newName", trainName);
         dataPacket.set("train.owners", owners);
         dataPacket.set("train.properties", trainProperties);
+        dataPacket.set("train.passengers", passengerList);
+
+        Message.debug("Transmitting train...");
 
         // Send dataPacket to server
         Client client = new Client(portal.getTargetPort());
@@ -96,20 +97,21 @@ public class PortalHandler {
         String worldName = ((String) trainData.get("target.world"));
         World world = Bukkit.getWorld(worldName);
 
-        int x = (int) trainData.get("target.x");
-        int y = (int) trainData.get("target.y");
-        int z = (int) trainData.get("target.z");
+        double x = (double) trainData.get("target.x");
+        double y = (double) trainData.get("target.y");
+        double z = (double) trainData.get("target.z");
 
         Location targetLocation = new Location(world, x, y, z);
         String trainID = (String) trainData.get("train.id");
         String trainNewName = (String) trainData.get("train.newName");
-        List<String> passengers = (List<String>) trainData.get("train.passengers");
-        List<String> owners = (List<String>) trainData.get("train.owners");
+        List<Object> owners = trainData.getList("train.owners");
         SpawnableGroup train = SpawnableGroup.fromConfig(trainData.getNode("train.properties"));
+        List<Object> passengers = trainData.getList("train.passengers");
 
         // Add players to passengerQueue
-        for (String passengerData : passengers) {
-            String[] passenger = passengerData.split(";");
+        for (Object passengerData : passengers) {
+            Message.debug((String) passengerData);
+            String[] passenger = ((String) passengerData).split(";");
             Passenger.register(UUID.fromString(passenger[0]), passenger[1], Integer.parseInt(passenger[2]));
         }
 
@@ -135,13 +137,13 @@ public class PortalHandler {
                             facing.getDirection().getBlockX() + " " +
                             facing.getDirection().getBlockX());
                 } else {
-                    Message.debug("No Rotation found!");
-                    Passenger.sendMessage(trainID, "No Rotation found!", 3);
+                    Message.debug("Sign not placed underneath the rails");
+                    Passenger.sendMessage(trainID, "§cSign not placed underneath the rails", 3);
                     return;
                 }
             } else {
                 Message.debug("No Sign found! (" + signBlock.getType().name() + ")");
-                Passenger.sendMessage(trainID, "No Sign found! (" + signBlock.getType().name() + ")", 3);
+                Passenger.sendMessage(trainID, "§cNo Sign found! (" + signBlock.getType().name() + ")", 3);
                 return;
             }
 
@@ -152,13 +154,13 @@ public class PortalHandler {
 
             if (!(railLoc.getBlock().getBlockData() instanceof Rail)) {
                Message.debug("No Rail found! (" + railBlock.getType().name() + ")");
-                Passenger.sendMessage(trainID, "No Rail found! (" + railBlock.getType().name() + ")", 3);
+                Passenger.sendMessage(trainID, "§cNo Rail found! (" + railBlock.getType().name() + ")", 3);
                 return;
             }
 
             /* DEBUG */
             StringBuilder ownerList = new StringBuilder();
-            for (String owner : owners) ownerList.append(owner + ",");
+            for (Object owner : owners) ownerList.append((String) owner + ",");
 
             Message.debug("World: " + world.getName());
             Message.debug("Location: " + x + " " + y + " " + z);
@@ -181,9 +183,12 @@ public class PortalHandler {
 
             // Set properties
             spawnedTrain.getProperties().setTrainName(trainID);
-            System.out.println("TRAINNAME: " + trainID);
+            Message.debug("TRAINNAME: " + trainID);
 
-            Set<String> ownerSet = new HashSet<>(owners);
+            Set<String> ownerSet = new HashSet<>();
+            for (Object owner : owners)
+                ownerSet.add(Objects.toString(owner, null));
+
             for (CartProperties cartProp : spawnedTrain.getProperties())
                 cartProp.setOwners(ownerSet);
 
@@ -200,13 +205,13 @@ public class PortalHandler {
         if (player == null)
             return;
 
-        String trainName = passenger.getTrainName();
+        String trainId = passenger.getTrainId();
         int cartIndex = passenger.getCartIndex();
 
-        Message.debug("Try to find train '" + trainName + "' for " + player.getName() + " cartIndex: " + cartIndex);
+        Message.debug("Try to find train '" + trainId + "' for " + player.getName() + " cartIndex: " + cartIndex);
 
         // Try to find train and set player as passenger
-        MinecartGroup train = TCHelper.getTrain(trainName);
+        MinecartGroup train = TCHelper.getTrain(trainId);
 
         if (train != null) {
             MinecartMember<?> cart = train.get(cartIndex);
@@ -218,14 +223,14 @@ public class PortalHandler {
                 e.setSpawnLocation(cart.getBlock().getLocation());
                 cart.getEntity().setPassenger(player);
 
-                Message.debug("Set player " + player.getName() + " as passenger of '" + trainName + "' at cartIndex: " + cartIndex);
+                Message.debug("Set player " + player.getName() + " as passenger of '" + trainId + "' at cartIndex: " + cartIndex);
                 Passenger.remove(passenger.getUUID());
             }
             else
-                Message.debug("Cart(" + cartIndex + ") at Train '" + trainName + "' is not rideable.");
+                Message.debug("Cart(" + cartIndex + ") at Train '" + trainId + "' is not rideable.");
         }
         else
-            Message.debug("Train '" + trainName + "' was not found.");
+            Message.debug("Train '" + trainId + "' was not found.");
     }
 
     public static void sendToServer(Player player, String server) {

@@ -66,8 +66,8 @@ public class Server extends Thread {
                     while ((inputLine = reader.readLine()) != null)
                         received.append(inputLine + "\r\n");
 
-                    Message.debug("Received:");
-                    Message.debug(received.toString());
+                    //Message.debug("Received:");
+                    //Message.debug(received.toString());
 
                     // Deserialize received Data
                     ConfigurationNode data = new ConfigurationNode();

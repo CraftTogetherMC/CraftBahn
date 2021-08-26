@@ -31,6 +31,6 @@ public class Message {
 
     public static void debug(String message) {
         //if (CraftBahnPlugin.getInstance().getConfig().getBoolean("debug"))
-            System.out.println("[CraftBahn][Debug]: " + message);
+        CraftBahnPlugin.getInstance().getLogger().info("[Debug]: " + message);
     }
 }

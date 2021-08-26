@@ -4,6 +4,7 @@ import de.crafttogether.craftbahn.commands.Commands;
 import de.crafttogether.craftbahn.commands.ListCommand;
 import de.crafttogether.craftbahn.commands.MobEnterCommand;
 import de.crafttogether.craftbahn.destinations.DestinationStorage;
+import de.crafttogether.craftbahn.listener.PlayerSpawnListener;
 import de.crafttogether.craftbahn.listener.TrainEnterListener;
 import de.crafttogether.craftbahn.net.Client;
 import de.crafttogether.craftbahn.net.Server;
@@ -37,6 +38,12 @@ public final class CraftBahnPlugin extends JavaPlugin {
         plugin = this;
 
         /* Check dependencies */
+        if (!getServer().getPluginManager().isPluginEnabled("MySQLAdapter")) {
+            plugin.getLogger().warning("Couldn't find MySQLAdapter");
+            Bukkit.getServer().getPluginManager().disablePlugin(plugin);
+            return;
+        }
+
         if (!getServer().getPluginManager().isPluginEnabled("BKCommonLib")) {
             plugin.getLogger().warning("Couldn't find BKCommonLib");
             Bukkit.getServer().getPluginManager().disablePlugin(plugin);
@@ -65,7 +72,7 @@ public final class CraftBahnPlugin extends JavaPlugin {
 
         // Register Listener
         getServer().getPluginManager().registerEvents(new TrainEnterListener(), this);
-        //getServer().getPluginManager().registerEvents(new PlayerSpawnListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerSpawnListener(), this);
 
         // Register PluginChannel
         this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");

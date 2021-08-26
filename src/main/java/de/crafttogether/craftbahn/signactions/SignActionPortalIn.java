@@ -34,14 +34,14 @@ public class SignActionPortalIn extends SignAction {
 
     @Override
     public void execute(SignActionEvent event) {
-        Message.debug("Event fires");
+        if (!event.isPowered()) return;
 
         // Train arrives sign
-        if (event.isAction(SignActionType.GROUP_ENTER) && event.isPowered() && event.hasGroup())
+        if (!pendingTeleports.containsKey(event.getGroup()) && event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasGroup())
             onTrainEnter(event);
 
-        // Cart arrives Sign
-        if (event.isAction(SignActionType.MEMBER_ENTER) && event.isPowered() && event.hasMember())
+        // Cart arrives sign
+        if (pendingTeleports.containsKey(event.getGroup()) && event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasMember())
             onCartEnter(event);
     }
 
@@ -98,17 +98,24 @@ public class SignActionPortalIn extends SignAction {
     private void onTrainEnter(SignActionEvent event) {
         MinecartGroup group = event.getGroup();
 
+        Message.debug("train entered");
+
         String portalName = event.getLine(2);
         Portal portal = CraftBahnPlugin.getInstance().getPortalStorage().getPortal(portalName);
 
         if (portal == null) {
-            TCHelper.sendMessage(group, "§cCouldn't find an §rPortal-Exit §cfor §r'§e" + portalName + "§r'§c!");
+            Message.debug("Portal '" + portalName + "' not found");
+            TCHelper.sendMessage(event.getMember(), "§cCouldn't find an §rPortal-Exit §cfor §r'§e" + portalName + "§r'§c!");
             return;
         }
 
+        //TODO: Set collisionMode to false
+
         // Clear Inventory if needed
-        if (event.getLine(3).equalsIgnoreCase("clear"))
+        if (event.getLine(3).equalsIgnoreCase("clear")) {
+            Message.debug("clear inventory of whole train");
             TCHelper.clearInventory(group);
+        }
 
         // cache teleportation-infos
         pendingTeleports.put(group, portal);
@@ -119,19 +126,22 @@ public class SignActionPortalIn extends SignAction {
 
     private void onCartEnter(SignActionEvent event) {
         MinecartGroup group = event.getGroup();
+        Portal portal = pendingTeleports.get(group);
 
-        if (pendingTeleports.containsKey(group))
+        Message.debug("cart entered");
+
+        if (portal == null)
             return;
 
-        Message.debug("Try to move players");
-
-        Portal portal = pendingTeleports.get(group);
         MinecartMember member = event.getMember();
         List<Player> passengers = TCHelper.getPlayerPassengers(member);
 
-        for (Player playerPassenger : passengers)
+        for (Player playerPassenger : passengers) {
+            Message.debug("Send player " + playerPassenger.getName() + " to " + portal.getTargetLocation().toString());
             PortalHandler.sendToServer(playerPassenger, portal.getTargetLocation().getServer());
+        }
 
+        // Destroy cart and remove group
         if (group.size() <= 1) {
             pendingTeleports.remove(group);
             group.destroy();
