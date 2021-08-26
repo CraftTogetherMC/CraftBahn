@@ -1,6 +1,6 @@
 package de.crafttogether.craftbahn.util;
 
-import de.crafttogether.craftbahn.CraftBahn;
+import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.destinations.Destination;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -15,10 +15,10 @@ import java.util.UUID;
 
 public class MarkerManager {
     public static void deleteMarker(Destination dest) {
-        if (!dest.getServer().equalsIgnoreCase(CraftBahn.getInstance().getServerName()))
+        if (!dest.getServer().equalsIgnoreCase(CraftBahnPlugin.getInstance().getServerName()))
             return;
 
-        CraftBahn plugin = CraftBahn.getInstance();
+        CraftBahnPlugin plugin = CraftBahnPlugin.getInstance();
         DynmapAPI dynmap = plugin.getDynmap();
 
         MarkerSet set = dynmap.getMarkerAPI().getMarkerSet("CT_" + dest.getType().name());
@@ -32,7 +32,7 @@ public class MarkerManager {
     }
 
     public static void createMarkerSets() {
-        CraftBahn plugin = CraftBahn.getInstance();
+        CraftBahnPlugin plugin = CraftBahnPlugin.getInstance();
         DynmapAPI dynmap = plugin.getDynmap();
 
         if (dynmap == null)
@@ -57,10 +57,10 @@ public class MarkerManager {
     }
 
     public static boolean addMarker(Destination dest, boolean updateOnly) {
-        if (!dest.getServer().equalsIgnoreCase(CraftBahn.getInstance().getServerName()))
+        if (!dest.getServer().equalsIgnoreCase(CraftBahnPlugin.getInstance().getServerName()))
             return false;
 
-        CraftBahn plugin = CraftBahn.getInstance();
+        CraftBahnPlugin plugin = CraftBahnPlugin.getInstance();
         DynmapAPI dynmap = plugin.getDynmap();
 
         if (dynmap == null)

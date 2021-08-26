@@ -1,5 +1,5 @@
 package de.crafttogether.craftbahn.destinations;
-import de.crafttogether.craftbahn.CraftBahn;
+import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.util.Message;
 import net.md_5.bungee.api.chat.*;
 import org.bukkit.Bukkit;
@@ -27,7 +27,7 @@ public class DestinationList {
     private boolean showType = true;
 
     public DestinationList() {
-        this.destinations = new ArrayList<>(CraftBahn.getInstance().getDestinationStorage().getDestinations());
+        this.destinations = new ArrayList<>(CraftBahnPlugin.getInstance().getDestinationStorage().getDestinations());
         this.pages = new ArrayList<>();
         this.filterType = null;
         this.filterName = null;
@@ -116,8 +116,8 @@ public class DestinationList {
         String lastKey = null;
 
         for (String key : keys) {
-            Message.debug(key + " - " + CraftBahn.getInstance().getServerName());
-            if (key.equalsIgnoreCase(CraftBahn.getInstance().getServerName()))
+            Message.debug(key + " - " + CraftBahnPlugin.getInstance().getServerName());
+            if (key.equalsIgnoreCase(CraftBahnPlugin.getInstance().getServerName()))
                 firstKey = key;
             else if (key.equalsIgnoreCase("creative"))
                 lastKey = key;
@@ -164,7 +164,7 @@ public class DestinationList {
                 else
                     btnFahrziel = Message.format("&6CraftBahn &8» &6" + dest.getName());
 
-                Collection<Destination> duplicates = CraftBahn.getInstance().getDestinationStorage().getDestinations(dest.getName());
+                Collection<Destination> duplicates = CraftBahnPlugin.getInstance().getDestinationStorage().getDestinations(dest.getName());
 
                 String hoverText = "&2/fahrziel " + dest.getName() + (duplicates.size() > 1 ? (" &7" + dest.getServer()) : "");
 

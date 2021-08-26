@@ -1,7 +1,5 @@
-package de.crafttogether.craftbahn;
+package de.crafttogether;
 
-import de.crafttogether.MySQLAdapter;
-import de.crafttogether.MySQLConfig;
 import de.crafttogether.craftbahn.commands.Commands;
 import de.crafttogether.craftbahn.commands.ListCommand;
 import de.crafttogether.craftbahn.commands.MobEnterCommand;
@@ -11,6 +9,8 @@ import de.crafttogether.craftbahn.net.Client;
 import de.crafttogether.craftbahn.net.Server;
 import de.crafttogether.craftbahn.portals.PortalStorage;
 import de.crafttogether.craftbahn.util.TCHelper;
+import de.crafttogether.mysql.MySQLAdapter;
+import de.crafttogether.mysql.MySQLConfig;
 import org.bukkit.Bukkit;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -19,8 +19,8 @@ import org.dynmap.DynmapAPI;
 
 import java.util.Objects;
 
-public final class CraftBahn extends JavaPlugin {
-    private static CraftBahn plugin;
+public final class CraftBahnPlugin extends JavaPlugin {
+    private static CraftBahnPlugin plugin;
 
     private String serverName;
     private DynmapAPI dynmap;
@@ -117,7 +117,8 @@ public final class CraftBahn extends JavaPlugin {
         TCHelper.unregisterActionSigns();
 
         // Close server
-        server.close();
+        if (server != null)
+            server.close();
 
         // Close all active clients
         Client.closeAll();
@@ -139,5 +140,5 @@ public final class CraftBahn extends JavaPlugin {
     public DestinationStorage getDestinationStorage() { return destinationStorage; }
 
     public String getServerName() { return serverName; }
-    public static CraftBahn getInstance() { return plugin; }
+    public static CraftBahnPlugin getInstance() { return plugin; }
 }

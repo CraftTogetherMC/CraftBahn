@@ -1,6 +1,6 @@
 package de.crafttogether.craftbahn.portals;
 
-import de.crafttogether.craftbahn.CraftBahn;
+import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.util.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -65,7 +65,7 @@ public class Passenger {
     }
 
     public static void sendMessage(String trainName, String message, int delaySec) {
-        Bukkit.getScheduler().runTaskLaterAsynchronously(CraftBahn.getInstance(), () -> {
+        Bukkit.getScheduler().runTaskLaterAsynchronously(CraftBahnPlugin.getInstance(), () -> {
             Message.debug("Send delayed message to all passengers of '" + trainName + "': " + message);
             sendMessage(trainName, message);
         }, 20L * delaySec);

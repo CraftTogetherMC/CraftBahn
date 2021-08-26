@@ -10,7 +10,7 @@ import com.bergerkiller.bukkit.tc.events.SignChangeActionEvent;
 import com.bergerkiller.bukkit.tc.signactions.SignAction;
 import com.bergerkiller.bukkit.tc.signactions.SignActionType;
 import com.bergerkiller.bukkit.tc.utils.SignBuildOptions;
-import de.crafttogether.craftbahn.CraftBahn;
+import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.portals.Portal;
 import de.crafttogether.craftbahn.portals.PortalHandler;
 import de.crafttogether.craftbahn.util.Message;
@@ -34,6 +34,8 @@ public class SignActionPortalIn extends SignAction {
 
     @Override
     public void execute(SignActionEvent event) {
+        Message.debug("Event fires");
+
         // Train arrives sign
         if (event.isAction(SignActionType.GROUP_ENTER) && event.isPowered() && event.hasGroup())
             onTrainEnter(event);
@@ -55,14 +57,14 @@ public class SignActionPortalIn extends SignAction {
         }
 
         // Get portal from database or create new entry
-        CraftBahn.getInstance().getPortalStorage().getOrCreate(lines[2], (err, portal) -> {
+        CraftBahnPlugin.getInstance().getPortalStorage().getOrCreate(lines[2], (err, portal) -> {
             if (err != null) {
                 Message.debug(event.getPlayer(), err.getMessage());
                 err.printStackTrace();
                 return;
             }
 
-            Bukkit.getScheduler().runTaskLaterAsynchronously(CraftBahn.getInstance(), () -> {
+            Bukkit.getScheduler().runTaskLaterAsynchronously(CraftBahnPlugin.getInstance(), () -> {
                 if (portal.getTargetHost() == null || portal.getTargetPort() == null || portal.getTargetLocation() == null)
                     event.getPlayer().sendMessage("§cCouldn't find an §rPortal-Exit §cfor §r'§e" + lines[2] + "§r'§c! Please create one");
                 else {
@@ -97,7 +99,7 @@ public class SignActionPortalIn extends SignAction {
         MinecartGroup group = event.getGroup();
 
         String portalName = event.getLine(2);
-        Portal portal = CraftBahn.getInstance().getPortalStorage().getPortal(portalName);
+        Portal portal = CraftBahnPlugin.getInstance().getPortalStorage().getPortal(portalName);
 
         if (portal == null) {
             TCHelper.sendMessage(group, "§cCouldn't find an §rPortal-Exit §cfor §r'§e" + portalName + "§r'§c!");

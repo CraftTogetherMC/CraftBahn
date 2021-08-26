@@ -14,6 +14,13 @@ public class Portal {
         this.id = id;
         this.name = name;
     }
+    public Portal(String name, Integer id, String targetHost, Integer targetPort, CTLocation targetLocation) {
+        this.id = id;
+        this.name = name;
+        this.targetHost = targetHost;
+        this.targetPort = targetPort;
+        this.targetLocation = targetLocation;
+    }
 
     public Integer getId() { return id; }
     public String getName() {

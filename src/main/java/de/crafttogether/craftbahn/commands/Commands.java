@@ -1,7 +1,7 @@
 package de.crafttogether.craftbahn.commands;
 
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
-import de.crafttogether.craftbahn.CraftBahn;
+import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.destinations.Destination;
 import de.crafttogether.craftbahn.destinations.DestinationList;
 import de.crafttogether.craftbahn.destinations.DestinationStorage;
@@ -27,7 +27,7 @@ import java.util.*;
 public class Commands implements TabExecutor {
 
     public boolean onCommand(@NotNull CommandSender sender, Command cmd, @NotNull String st, String[] args) {
-        DestinationStorage destinationStorage = CraftBahn.getInstance().getDestinationStorage();
+        DestinationStorage destinationStorage = CraftBahnPlugin.getInstance().getDestinationStorage();
 
         Player p = null;
 
@@ -43,7 +43,7 @@ public class Commands implements TabExecutor {
             boolean showAll = args.length > 0 && args[0].equalsIgnoreCase("all");
 
             List<Destination> destinations = new ArrayList<>(destinationStorage.getDestinations());
-            destinations = destinationStorage.filterByServer(destinations, CraftBahn.getInstance().getServerName());
+            destinations = destinationStorage.filterByServer(destinations, CraftBahnPlugin.getInstance().getServerName());
 
             for (Destination dst : destinations) {
                 if (showAll) {
@@ -180,7 +180,7 @@ public class Commands implements TabExecutor {
 
             train.getProperties().setDestination("train destination " + dest.getServer());
 
-            if (!CraftBahn.getInstance().getServerName().equalsIgnoreCase(dest.getServer())) {
+            if (!CraftBahnPlugin.getInstance().getServerName().equalsIgnoreCase(dest.getServer())) {
                 // Create a route first
                 List<String> route = new ArrayList<>();
                 route.add(dest.getServer());
@@ -233,7 +233,7 @@ public class Commands implements TabExecutor {
                     return true;
                 }
 
-                String serverName = CraftBahn.getInstance().getServerName();
+                String serverName = CraftBahnPlugin.getInstance().getServerName();
                 if (args.length >= 3)
                     serverName = args[2];
 
@@ -289,7 +289,7 @@ public class Commands implements TabExecutor {
                     return true;
                 }
 
-                if (destinationStorage.getDestination(args[1], CraftBahn.getInstance().getServerName()) != null) {
+                if (destinationStorage.getDestination(args[1], CraftBahnPlugin.getInstance().getServerName()) != null) {
                     sendMessage(p, "&6CraftBahn &8» &cEs existiert bereits ein Ziel mit diesem Namen in der Liste.");
                     return true;
                 }
@@ -335,7 +335,7 @@ public class Commands implements TabExecutor {
                     return true;
                 }
 
-                Destination dest = destinationStorage.getDestination(args[1], CraftBahn.getInstance().getServerName());
+                Destination dest = destinationStorage.getDestination(args[1], CraftBahnPlugin.getInstance().getServerName());
                 if (dest == null) {
                     sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen.");
                     return true;
@@ -363,7 +363,7 @@ public class Commands implements TabExecutor {
                     return true;
                 }
 
-                if (destinationStorage.getDestination(args[1], CraftBahn.getInstance().getServerName()) == null) {
+                if (destinationStorage.getDestination(args[1], CraftBahnPlugin.getInstance().getServerName()) == null) {
                     sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen");
                     return true;
                 }
@@ -379,7 +379,7 @@ public class Commands implements TabExecutor {
                     return true;
                 }
 
-                Destination dest = destinationStorage.getDestination(args[1], CraftBahn.getInstance().getServerName());
+                Destination dest = destinationStorage.getDestination(args[1], CraftBahnPlugin.getInstance().getServerName());
                 dest.setOwner(owner.getUniqueId());
 
                 // Speichern
@@ -403,7 +403,7 @@ public class Commands implements TabExecutor {
                     return true;
                 }
 
-                if (destinationStorage.getDestination(args[1], CraftBahn.getInstance().getServerName()) == null) {
+                if (destinationStorage.getDestination(args[1], CraftBahnPlugin.getInstance().getServerName()) == null) {
                     sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen");
                     return true;
                 }
@@ -419,7 +419,7 @@ public class Commands implements TabExecutor {
                     return true;
                 }
 
-                Destination dest = destinationStorage.getDestination(args[1], CraftBahn.getInstance().getServerName());
+                Destination dest = destinationStorage.getDestination(args[1], CraftBahnPlugin.getInstance().getServerName());
                 dest.addParticipant(owner.getUniqueId());
 
                 // Speichern
@@ -443,7 +443,7 @@ public class Commands implements TabExecutor {
                     return true;
                 }
 
-                if (destinationStorage.getDestination(args[1], CraftBahn.getInstance().getServerName()) == null) {
+                if (destinationStorage.getDestination(args[1], CraftBahnPlugin.getInstance().getServerName()) == null) {
                     sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen");
                     return true;
                 }
@@ -459,7 +459,7 @@ public class Commands implements TabExecutor {
                     return true;
                 }
 
-                Destination dest = destinationStorage.getDestination(args[1], CraftBahn.getInstance().getServerName());
+                Destination dest = destinationStorage.getDestination(args[1], CraftBahnPlugin.getInstance().getServerName());
                 dest.removeParticipant(owner.getUniqueId());
 
                 // Speichern
@@ -483,7 +483,7 @@ public class Commands implements TabExecutor {
                     return true;
                 }
 
-                if (destinationStorage.getDestination(args[1], CraftBahn.getInstance().getServerName()) == null) {
+                if (destinationStorage.getDestination(args[1], CraftBahnPlugin.getInstance().getServerName()) == null) {
                     sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen");
                     return true;
                 }
@@ -502,7 +502,7 @@ public class Commands implements TabExecutor {
                     return true;
                 }
 
-                Destination dest = destinationStorage.getDestination(args[1], CraftBahn.getInstance().getServerName());
+                Destination dest = destinationStorage.getDestination(args[1], CraftBahnPlugin.getInstance().getServerName());
                 dest.setType(type);
 
                 // Speichern
@@ -527,12 +527,12 @@ public class Commands implements TabExecutor {
                     return true;
                 }
 
-                if (destinationStorage.getDestination(args[1], CraftBahn.getInstance().getServerName()) == null) {
+                if (destinationStorage.getDestination(args[1], CraftBahnPlugin.getInstance().getServerName()) == null) {
                     sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen");
                     return true;
                 }
 
-                Destination dest = destinationStorage.getDestination(args[1], CraftBahn.getInstance().getServerName());
+                Destination dest = destinationStorage.getDestination(args[1], CraftBahnPlugin.getInstance().getServerName());
                 dest.setLocation(CTLocation.fromBukkitLocation(p.getLocation()));
 
                 // Speichern
@@ -558,12 +558,12 @@ public class Commands implements TabExecutor {
                     return true;
                 }
 
-                if (destinationStorage.getDestination(args[1], CraftBahn.getInstance().getServerName()) == null) {
+                if (destinationStorage.getDestination(args[1], CraftBahnPlugin.getInstance().getServerName()) == null) {
                     sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen");
                     return true;
                 }
 
-                Destination dest = destinationStorage.getDestination(args[1], CraftBahn.getInstance().getServerName());
+                Destination dest = destinationStorage.getDestination(args[1], CraftBahnPlugin.getInstance().getServerName());
                 dest.setTeleportLocation(CTLocation.fromBukkitLocation(p.getLocation()));
 
                 // Speichern
@@ -588,12 +588,12 @@ public class Commands implements TabExecutor {
                     return true;
                 }
 
-                if (destinationStorage.getDestination(args[1], CraftBahn.getInstance().getServerName()) == null) {
+                if (destinationStorage.getDestination(args[1], CraftBahnPlugin.getInstance().getServerName()) == null) {
                     sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen");
                     return true;
                 }
 
-                Destination dest = destinationStorage.getDestination(args[1], CraftBahn.getInstance().getServerName());
+                Destination dest = destinationStorage.getDestination(args[1], CraftBahnPlugin.getInstance().getServerName());
                 dest.setPublic(Boolean.valueOf(false));
 
                 // Speichern
@@ -617,12 +617,12 @@ public class Commands implements TabExecutor {
                     return true;
                 }
 
-                if (destinationStorage.getDestination(args[1], CraftBahn.getInstance().getServerName()) == null) {
+                if (destinationStorage.getDestination(args[1], CraftBahnPlugin.getInstance().getServerName()) == null) {
                     sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen");
                     return true;
                 }
 
-                Destination dest = destinationStorage.getDestination(args[1], CraftBahn.getInstance().getServerName());
+                Destination dest = destinationStorage.getDestination(args[1], CraftBahnPlugin.getInstance().getServerName());
                 dest.setPublic(Boolean.valueOf(true));
 
                 // Speichern
@@ -677,14 +677,14 @@ public class Commands implements TabExecutor {
                     return true;
                 }
 
-                if (destinationStorage.getDestination(args[1], CraftBahn.getInstance().getServerName()) == null) {
+                if (destinationStorage.getDestination(args[1], CraftBahnPlugin.getInstance().getServerName()) == null) {
                     sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen");
                     return true;
                 }
 
-                Destination dest = destinationStorage.getDestination(args[1], CraftBahn.getInstance().getServerName());
+                Destination dest = destinationStorage.getDestination(args[1], CraftBahnPlugin.getInstance().getServerName());
 
-                if (dest.getTeleportLocation().getServer().equalsIgnoreCase(CraftBahn.getInstance().getServerName())) {
+                if (dest.getTeleportLocation().getServer().equalsIgnoreCase(CraftBahnPlugin.getInstance().getServerName())) {
                     Location loc = dest.getTeleportLocation().getBukkitLocation();
                     p.teleport(loc);
                     sendMessage(p, "&6CraftBahn &8» &6Du wurdest zum Ziel: &f'&e" + dest.getName() + "&f' &6teleportiert.");
@@ -702,7 +702,7 @@ public class Commands implements TabExecutor {
     }
 
     public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
-        DestinationStorage destinationStorage = CraftBahn.getInstance().getDestinationStorage();
+        DestinationStorage destinationStorage = CraftBahnPlugin.getInstance().getDestinationStorage();
 
         ArrayList<String> newList = new ArrayList<>();
         ArrayList<String> proposals = new ArrayList<>();
@@ -771,7 +771,7 @@ public class Commands implements TabExecutor {
                         proposals.add(p.getName());
 
                 } else if (args[0].equalsIgnoreCase("removemember") && sender.hasPermission("ctdestinations.edit.removemember")) {
-                    Destination dest = destinationStorage.getDestination(args[1], CraftBahn.getInstance().getServerName());
+                    Destination dest = destinationStorage.getDestination(args[1], CraftBahnPlugin.getInstance().getServerName());
                     if (dest != null) {
                         for (UUID uuid : dest.getParticipants()) {
                             OfflinePlayer participant = Bukkit.getOfflinePlayer(uuid);

@@ -48,7 +48,8 @@ public class Destination {
         }
     }
 
-    public Destination(String name) {
+    public Destination(String name, Integer id) {
+        this.id = id;
         this.name = name;
     }
 

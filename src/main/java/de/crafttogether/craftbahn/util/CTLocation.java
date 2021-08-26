@@ -1,6 +1,6 @@
 package de.crafttogether.craftbahn.util;
 
-import de.crafttogether.craftbahn.CraftBahn;
+import de.crafttogether.CraftBahnPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
@@ -27,7 +27,7 @@ public class CTLocation {
     }
 
     public static CTLocation fromBukkitLocation(Location loc) {
-        return new CTLocation(CraftBahn.getInstance().getServerName(), loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ());
+        return new CTLocation(CraftBahnPlugin.getInstance().getServerName(), loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ());
     }
 
     public String getServer() {

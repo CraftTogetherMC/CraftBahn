@@ -1,30 +1,72 @@
 package de.crafttogether.craftbahn.portals;
 
 import de.crafttogether.Callback;
-import de.crafttogether.MySQLConnection;
-import de.crafttogether.craftbahn.CraftBahn;
-import de.crafttogether.craftbahn.destinations.Destination;
+import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.util.CTLocation;
+import de.crafttogether.mysql.MySQLConnection;
+import org.bukkit.Bukkit;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.TreeMap;
 
 public class PortalStorage {
-    private final CraftBahn plugin = CraftBahn.getInstance();
+    private final CraftBahnPlugin plugin = CraftBahnPlugin.getInstance();
     private final TreeMap<Integer, Portal> portals = new TreeMap<>();
 
     public PortalStorage() {
-        MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
+        MySQLConnection MySQL = CraftBahnPlugin.getInstance().getMySQLAdapter().getConnection();
 
-        //TODO: Install Tables
+        plugin.getLogger().info("Load Portals...");
+        // Create Tables if missing
+        try {
+            ResultSet result = MySQL.query("SHOW TABLES LIKE '%sportals';", MySQL.getTablePrefix());
+
+            if (!result.next()) {
+                plugin.getLogger().info("[MySQL]: Create Table '" + MySQL.getTablePrefix() + "portals' ...");
+
+                MySQL.execute("""
+                    CREATE TABLE `%sportals` (
+                      `id` int(11) NOT NULL,
+                      `name` int(16) NOT NULL,
+                      `target_host` int(255) DEFAULT NULL,
+                      `target_port` int(11) DEFAULT NULL,
+                      `target_server` int(24) DEFAULT NULL,
+                      `target_world` varchar(24) DEFAULT NULL,
+                      `target_x` double DEFAULT NULL,
+                      `target_y` double DEFAULT NULL,
+                      `target_z` double DEFAULT NULL
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+                """, MySQL.getTablePrefix());
+
+                MySQL.execute("""
+                     ALTER TABLE `%sportals`
+                       ADD PRIMARY KEY (`id`),
+                       ADD UNIQUE KEY `name` (`name`);
+                """, MySQL.getTablePrefix());
+
+                MySQL.execute("""
+                    ALTER TABLE `%sportals`
+                      MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+                """, MySQL.getTablePrefix());
+            }
+        }
+        catch (SQLException ex) {
+            plugin.getLogger().warning("[MySQL]: " + ex.getMessage());
+        }
+        finally {
+            MySQL.close();
+        }
+
+        // Load all portals from database into our cache
+        Bukkit.getServer().getScheduler().runTask(plugin, () -> loadAll((err, portals) -> {
+            plugin.getLogger().info("Loaded " + portals.size() + " Portals");
+        }));
     }
 
     public void getOrCreate(String portalName, Callback<SQLException, Portal> callback) {
-        MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
+        MySQLConnection MySQL = CraftBahnPlugin.getInstance().getMySQLAdapter().getConnection();
 
         try {
             ResultSet result = MySQL.query("SELECT * FROM `%sportals` WHERE `name` = '%s'", MySQL.getTablePrefix(), portalName);
@@ -65,7 +107,7 @@ public class PortalStorage {
     }
 
     public void get(String portalName, Callback<SQLException, Portal> callback) {
-        MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
+        MySQLConnection MySQL = CraftBahnPlugin.getInstance().getMySQLAdapter().getConnection();
 
         try {
             ResultSet result = MySQL.query("SELECT * FROM `%sportals` WHERE `name` = '%s'", MySQL.getTablePrefix(), portalName);
@@ -141,6 +183,63 @@ public class PortalStorage {
 
             MySQL.close();
         }, MySQL.getTablePrefix(), portalId);
+    }
+
+    public void loadAll(Callback<SQLException, Collection<Portal>> callback) {
+        MySQLConnection MySQL = CraftBahnPlugin.getInstance().getMySQLAdapter().getConnection();
+
+        MySQL.queryAsync("SELECT * FROM `%sportals`", (err, result) -> {
+            if (err != null) {
+                CraftBahnPlugin.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
+                callback.call(err, null);
+            }
+
+            else {
+                try {
+                    while (result.next()) {
+                        Portal portal = setupPortal(result);
+
+                        // Update cache
+                        portals.put(portal.getId(), portal);
+                    }
+                } catch (SQLException ex) {
+                    err = ex;
+                    CraftBahnPlugin.getInstance().getLogger().warning("[MySQL:] Error: " + ex.getMessage());
+                }
+                finally {
+                    MySQL.close();
+                }
+
+                callback.call(err, portals.values());
+            }
+        }, MySQL.getTablePrefix());
+    }
+
+    private Portal setupPortal(ResultSet result) {
+        Portal portal = null;
+
+        try {
+            Integer id = result.getInt("id");
+            String name = result.getString("name");
+            String server = result.getString("target_server");
+            String world = result.getString("target_world");
+
+            double x = result.getDouble("target_x");
+            double y = result.getDouble("target_y");
+            double z = result.getDouble("target_z");
+            CTLocation targetLocation = new CTLocation(server, world, x, y, z);
+
+            portal = new Portal(name, id);
+            portal.setId(result.getInt("id"));
+            portal.setTargetHost(result.getString("target_host"));
+            portal.setTargetPort(result.getInt("target_port"));
+            portal.setTargetLocation(targetLocation);
+        }
+        catch (Exception err) {
+            CraftBahnPlugin.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
+        }
+
+        return portal;
     }
 
     public Collection<Portal> getPortals() {

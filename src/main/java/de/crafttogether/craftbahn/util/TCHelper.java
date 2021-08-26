@@ -18,11 +18,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TCHelper {
-    private static final SignActionPortalIn signActionPortalIn = new SignActionPortalIn();
-    private static final SignActionPortalOut signActionPortalOut = new SignActionPortalOut();
+    private static SignActionPortalIn signActionPortalIn;
+    private static SignActionPortalOut signActionPortalOut;
 
     public static void registerActionSigns() {
+        signActionPortalIn = new SignActionPortalIn();
         SignAction.register(signActionPortalIn);
+
+        signActionPortalOut = new SignActionPortalOut();
         SignAction.register(signActionPortalOut);
     }
 

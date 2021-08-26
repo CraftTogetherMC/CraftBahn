@@ -1,8 +1,8 @@
 package de.crafttogether.craftbahn.destinations;
 
 import de.crafttogether.Callback;
-import de.crafttogether.MySQLConnection;
-import de.crafttogether.craftbahn.CraftBahn;
+import de.crafttogether.CraftBahnPlugin;
+import de.crafttogether.mysql.MySQLConnection;
 import de.crafttogether.craftbahn.util.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -13,11 +13,11 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class DestinationStorage {
-    private final CraftBahn plugin = CraftBahn.getInstance();
+    private final CraftBahnPlugin plugin = CraftBahnPlugin.getInstance();
     private final TreeMap<Integer, Destination> destinations = new TreeMap<>();
 
     public DestinationStorage() {
-        MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
+        MySQLConnection MySQL = CraftBahnPlugin.getInstance().getMySQLAdapter().getConnection();
 
         // Create Tables if missing
         try {
@@ -26,8 +26,7 @@ public class DestinationStorage {
             if (!result.next()) {
                 plugin.getLogger().info("[MySQL]: Create Table '" + MySQL.getTablePrefix() + "destinations' ...");
 
-                MySQL.execute(
-            """
+                MySQL.execute("""
                     CREATE TABLE `%sdestinations` (
                       `id` int(11) NOT NULL,
                       `name` varchar(24) NOT NULL,
@@ -44,18 +43,17 @@ public class DestinationStorage {
                       `tp_y` double DEFAULT NULL,
                       `tp_z` double DEFAULT NULL
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-                    """
-                , MySQL.getTablePrefix());
+                """, MySQL.getTablePrefix());
 
-                MySQL.execute(
-                "ALTER TABLE `%sdestinations`\n" +
-                        "  ADD PRIMARY KEY (`id`);"
-                , MySQL.getTablePrefix());
+                MySQL.execute("""
+                    ALTER TABLE `%sdestinations`
+                      ADD PRIMARY KEY (`id`);
+                """, MySQL.getTablePrefix());
 
-                MySQL.execute(
-                "ALTER TABLE `%sdestinations`\n" +
-                    "  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;"
-                , MySQL.getTablePrefix());
+                MySQL.execute("""
+                    ALTER TABLE `%sdestinations`
+                      MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+                """, MySQL.getTablePrefix());
             }
         }
         catch (SQLException ex) {
@@ -75,7 +73,7 @@ public class DestinationStorage {
 
             int markersCreated = 0;
             for (Destination dest : destinations) {
-                if (!CraftBahn.getInstance().getServerName().equalsIgnoreCase(dest.getServer()))
+                if (!CraftBahnPlugin.getInstance().getServerName().equalsIgnoreCase(dest.getServer()))
                     continue;
 
                 if(MarkerManager.addMarker(dest, true))
@@ -88,7 +86,7 @@ public class DestinationStorage {
     }
 
     private void insert(Destination destination, Callback<SQLException, Destination> callback) {
-        MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
+        MySQLConnection MySQL = CraftBahnPlugin.getInstance().getMySQLAdapter().getConnection();
 
         CTLocation loc = destination.getLocation();
         CTLocation tpLoc = destination.getTeleportLocation();
@@ -132,7 +130,7 @@ public class DestinationStorage {
 
         (err, lastInsertedId) -> {
             if (err != null)
-                CraftBahn.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
+                CraftBahnPlugin.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
 
             // Add to cache
             destination.setId(lastInsertedId);
@@ -144,7 +142,7 @@ public class DestinationStorage {
     }
 
     public void update(Destination destination, Callback<SQLException, Integer> callback) {
-        MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
+        MySQLConnection MySQL = CraftBahnPlugin.getInstance().getMySQLAdapter().getConnection();
 
         CTLocation loc = destination.getLocation();
         CTLocation tpLoc = destination.getTeleportLocation();
@@ -171,7 +169,7 @@ public class DestinationStorage {
 
         (err, affectedRows) -> {
             if (err != null)
-                CraftBahn.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
+                CraftBahnPlugin.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
 
             callback.call(err, affectedRows);
             MySQL.close();
@@ -180,11 +178,11 @@ public class DestinationStorage {
 
     // TODO: Trigger if other server updates a destination
     public void load(int destinationId, Callback<SQLException, Destination> callback) {
-        MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
+        MySQLConnection MySQL = CraftBahnPlugin.getInstance().getMySQLAdapter().getConnection();
 
         MySQL.queryAsync("SELECT * FROM `%sdestinations` WHERE `id` = %s", (err, result) -> {
             if (err != null) {
-                CraftBahn.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
+                CraftBahnPlugin.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
             }
 
             else {
@@ -199,7 +197,7 @@ public class DestinationStorage {
                     }
                 } catch (SQLException ex) {
                     err = ex;
-                    CraftBahn.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
+                    CraftBahnPlugin.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
                 }
                 finally {
                     MySQL.close();
@@ -211,11 +209,11 @@ public class DestinationStorage {
     }
 
     public void delete(int destinationId, Callback<SQLException, Integer> callback) {
-        MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
+        MySQLConnection MySQL = CraftBahnPlugin.getInstance().getMySQLAdapter().getConnection();
 
         MySQL.updateAsync("DELETE FROM `%sdestinations` WHERE `id` = %s", (err, affectedRows) -> {
             if (err != null) {
-                CraftBahn.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
+                CraftBahnPlugin.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
                 callback.call(err, null);
             }
             else {
@@ -229,11 +227,11 @@ public class DestinationStorage {
     }
 
     public void loadAll(Callback<SQLException, Collection<Destination>> callback) {
-        MySQLConnection MySQL = CraftBahn.getInstance().getMySQLAdapter().getConnection();
+        MySQLConnection MySQL = CraftBahnPlugin.getInstance().getMySQLAdapter().getConnection();
 
         MySQL.queryAsync("SELECT * FROM `%sdestinations`", (err, result) -> {
             if (err != null) {
-                CraftBahn.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
+                CraftBahnPlugin.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
                 callback.call(err, null);
             }
 
@@ -247,7 +245,7 @@ public class DestinationStorage {
                     }
                 } catch (SQLException ex) {
                     err = ex;
-                    CraftBahn.getInstance().getLogger().warning("[MySQL:] Error: " + ex.getMessage());
+                    CraftBahnPlugin.getInstance().getLogger().warning("[MySQL:] Error: " + ex.getMessage());
                 }
                 finally {
                     MySQL.close();
@@ -310,7 +308,7 @@ public class DestinationStorage {
     }
 
     public void addDestination(String name, UUID owner, Destination.DestinationType type, Location loc, Boolean isPublic, Callback<SQLException, Destination> callback) {
-        String serverName = CraftBahn.getInstance().getServerName();
+        String serverName = CraftBahnPlugin.getInstance().getServerName();
         CTLocation ctLoc = CTLocation.fromBukkitLocation(loc);
 
         Destination dest = new Destination(name, serverName, loc.getWorld().getName(), owner, new ArrayList<>(), type, ctLoc, ctLoc, isPublic);
@@ -321,6 +319,7 @@ public class DestinationStorage {
         Destination dest = null;
 
         try {
+            Integer id = result.getInt("id");
             String name = result.getString("name");
             String server = result.getString("server");
             String world = result.getString("world");
@@ -333,12 +332,11 @@ public class DestinationStorage {
                 JSONArray jsonArray = new JSONArray(result.getString("participants"));
                 for (Object uuid : jsonArray) participants.add(UUID.fromString((String) uuid));
             } catch (Exception e) {
-                CraftBahn.getInstance().getLogger().warning("Error: Unable to read participants for '" + name + "'");
+                CraftBahnPlugin.getInstance().getLogger().warning("Error: Unable to read participants for '" + name + "'");
             }
 
             Destination.DestinationType destinationType = Destination.DestinationType.valueOf(result.getString("type"));
-            dest = new Destination(name);
-            dest.setId(result.getInt("id"));
+            dest = new Destination(name, id);
             dest.setServer(server);
             dest.setWorld(world);
             dest.setOwner(UUID.fromString(result.getString("owner")));
@@ -349,7 +347,7 @@ public class DestinationStorage {
             dest.setPublic(result.getBoolean("public"));
         }
         catch (Exception err) {
-            CraftBahn.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
+            CraftBahnPlugin.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
         }
 
         return dest;

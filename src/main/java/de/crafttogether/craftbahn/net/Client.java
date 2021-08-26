@@ -1,6 +1,6 @@
 package de.crafttogether.craftbahn.net;
 
-import de.crafttogether.craftbahn.CraftBahn;
+import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.util.Message;
 
 import java.io.IOException;
@@ -24,7 +24,7 @@ public class Client extends Thread {
             outputStream = clientSocket.getOutputStream();
         } catch (ConnectException e) {
             if (!e.getMessage().equalsIgnoreCase("connection refused")) {
-                CraftBahn.getInstance().getLogger().warning("Couldn't connect to server at 127.0.0.1:" + port);
+                CraftBahnPlugin.getInstance().getLogger().warning("Couldn't connect to server at 127.0.0.1:" + port);
                 Message.debug("Error: " + e.getMessage());
             }
         } catch (IOException ex) {

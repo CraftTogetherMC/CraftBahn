@@ -1,6 +1,6 @@
 package de.crafttogether.craftbahn.util;
 
-import de.crafttogether.craftbahn.CraftBahn;
+import de.crafttogether.CraftBahnPlugin;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.chat.ComponentSerializer;
@@ -25,12 +25,12 @@ public class Message {
     }
 
     public static void debug(Player p, String message) {
-        if (!CraftBahn.getInstance().getConfig().getBoolean("debug") || !p.hasPermission("craftbahn.debug")) return;
+        if (!CraftBahnPlugin.getInstance().getConfig().getBoolean("debug") || !p.hasPermission("craftbahn.debug")) return;
         p.sendMessage(ChatColor.translateAlternateColorCodes('&', "&4&l[Debug]: &e" + message));
     }
 
     public static void debug(String message) {
-        if (CraftBahn.getInstance().getConfig().getBoolean("debug"))
+        //if (CraftBahnPlugin.getInstance().getConfig().getBoolean("debug"))
             System.out.println("[CraftBahn][Debug]: " + message);
     }
 }

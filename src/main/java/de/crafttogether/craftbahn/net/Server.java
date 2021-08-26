@@ -1,7 +1,7 @@
 package de.crafttogether.craftbahn.net;
 
 import com.bergerkiller.bukkit.common.config.ConfigurationNode;
-import de.crafttogether.craftbahn.CraftBahn;
+import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.portals.PortalHandler;
 import de.crafttogether.craftbahn.util.Message;
 
@@ -94,7 +94,7 @@ public class Server extends Thread {
 
         } catch (BindException e) {
             Message.debug("Can't bind to " + port + ".. Port already in use!");
-            CraftBahn.getInstance().onDisable();
+            CraftBahnPlugin.getInstance().onDisable();
 
         } catch (IOException ex) {
             ex.printStackTrace();

@@ -1,8 +1,6 @@
 package de.crafttogether.craftbahn.portals;
 
 import com.bergerkiller.bukkit.common.config.ConfigurationNode;
-import com.bergerkiller.bukkit.common.entity.CommonEntity;
-import com.bergerkiller.bukkit.common.nbt.CommonTagCompound;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.controller.spawnable.SpawnableGroup;
@@ -11,15 +9,13 @@ import com.bergerkiller.bukkit.tc.properties.CartProperties;
 import com.bergerkiller.bukkit.tc.properties.TrainProperties;
 import com.bergerkiller.bukkit.tc.signactions.SignActionSpawn;
 import com.bergerkiller.bukkit.tc.utils.LauncherConfig;
-import com.bergerkiller.generated.net.minecraft.world.entity.EntityHandle;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import de.crafttogether.craftbahn.CraftBahn;
+import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.net.Client;
 import de.crafttogether.craftbahn.util.Message;
 import de.crafttogether.craftbahn.util.TCHelper;
 import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -28,7 +24,6 @@ import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Rail;
 import org.bukkit.block.data.Rotatable;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 
@@ -49,7 +44,7 @@ public class PortalHandler {
 
         // Generate new name
         String trainID = UUID.randomUUID().toString().split("-")[0];
-        String trainName = CraftBahn.getInstance().getServerName() + "-" + group.getProperties().getTrainName();
+        String trainName = CraftBahnPlugin.getInstance().getServerName() + "-" + group.getProperties().getTrainName();
 
         // Get train-owners
         Set<String> owners = group.getProperties().getOwners();
@@ -125,7 +120,7 @@ public class PortalHandler {
         }
 
         // Use scheduler to be sync with main-thread
-        Bukkit.getServer().getScheduler().runTask(CraftBahn.getInstance(), () -> {
+        Bukkit.getServer().getScheduler().runTask(CraftBahnPlugin.getInstance(), () -> {
             
             /* Look for "portal-out"-sign */
             Block signBlock = targetLocation.getBlock();
@@ -237,7 +232,7 @@ public class PortalHandler {
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF("Connect");
         out.writeUTF(server);
-        player.sendPluginMessage(CraftBahn.getInstance(), "BungeeCord", out.toByteArray());
+        player.sendPluginMessage(CraftBahnPlugin.getInstance(), "BungeeCord", out.toByteArray());
         Message.debug("Moved player " + player.getName() + " to " + server);
     }
 }
