@@ -20,6 +20,8 @@ import de.crafttogether.craftbahn.util.TCHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -129,13 +131,24 @@ public class SignActionPortalIn extends SignAction {
         if (portal == null)
             return;
 
-        MinecartMember member = event.getMember();
-        List<Player> passengers = TCHelper.getPlayerPassengers(member);
+        MinecartMember<?> member = event.getMember();
 
-        for (Player playerPassenger : passengers) {
-            Message.debug(playerPassenger, "Try to send you to: " + portal.getTargetLocation().toString());
-            Message.debug("Try to send " + playerPassenger.getName() + " to: " + portal.getTargetLocation().toString());
-            PortalHandler.sendToServer(playerPassenger, portal.getTargetLocation().getServer());
+        // Iterate passengers
+        for (Entity passenger : member.getEntity().getPassengers()) {
+
+            if (passenger instanceof Player) {
+                Player playerPassenger = (Player) passenger;
+                PortalHandler.sendToServer(playerPassenger, portal.getTargetLocation().getServer());
+
+                Message.debug(playerPassenger, "Try to send you to: " + portal.getTargetLocation().toString());
+                Message.debug("Try to send " + playerPassenger.getName() + " to: " + portal.getTargetLocation().toString());
+            }
+
+            if (passenger instanceof LivingEntity) {
+                LivingEntity entity = (LivingEntity) passenger;
+                Message.debug("Despawn " + entity.getType().name());
+                entity.remove();
+            }
         }
 
         // Destroy cart and remove group

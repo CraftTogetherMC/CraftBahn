@@ -2,6 +2,7 @@ package de.crafttogether.craftbahn.portals;
 
 import com.bergerkiller.bukkit.common.config.ConfigurationNode;
 import com.bergerkiller.bukkit.common.entity.CommonEntity;
+import com.bergerkiller.bukkit.common.nbt.CommonTagCompound;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.controller.spawnable.SpawnableGroup;
@@ -10,6 +11,7 @@ import com.bergerkiller.bukkit.tc.properties.CartProperties;
 import com.bergerkiller.bukkit.tc.properties.TrainProperties;
 import com.bergerkiller.bukkit.tc.signactions.SignActionSpawn;
 import com.bergerkiller.bukkit.tc.utils.LauncherConfig;
+import com.bergerkiller.generated.net.minecraft.world.entity.EntityHandle;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import de.crafttogether.CraftBahnPlugin;
@@ -25,6 +27,8 @@ import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Rail;
 import org.bukkit.block.data.Rotatable;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.spigotmc.event.player.PlayerSpawnLocationEvent;
@@ -53,7 +57,8 @@ public class PortalHandler {
 
         // Get passengers
         List<Player> playerPassengers = new ArrayList<>();
-        //List<String> mobPassengers = new ArrayList<>();
+        List<LivingEntity> livingPassengers = new ArrayList<>();
+        Map<UUID, Set> passengerData = new HashMap<>();
         List<String> passengerList = new ArrayList<>();
 
         /* Save & Load Entity NBT
@@ -66,12 +71,26 @@ public class PortalHandler {
         entityHandle.loadFromNBT(tagCompound);
         */
 
+        // Iterate minecarts in train
         for (MinecartMember<?> member : group) {
-            List<Player> cartPassengers = TCHelper.getPlayerPassengers(member);
 
-            for (Player passenger : cartPassengers) {
-                playerPassengers.add(passenger);
-                passengerList.add(passenger.getUniqueId() + ";" + trainID + ";" + member.getIndex());
+            // Iterate passengers in minecart
+            for (Entity passenger : member.getEntity().getPassengers()) {
+
+                if (passenger instanceof Player) {
+                    playerPassengers.add((Player) passenger);
+                    passengerList.add("player;" + passenger.getUniqueId() + ";" + trainID + ";" + member.getIndex());
+                }
+
+                if (passenger instanceof LivingEntity) {
+                    livingPassengers.add((LivingEntity) passenger);
+                    passengerList.add("livingEntity;" + passenger.getUniqueId() + ";" + trainID + ";" + member.getIndex());
+
+                    EntityHandle entityHandle = EntityHandle.fromBukkit(passenger);
+                    CommonTagCompound tagCompound = CommonTagCompound.create(entityHandle);
+                    entityHandle.loadFromNBT(tagCompound);
+                    passengerData.put(passenger.getUniqueId(), tagCompound.entrySet());
+                }
             }
         }
 
@@ -86,6 +105,7 @@ public class PortalHandler {
         dataPacket.set("train.owners", owners);
         dataPacket.set("train.properties", trainProperties);
         dataPacket.set("train.passengers", passengerList);
+        dataPacket.set("train.passengerData", passengerData);
 
         // Send dataPacket to server
         Client client = new Client(portal.getTargetPort());
