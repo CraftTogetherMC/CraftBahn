@@ -1,6 +1,6 @@
 package de.crafttogether.craftbahn.util;
 
-import de.crafttogether.craftbahn.CraftBahn;
+import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.destinations.Destination;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -15,10 +15,10 @@ import java.util.UUID;
 
 public class MarkerManager {
     public static void deleteMarker(Destination dest) {
-        if (!dest.getServer().equalsIgnoreCase(CraftBahn.getInstance().getServerName()))
+        if (!dest.getServer().equalsIgnoreCase(CraftBahnPlugin.getInstance().getServerName()))
             return;
 
-        CraftBahn plugin = CraftBahn.getInstance();
+        CraftBahnPlugin plugin = CraftBahnPlugin.getInstance();
         DynmapAPI dynmap = plugin.getDynmap();
 
         MarkerSet set = dynmap.getMarkerAPI().getMarkerSet("CT_" + dest.getType().name());
@@ -32,25 +32,23 @@ public class MarkerManager {
     }
 
     public static void createMarkerSets() {
-        CraftBahn plugin = CraftBahn.getInstance();
+        CraftBahnPlugin plugin = CraftBahnPlugin.getInstance();
         DynmapAPI dynmap = plugin.getDynmap();
-        MarkerAPI markerApi = dynmap.getMarkerAPI();
 
         if (dynmap == null)
             return;
 
         for (Destination.DestinationType type : Destination.DestinationType.values()) {
             MarkerSet set = dynmap.getMarkerAPI().getMarkerSet("CT_" + type.name());
-            String label = "Bahnhof";
-            if (type.name().equals("MAIN_STATION")) {
-                label = "Hauptbahnhof";
-            } else if (type.name().equals("PUBLIC_STATION")) {
-                label = "Bahnhof (Öffentlich)";
-            } else if (type.name().equals("PLAYER_STATION")) {
-                label = "Bahnhof (Spieler)";
-            }
+            String label = switch (type.name()) {
+                case "MAIN_STATION" -> "Hauptbahnhof";
+                case "PUBLIC_STATION" -> "Bahnhof (Öffentlich)";
+                case "PLAYER_STATION" -> "Bahnhof (Spieler)";
+                default -> "Bahnhof";
+            };
+
             if (set == null)
-                set = dynmap.getMarkerAPI().createMarkerSet("CT_" + type.name(), label, null, true);
+                dynmap.getMarkerAPI().createMarkerSet("CT_" + type.name(), label, null, true);
         }
     }
 
@@ -59,10 +57,10 @@ public class MarkerManager {
     }
 
     public static boolean addMarker(Destination dest, boolean updateOnly) {
-        if (!dest.getServer().equalsIgnoreCase(CraftBahn.getInstance().getServerName()))
+        if (!dest.getServer().equalsIgnoreCase(CraftBahnPlugin.getInstance().getServerName()))
             return false;
 
-        CraftBahn plugin = CraftBahn.getInstance();
+        CraftBahnPlugin plugin = CraftBahnPlugin.getInstance();
         DynmapAPI dynmap = plugin.getDynmap();
 
         if (dynmap == null)
@@ -86,38 +84,38 @@ public class MarkerManager {
         }
 
         MarkerIcon icon = null;
-        String label = null;
+        String label;
         String color = null;
-        Boolean showOwner = Boolean.valueOf(true);
-        String strParticipants = Bukkit.getOfflinePlayer(dest.getOwner()).getName() + ", ";
+        Boolean showOwner = Boolean.TRUE;
+        StringBuilder strParticipants = new StringBuilder(Bukkit.getOfflinePlayer(dest.getOwner()).getName() + ", ");
 
         for (UUID uuid : dest.getParticipants()) {
             OfflinePlayer participant = Bukkit.getOfflinePlayer(uuid);
             if (!participant.hasPlayedBefore()) continue;
-            strParticipants += participant.getName() + ", ";
+            strParticipants.append(participant.getName()).append(", ");
         }
 
         if (strParticipants.length() > 1)
-            strParticipants = strParticipants.substring(0, strParticipants.length()-2);
+            strParticipants = new StringBuilder(strParticipants.substring(0, strParticipants.length() - 2));
 
         switch (dest.getType().name()) {
-            case "STATION": case "MAIN_STATION": case "PUBLIC_STATION":
+            case "STATION", "MAIN_STATION", "PUBLIC_STATION" -> {
                 color = "#ffaa00";
                 icon = markerApi.getMarkerIcon("ct-rail");
-                showOwner = Boolean.valueOf(false);
-                break;
-            case "PLAYER_STATION":
+                showOwner = Boolean.FALSE;
+            }
+            case "PLAYER_STATION" -> {
                 color = "#ffff55";
                 icon = markerApi.getMarkerIcon("ct-minecart");
-                showOwner = Boolean.valueOf(true);
-                break;
+                showOwner = Boolean.TRUE;
+            }
         }
 
         label = "<div style=\"z-index:99999\">" +
                     "<div style=\"padding:6px\">" +
                         "<h3 style=\"padding:0px;margin:0px;color:" + color + "\">" + dest.getName() + "</h3>" +
                         "<span style=\"font-weight:bold;color:#aaaaaa;\">Stations-Typ:</span> " + dest.getType() + "<br>" +
-                        (showOwner.booleanValue() ? ("<span style=\"font-weight:bold;color:#aaaaaa;\">Besitzer:</span> " + strParticipants + "<br>") : "") +
+                        (showOwner ? ("<span style=\"font-weight:bold;color:#aaaaaa;\">Besitzer:</span> " + strParticipants + "<br>") : "") +
                         "<span style=\"font-style:italic;font-weight:bold;color:#ffaa00\">/fahrziel <span style=\"color:#ffff55\">" + dest.getName() + "</span></span>" +
                     "</div>" +
                 "</div>";

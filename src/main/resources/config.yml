@@ -1,9 +1,10 @@
 Settings:
+  Port: 5000
   ServerName: 'lobby'
   Debug: true
 MySQL:
   Host: '127.0.0.1'
-  Port: '3306'
+  Port: 3306
   Database: 'database'
   Username: 'username'
   Password: 'password'

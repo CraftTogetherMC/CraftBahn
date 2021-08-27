@@ -1,7 +1,7 @@
 package de.crafttogether.craftbahn.commands;
 
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
-import de.crafttogether.craftbahn.CraftBahn;
+import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.destinations.Destination;
 import de.crafttogether.craftbahn.destinations.DestinationList;
 import de.crafttogether.craftbahn.util.Message;
@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ListCommand implements TabExecutor {
-    private CraftBahn plugin = CraftBahn.getInstance();
+    private CraftBahnPlugin plugin = CraftBahnPlugin.getInstance();
 
     public boolean onCommand(CommandSender sender, Command cmd, String st, String[] args) {
         if (cmd.getName().equalsIgnoreCase("setdestination")) {
@@ -104,7 +104,7 @@ public class ListCommand implements TabExecutor {
                     pageIndex = (filterType == null) ? 1 : 2;
 
                 if (argList.contains("--book")) {
-                    CraftBahn.getInstance().getLogger().info("OPEN BOOK");
+                    CraftBahnPlugin.getInstance().getLogger().info("OPEN BOOK");
                     ItemStack book = list.getBook();
                     p.getInventory().setItem(0, book);
                     //Message.openBook(list.getBook(), p);
@@ -113,7 +113,7 @@ public class ListCommand implements TabExecutor {
                     list.sendPage(p, pageIndex);
 
             } else {
-                CraftBahn.getInstance().getLogger().info("Dieser Befehl kann nicht von der Konsole ausgeführt werden.");
+                CraftBahnPlugin.getInstance().getLogger().info("Dieser Befehl kann nicht von der Konsole ausgeführt werden.");
                 return true;
             }
         }

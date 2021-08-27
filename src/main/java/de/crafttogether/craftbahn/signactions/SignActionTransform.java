@@ -4,16 +4,14 @@ import com.bergerkiller.bukkit.common.resources.SoundEffect;
 import com.bergerkiller.bukkit.common.utils.WorldUtil;
 import com.bergerkiller.bukkit.tc.TrainCarts;
 import com.bergerkiller.bukkit.tc.Util;
-import org.bukkit.Location;
-import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Player;
-
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.events.SignActionEvent;
 import com.bergerkiller.bukkit.tc.events.SignChangeActionEvent;
 import com.bergerkiller.bukkit.tc.signactions.SignAction;
 import com.bergerkiller.bukkit.tc.signactions.SignActionType;
 import com.bergerkiller.bukkit.tc.utils.SignBuildOptions;
+import org.bukkit.Location;
+import org.bukkit.block.BlockFace;
 
 public class SignActionTransform extends SignAction {
 
@@ -58,8 +56,8 @@ public class SignActionTransform extends SignAction {
         // When not successful, display particles at the sign to indicate such
         BlockFace facingInv = info.getFacing().getOppositeFace();
         Location effectLocation = info.getSign().getLocation()
-                .add(0.5, 0.5, 0.5)
-                .add(0.3 * facingInv.getModX(), 0.0, 0.3 * facingInv.getModZ());
+            .add(0.5, 0.5, 0.5)
+            .add(0.3 * facingInv.getModX(), 0.0, 0.3 * facingInv.getModZ());
 
         Util.spawnDustParticle(effectLocation, 255.0, 255.0, 0.0);
         WorldUtil.playSound(effectLocation, SoundEffect.EXTINGUISH, 1.0f, 2.0f);
