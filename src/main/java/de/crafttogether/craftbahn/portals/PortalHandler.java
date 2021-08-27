@@ -25,6 +25,8 @@ import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Rail;
 import org.bukkit.block.data.Rotatable;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.spigotmc.event.player.PlayerSpawnLocationEvent;
@@ -67,11 +69,15 @@ public class PortalHandler {
         */
 
         for (MinecartMember<?> member : group) {
-            List<Player> cartPassengers = TCHelper.getPlayerPassengers(member);
+            for (Entity passenger : member.getEntity().getEntity().getPassengers()) {
+                if (passenger instanceof Player) {
+                    playerPassengers.add((Player) passenger);
+                    passengerList.add(passenger.getUniqueId() + ";" + trainID + ";" + member.getIndex());
+                }
 
-            for (Player passenger : cartPassengers) {
-                playerPassengers.add(passenger);
-                passengerList.add(passenger.getUniqueId() + ";" + trainID + ";" + member.getIndex());
+                else if (passenger instanceof LivingEntity) {
+                    // Coming soon
+                }
             }
         }
 

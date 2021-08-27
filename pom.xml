@@ -75,14 +75,14 @@
         <dependency>
             <groupId>com.bergerkiller.bukkit</groupId>
             <artifactId>BKCommonLib</artifactId>
-            <version>1.17.1-v1-SNAPSHOT</version>
+            <version>1.17.1-v2-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>com.bergerkiller.bukkit</groupId>
             <artifactId>TrainCarts</artifactId>
-            <version>1.17.1-v1-SNAPSHOT</version>
+            <version>1.17.1-v2-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 

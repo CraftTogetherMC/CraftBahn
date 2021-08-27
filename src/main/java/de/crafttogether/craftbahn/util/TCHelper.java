@@ -69,27 +69,7 @@ public class TCHelper {
         return null;
     }
 
-    public static List<Player> getPlayerPassengers(MinecartMember<?> member) {
-        List<Player> passengers = new ArrayList<>();
-        CommonEntity entity = CommonEntity.get(member.getEntity().getEntity());
 
-        if (!(member instanceof MinecartMemberRideable))
-            return passengers;
-
-        for (Object passenger : entity.getPlayerPassengers())
-            passengers.add((Player) passenger);
-
-        return passengers;
-    }
-
-    public static List<Player> getPlayerPassengers(MinecartGroup group) {
-        List<Player> passengers = new ArrayList<>();
-
-        for (MinecartMember member : group)
-            passengers.addAll(getPlayerPassengers(member));
-
-        return passengers;
-    }
 
     // Clear inventory if given MinecartMember is a chest-minecart
     public static void clearInventory(MinecartMember<?> member) {

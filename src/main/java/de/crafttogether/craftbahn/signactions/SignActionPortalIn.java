@@ -20,6 +20,8 @@ import de.crafttogether.craftbahn.util.TCHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -39,12 +41,16 @@ public class SignActionPortalIn extends SignAction {
         if (!event.isPowered()) return;
 
         // Train arrives sign
-        if (!pendingTeleports.containsKey(event.getGroup()) && event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasGroup())
+        if (!pendingTeleports.containsKey(event.getGroup()) && event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasGroup()) {
+            Message.debug("#trainEnter");
             onTrainEnter(event);
+        }
 
         // Cart arrives sign
-        if (pendingTeleports.containsKey(event.getGroup()) && event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasMember())
+        if (pendingTeleports.containsKey(event.getGroup()) && event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasMember()) {
+            Message.debug("#cartEnter");
             onCartEnter(event);
+        }
     }
 
     @Override
@@ -126,16 +132,30 @@ public class SignActionPortalIn extends SignAction {
         MinecartGroup group = event.getGroup();
         Portal portal = pendingTeleports.get(group);
 
-        if (portal == null)
+        Message.debug("Look for passengers in #" + event.getMember().getIndex());
+        if (portal == null) {
+            Message.debug("Portal is null");
             return;
+        }
 
         MinecartMember member = event.getMember();
-        List<Player> passengers = TCHelper.getPlayerPassengers(member);
 
-        for (Player playerPassenger : passengers) {
-            Message.debug(playerPassenger, "Try to send you to: " + portal.getTargetLocation().toString());
-            Message.debug("Try to send " + playerPassenger.getName() + " to: " + portal.getTargetLocation().toString());
-            PortalHandler.sendToServer(playerPassenger, portal.getTargetLocation().getServer());
+        Message.debug("entered cart is a " + member.getEntity().getEntity().getType().name() + "(" + member.getEntity().getEntity().getUniqueId() + ")");
+
+        for (Entity passenger : member.getEntity().getEntity().getPassengers()) {
+
+            if (passenger instanceof Player) {
+                Player playerPassenger = (Player) passenger;
+                PortalHandler.sendToServer(playerPassenger, portal.getTargetLocation().getServer());
+
+                Message.debug(playerPassenger, "Try to send you to: " + portal.getTargetLocation().toString());
+                Message.debug("Try to send " + playerPassenger.getName() + " to: " + portal.getTargetLocation().toString());
+            }
+
+            else if (passenger instanceof LivingEntity) {
+                // Coming Soon
+            }
+
         }
 
         // Destroy cart and remove group

@@ -56,8 +56,8 @@ public class Client extends Thread {
             pw.write(output);
             pw.flush();
 
-            //Message.debug("Sent:");
-            //Message.debug(output);
+            Message.debug("Sent:");
+            Message.debug(output);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
