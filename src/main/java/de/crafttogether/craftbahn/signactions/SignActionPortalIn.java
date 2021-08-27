@@ -8,6 +8,7 @@ import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.events.SignActionEvent;
 import com.bergerkiller.bukkit.tc.events.SignChangeActionEvent;
 import com.bergerkiller.bukkit.tc.properties.standard.type.CollisionMobCategory;
+import com.bergerkiller.bukkit.tc.properties.standard.type.CollisionOptions;
 import com.bergerkiller.bukkit.tc.signactions.SignAction;
 import com.bergerkiller.bukkit.tc.signactions.SignActionType;
 import com.bergerkiller.bukkit.tc.utils.SignBuildOptions;
@@ -81,7 +82,7 @@ public class SignActionPortalIn extends SignAction {
         // Respond
         return SignBuildOptions.create()
             .setName("Portal-Entrance")
-            .setDescription("allow trains to travel between servers")
+                .setName("Portal-Exit").setDescription("allow trains to travel between servers" + ((event.getLine(3).equalsIgnoreCase("clear")) ? ".\n§eChest-Minecarts will be cleared" : ""))
             .handle(event.getPlayer());
     }
 
@@ -101,8 +102,9 @@ public class SignActionPortalIn extends SignAction {
         String portalName = event.getLine(2);
         Portal portal = CraftBahnPlugin.getInstance().getPortalStorage().getPortal(portalName);
 
-        if (portal == null) {
-            TCHelper.sendMessage(event.getMember(), "§cCouldn't find an §rPortal-Exit §cfor §r'§e" + portalName + "§r'§c!");
+        if (portal == null || portal.getTargetLocation() == null) {
+            TCHelper.sendMessage(event.getGroup(), "§cCouldn't find an §rPortal-Exit §cfor §r'§e" + portalName + "§r'§c!");
+            group.destroy();
             return;
         }
 
@@ -117,7 +119,7 @@ public class SignActionPortalIn extends SignAction {
         PortalHandler.transmitTrain(group, portal);
 
         // Disable collisions after train is sent to avoid they're being pushed back by players
-        group.getProperties().setCollisionMode("collision", "false");
+        group.getProperties().setCollision(CollisionOptions.CANCEL);
     }
 
     private void onCartEnter(SignActionEvent event) {

@@ -16,38 +16,38 @@ import org.bukkit.block.BlockFace;
 public class SignActionPortalOut extends SignAction {
 
     @Override
-    public boolean match(SignActionEvent info) {
-        return info.isType("portal-out");
+    public boolean match(SignActionEvent event) {
+        return event.isType("portal-out");
     }
 
     @Override
-    public void execute(SignActionEvent info) { }
+    public void execute(SignActionEvent event) { }
 
     @Override
-    public boolean build(SignChangeActionEvent info) {
-        String[] lines = info.getLines();
+    public boolean build(SignChangeActionEvent event) {
+        String[] lines = event.getLines();
 
         // Validate third line
         if (lines[2].length() < 1) {
-            info.getPlayer().sendMessage("&§Please write a name for this portal on the third line");
-            displayError(info);
+            event.getPlayer().sendMessage("&§Please write a name for this portal on the third line");
+            displayError(event);
             return false;
         }
 
         // Get portal from database or create new entry
         CraftBahnPlugin.getInstance().getPortalStorage().getOrCreate(lines[2], (err1, portal) -> {
             if (err1 != null) {
-                Message.debug(info.getPlayer(), err1.getMessage());
+                Message.debug(event.getPlayer(), err1.getMessage());
                 err1.printStackTrace();
             }
 
             portal.setTargetHost("127.0.0.1");
             portal.setTargetPort(CraftBahnPlugin.getInstance().getConfig().getInt("Settings.Port"));
-            portal.setTargetLocation(CTLocation.fromBukkitLocation(info.getLocation()));
+            portal.setTargetLocation(CTLocation.fromBukkitLocation(event.getLocation()));
 
             CraftBahnPlugin.getInstance().getPortalStorage().update(portal, (err2, updated) -> {
                 if (err2 != null) {
-                    Message.debug(info.getPlayer(), err2.getMessage());
+                    Message.debug(event.getPlayer(), err2.getMessage());
                     err2.printStackTrace();
                 }
             });
@@ -55,9 +55,8 @@ public class SignActionPortalOut extends SignAction {
 
         // Respond
         return SignBuildOptions.create()
-            .setName("Portal-Exit")
-            .setDescription("allow trains to travel between servers")
-            .handle(info.getPlayer());
+            .setName("Portal-Exit").setDescription("allow trains to travel between servers" + ((event.getLine(3).equalsIgnoreCase("clear")) ? ".\n§eChest-Minecarts will be cleared" : ""))
+            .handle(event.getPlayer());
     }
 
     private void displayError(SignActionEvent info) {
