@@ -138,11 +138,11 @@ public class SignActionPortalIn extends SignAction {
             return;
         }
 
-        MinecartMember member = event.getMember();
+        MinecartMember<?> member = event.getMember();
 
-        Message.debug("entered cart is a " + member.getEntity().getEntity().getType().name() + "(" + member.getEntity().getEntity().getUniqueId() + ")");
+        Message.debug("entered cart is a " + member.getEntity().getType().name() + "(" + member.getEntity().getUniqueId() + ")");
 
-        for (Entity passenger : member.getEntity().getEntity().getPassengers()) {
+        for (Entity passenger : member.getEntity().getPassengers()) {
 
             if (passenger instanceof Player) {
                 Player playerPassenger = (Player) passenger;

@@ -69,7 +69,7 @@ public class PortalHandler {
         */
 
         for (MinecartMember<?> member : group) {
-            for (Entity passenger : member.getEntity().getEntity().getPassengers()) {
+            for (Entity passenger : member.getEntity().getPassengers()) {
                 if (passenger instanceof Player) {
                     playerPassengers.add((Player) passenger);
                     passengerList.add(passenger.getUniqueId() + ";" + trainID + ";" + member.getIndex());
