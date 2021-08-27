@@ -3,14 +3,19 @@
 ![](https://media.tenor.com/images/b31da936191fcccadb8fc6e0fc777070/tenor.gif)
 
 **TODO:**
-- ~~ICS: Items löschen beim Port in die Creative-Welt~~
+- Debugging (Ein Job für Ceddix)
+- CBPortals: Warnmeldung wenn portal-out bereits existiert
+- CBPortals: Erstelle portal-in nicht wenn ziel auf gleichem server ist
+- CBPortals: Reload-Befehl
+- Befehl: /mobeject
+- Züge mit kurzer Verzögerung löschen wenn Spieler ausgestiegen ist. (Benötigt Tag-Signs an allen Bahnhöfen!)
+- Alias-System um Spielerbahnhöfe anders in der Liste anzuzeigen
+- /tprelative-Befehl Beispiel: `/tpr 300 north`
+- Möglichkeit Beschreibung bei Fahrzielen
 - Eigenes Icon für StationType: PUBLIC_STATION (Chest_Minecard)
 - `/fze settype` / `/fze updatemarker` prüfen
-- Debugging (Ein Job für Ceddix)- 
 - ~~`/fze <action> <destination> [server]`~ -> Destination jeweils anhand des verbundenen Server auswählen (wenn kein anderer angegeben)`~~
 - ~~`/fahrziel` <destination> -> Alle gefundenen Fahrziele mit dem angegebenen Namen sortiert nach server auflisten~~
-- /mobeject
-- ~~Bestehende Daten aus altem Plugin importieren (php)~~
 - ~~/fahrzieledit setwarp -cmd für das setzen der Teleport-Position hinzufügen (setlocation == MarkerPosition)~~
 - ~~/farhzieledit add/remove-owner -cmd für die Verwaltung weiterer Besitzer (participants) hinzufügen.~~
 - ~~TrainListener wieder einfügen (Für EnterMessages und weitere CraftBahn features)~~
@@ -19,24 +24,20 @@
 - ~~/fahrziele (Liste) übersichtlicher gestalten.. (Mit Pagination)~~
 - ~~Befehl hinzufügen um Info's über ein bestimmtes Fahrziel anzuzeigen `/fze info <name> [server]`~~
 - ~~Route / Destination über TrainCartsAPI setzen anstatt jeweiliges command auszuführen. (Um Rückgabe zu vermeiden)~~
-- Ausgabe im Chat was gespawned wurde (Minecart oder Traincart) wenn man ein Minecart placed
 - ~~MarkerSystem überarbeiten~~
-- /tprelative-Befehl Beispiel: `/tpr 300 north`
-- PluginMessage: Andere Server im Netzwerk bei Änderungen benachrichtigen
-- ICS integrieren
-- Züge mit kurzer Verzögerung löschen wenn Spieler ausgestiegen ist. (Benötigt Tag-Signs an allen Bahnhöfen!)
+- ~~ICS integrieren~~
 - ~~ViewDistance bei der Zugfahrt für mitfahrende Spieler senken https://github.com/Spottedleaf/Tuinity/commit/1ed460a26b4266b9573d7f28202ca4022784c5d9~~
-- Alias-System um Spielerbahnhöfe anders in der Liste anzuzeigen
-- Möglichkeit Beschreibung bei Fahrzielen
+- ~~ICS: Items löschen beim Port in die Creative-Welt~~
+- ~~Bestehende Daten aus altem Plugin importieren (php)~~
 
 **Probleme:**
-- Direktes anzeigen von Büchern bedarf weiterer recherche.
-- Sämtliche Texte im Buch müssen mit anderen Farben dargestellt werden.
+- CBPortals: Beim PlayerSpawnLocationEvent gibt es Probleme beim Entity-Tracking(?) wenn der Spieler schon hier zum passenger einer Entity wird
 
-**Ideen:**
-- ICS: LinkRegistry (MySQL) Für einfachere Syntax auf ActionSigns (receive & link)
-- ICS: Zug nach teleport für eine kurze konfigurierbare Zeit anhalten. (Für sauberes Chunkloading)
-- ICS: "Besserer" Übergang (z.B. durch Blindness-Effekt)
+- **Ideen:**
+- Allgemein: Ausgabe im Chat was gespawned wurde (Minecart oder Traincart) wenn man ein Minecart placed
+- CBPortals: Zug nach teleport für eine kurze konfigurierbare Zeit anhalten. (Für sauberes Chunkloading) // Ist das noch notwendig?
+- CBPortals: "Besserer" Übergang (z.B. durch Blindness-Effekt)
+- PluginMessage: Andere Server im Netzwerk bei Änderungen benachrichtigen (Destinations & Portals)
 
 **Tabelle:**
 ![](https://craft-together.de/~irgendsoeintyp/chrome_42JbdTaOft.png)
