@@ -205,21 +205,22 @@ public class Commands implements TabExecutor {
                 return false;
 
             if (args.length == 0) {
-                sendMessage(p, "&e/fahrziel &7<name> [server]&f- &6Fahrziel festlegen");
-                sendMessage(p, "&e/fahrziele &7[kategorie] [seite] &f- &6Fahrziele auflisten");
-                sendMessage(p, "&e/fze info &7<name> [server] &f- &6Details zu Fahrziel anzeigen");
-                sendMessage(p, "&e/fze add &7<name> [server] &f- &6Neues Fahrziel anlegen");
-                sendMessage(p, "&e/fze remove &7<name> [server] &f- &6Fahrziel entfernen");
-                sendMessage(p, "&e/fze settype &7<name> [server] <typ> &f- &6Kategorie aktualisieren");
-                sendMessage(p, "&e/fze setowner &7<name> [server] &f- &6Besitzer aktualisieren");
-                sendMessage(p, "&e/fze addmember &7<name> [server] &f- &6Weitere Besitzer hinzufügen");
-                sendMessage(p, "&e/fze removemember &7<name> [server] &f- &6Weitere Besitzer entfernen");
-                sendMessage(p, "&e/fze setlocation &7<name> [server] &f- &6(Marker-)Position aktualisieren");
-                sendMessage(p, "&e/fze settplocation &7<name> [server] &f- &6Teleport-Position aktualisieren");
-                sendMessage(p, "&e/fze setprivate &7<name> [server] &f- &6Fahrziel verstecken");
-                sendMessage(p, "&e/fze setpublic &7<name> [server] &f- &6Fahrziel wieder anzeigen");
-                sendMessage(p, "&e/fze tp &7<name> [server] &f- &6Teleportiere zu Fahrziel");
-                sendMessage(p, "&e/fze updatemarker &7<name> [server] &f- &6Update Dynmap-Marker");
+                sendMessage(p, "&e/fahrziel &7<name> [server] &8| &6Fahrziel festlegen");
+                sendMessage(p, "&e/fahrziele &7[kategorie] [seite] &8| &6Fahrziele auflisten");
+                sendMessage(p, "&e/fze info &7<name> [server] &8| &6Details zu Fahrziel anzeigen");
+                sendMessage(p, "&e/fze add &7<name> [typ] [sichtbarkeit] &8| &6Neues Fahrziel anlegen");
+                sendMessage(p, "&e/fze remove &7<name> [server] &8| &6Fahrziel entfernen");
+                sendMessage(p, "&e/fze settype &7<name> [server] <typ> &8| &6Kategorie aktualisieren");
+                sendMessage(p, "&e/fze setowner &7<name> [server] &8| &6Besitzer aktualisieren");
+                sendMessage(p, "&e/fze addmember &7<name> [server] &8| &6Weitere Besitzer hinzufügen");
+                sendMessage(p, "&e/fze removemember &7<name> [server] &8| &6Weitere Besitzer entfernen");
+                sendMessage(p, "&e/fze setlocation &7<name> &8| &6(Marker-)Position aktualisieren");
+                sendMessage(p, "&e/fze settplocation &7<name> &8| &6Teleport-Position aktualisieren");
+                sendMessage(p, "&e/fze setprivate &7<name> [server] &8| &6Fahrziel verstecken");
+                sendMessage(p, "&e/fze setpublic &7<name> [server] &8| &6Fahrziel wieder anzeigen");
+                sendMessage(p, "&e/fze tp &7<name> [server] &8| &6Teleportiere zu Fahrziel");
+                sendMessage(p, "&e/fze updatemarker &7<name> [server] &8| &6Aktualisiere Dynmap-Marker");
+                sendMessage(p, "&e/fze updateportals &8| &6Aktualisiere Portale");
             }
 
             else if (args[0].equalsIgnoreCase("info")) {
