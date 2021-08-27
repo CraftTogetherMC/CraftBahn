@@ -26,7 +26,6 @@ public class Passenger {
     public int getCartIndex() { return this.cartIndex; }
 
     public static Passenger register(UUID uuid, String trainName, int cartIndex) {
-        Message.debug("register " + uuid + " at train: " + trainName + " cart: " + cartIndex);
         Passenger passenger = new Passenger(uuid, trainName, cartIndex);
         passengers.put(uuid, passenger);
         return passenger;
@@ -66,9 +65,6 @@ public class Passenger {
     }
 
     public static void sendMessage(String trainName, String message, int delaySec) {
-        Bukkit.getScheduler().runTaskLaterAsynchronously(CraftBahnPlugin.getInstance(), () -> {
-            Message.debug("Send delayed message to all passengers of '" + trainName + "': " + message);
-            sendMessage(trainName, message);
-        }, 20L * delaySec);
+        Bukkit.getScheduler().runTaskLaterAsynchronously(CraftBahnPlugin.getInstance(), () -> sendMessage(trainName, message), 20L * delaySec);
     }
 }

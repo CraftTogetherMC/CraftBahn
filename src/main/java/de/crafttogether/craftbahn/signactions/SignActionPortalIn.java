@@ -7,6 +7,7 @@ import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.events.SignActionEvent;
 import com.bergerkiller.bukkit.tc.events.SignChangeActionEvent;
+import com.bergerkiller.bukkit.tc.properties.standard.type.CollisionMobCategory;
 import com.bergerkiller.bukkit.tc.signactions.SignAction;
 import com.bergerkiller.bukkit.tc.signactions.SignActionType;
 import com.bergerkiller.bukkit.tc.utils.SignBuildOptions;
@@ -97,38 +98,31 @@ public class SignActionPortalIn extends SignAction {
 
     private void onTrainEnter(SignActionEvent event) {
         MinecartGroup group = event.getGroup();
-
-        Message.debug("train entered");
-
         String portalName = event.getLine(2);
         Portal portal = CraftBahnPlugin.getInstance().getPortalStorage().getPortal(portalName);
 
         if (portal == null) {
-            Message.debug("Portal '" + portalName + "' not found");
             TCHelper.sendMessage(event.getMember(), "§cCouldn't find an §rPortal-Exit §cfor §r'§e" + portalName + "§r'§c!");
             return;
         }
 
-        //TODO: Set collisionMode to false
-
         // Clear Inventory if needed
-        if (event.getLine(3).equalsIgnoreCase("clear")) {
-            Message.debug("clear inventory of whole train");
+        if (event.getLine(3).equalsIgnoreCase("clear"))
             TCHelper.clearInventory(group);
-        }
 
         // cache teleportation-infos
         pendingTeleports.put(group, portal);
 
         // Transmit collected Data to other server
         PortalHandler.transmitTrain(group, portal);
+
+        // Disable collisions after train is sent to avoid they're being pushed back by players
+        group.getProperties().setCollisionMode("collision", "false");
     }
 
     private void onCartEnter(SignActionEvent event) {
         MinecartGroup group = event.getGroup();
         Portal portal = pendingTeleports.get(group);
-
-        Message.debug("cart entered");
 
         if (portal == null)
             return;
@@ -136,10 +130,8 @@ public class SignActionPortalIn extends SignAction {
         MinecartMember member = event.getMember();
         List<Player> passengers = TCHelper.getPlayerPassengers(member);
 
-        for (Player playerPassenger : passengers) {
-            Message.debug("Send player " + playerPassenger.getName() + " to " + portal.getTargetLocation().toString());
+        for (Player playerPassenger : passengers)
             PortalHandler.sendToServer(playerPassenger, portal.getTargetLocation().getServer());
-        }
 
         // Destroy cart and remove group
         if (group.size() <= 1) {

@@ -87,8 +87,6 @@ public class PortalHandler {
         dataPacket.set("train.properties", trainProperties);
         dataPacket.set("train.passengers", passengerList);
 
-        Message.debug("Transmitting train...");
-
         // Send dataPacket to server
         Client client = new Client(portal.getTargetPort());
         client.send(dataPacket.toString()); // Serialize ConfigurationNode
@@ -112,15 +110,14 @@ public class PortalHandler {
 
         // Add players to passengerQueue
         for (Object passengerData : passengers) {
-            Message.debug((String) passengerData);
             String[] passenger = ((String) passengerData).split(";");
             Passenger.register(UUID.fromString(passenger[0]), passenger[1], Integer.parseInt(passenger[2]));
         }
 
         // Check if world exists
         if (world == null) {
-            Message.debug("World '" + worldName + "' was not found!");
             Passenger.sendMessage(trainID, "§cWorld '" + worldName + "' was not found!", 2);
+            return;
         }
 
         // Use scheduler to be sync with main-thread
@@ -128,23 +125,22 @@ public class PortalHandler {
             
             /* Look for "portal-out"-sign */
             Block signBlock = targetLocation.getBlock();
-            BlockFace facing = null;
+            Sign sign;
+            BlockData blockData;
+            BlockFace facing;
 
             if (signBlock.getState() instanceof Sign) {
-                BlockData blockData = signBlock.getState().getBlockData();
+                sign = (Sign) signBlock.getState();
+                blockData = signBlock.getState().getBlockData();
 
-                if (blockData instanceof Rotatable) {
+                if (blockData instanceof Rotatable)
                     facing = ((Rotatable) blockData).getRotation();
-                    Message.debug(facing.getDirection().getBlockX() + " " +
-                            facing.getDirection().getBlockX() + " " +
-                            facing.getDirection().getBlockX());
-                } else {
-                    Message.debug("Sign not placed underneath the rails");
+
+                else {
                     Passenger.sendMessage(trainID, "§cSign not placed underneath the rails", 3);
                     return;
                 }
             } else {
-                Message.debug("No Sign found! (" + signBlock.getType().name() + ")");
                 Passenger.sendMessage(trainID, "§cNo Sign found! (" + signBlock.getType().name() + ")", 3);
                 return;
             }
@@ -155,23 +151,9 @@ public class PortalHandler {
             Block railBlock = railLoc.getBlock();
 
             if (!(railLoc.getBlock().getBlockData() instanceof Rail)) {
-               Message.debug("No Rail found! (" + railBlock.getType().name() + ")");
                 Passenger.sendMessage(trainID, "§cNo Rail found! (" + railBlock.getType().name() + ")", 3);
                 return;
             }
-
-            /* DEBUG */
-            StringBuilder ownerList = new StringBuilder();
-            for (Object owner : owners) ownerList.append((String) owner + ",");
-
-            Message.debug("World: " + world.getName());
-            Message.debug("Location: " + x + " " + y + " " + z);
-            Message.debug("Direction: " + facing);
-            Message.debug("TrainID: " + trainID);
-            Message.debug("TrainName: " + trainNewName);
-            Message.debug("Owners: " + ownerList.toString());
-            Message.debug("Passengers: " + passengers.size());
-            Message.debug("Try to spawn a train with " + train.getMembers().size() + " carts...");
 
             List<Location> spawnLocations = SignActionSpawn.getSpawnPositions(railLoc, false, facing, train.getMembers());
 
@@ -183,9 +165,12 @@ public class PortalHandler {
             MinecartGroup spawnedTrain = MinecartGroup.spawn(train, spawnLocations);
             TrainProperties trainProperties = spawnedTrain.getProperties();
 
+            // Clear Inventory if needed
+            if (sign.getLine(3).equalsIgnoreCase("clear"))
+                TCHelper.clearInventory(spawnedTrain);
+
             // Set properties
             spawnedTrain.getProperties().setTrainName(trainID);
-            Message.debug("TRAINNAME: " + trainID);
 
             Set<String> ownerSet = new HashSet<>();
             for (Object owner : owners)
@@ -206,15 +191,11 @@ public class PortalHandler {
         String trainId = passenger.getTrainId();
         int cartIndex = passenger.getCartIndex();
 
-        Message.debug("Try to find train '" + trainId + "' for " + player.getName() + " cartIndex: " + cartIndex);
-
         // Try to find train and set player as passenger
         MinecartGroup train = TCHelper.getTrain(trainId);
 
-        if (train == null) {
-            Message.debug("Train '" + trainId + "' was not found.");
+        if (train == null)
             return;
-        }
 
         MinecartMember<?> cart = train.get(cartIndex);
 
@@ -225,12 +206,8 @@ public class PortalHandler {
             //e.setSpawnLocation(cart.getEntity().getLocation());
             player.teleport(cart.getEntity().getLocation());
             cart.getEntity().setPassenger(player);
-
-            Message.debug("Set player " + player.getName() + " as passenger of '" + trainId + "' at cartIndex: " + cartIndex);
             Passenger.remove(passenger.getUUID());
         }
-        else
-            Message.debug("Cart(" + cartIndex + ") at Train '" + trainId + "' is not rideable.");
     }
 
     public static void sendToServer(Player player, String server) {
@@ -238,6 +215,5 @@ public class PortalHandler {
         out.writeUTF("Connect");
         out.writeUTF(server);
         player.sendPluginMessage(CraftBahnPlugin.getInstance(), "BungeeCord", out.toByteArray());
-        Message.debug("Moved player " + player.getName() + " to " + server);
     }
 }

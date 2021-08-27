@@ -29,8 +29,6 @@ public class TrainEnterListener implements Listener {
         String enterMessage = cart.getProperties().getEnterMessage();
         if (enterMessage.equalsIgnoreCase("cbDefault")) {
             cart.getProperties().setEnterMessage("");
-
-            // Send custom enterMessage
             sendEnterMessage(p, cart);
         }
 
