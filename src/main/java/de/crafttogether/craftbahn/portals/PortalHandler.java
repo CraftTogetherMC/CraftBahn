@@ -211,6 +211,7 @@ public class PortalHandler {
     }
 
     public static void sendToServer(Player player, String server) {
+        Message.debug("PluginMessage: Send " + player.getName() + " to " + server);
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF("Connect");
         out.writeUTF(server);

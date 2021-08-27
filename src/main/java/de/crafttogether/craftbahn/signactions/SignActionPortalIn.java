@@ -132,8 +132,11 @@ public class SignActionPortalIn extends SignAction {
         MinecartMember member = event.getMember();
         List<Player> passengers = TCHelper.getPlayerPassengers(member);
 
-        for (Player playerPassenger : passengers)
+        for (Player playerPassenger : passengers) {
+            Message.debug(playerPassenger, "Try to send you to: " + portal.getTargetLocation().toString());
+            Message.debug("Try to send " + playerPassenger.getName() + " to: " + portal.getTargetLocation().toString());
             PortalHandler.sendToServer(playerPassenger, portal.getTargetLocation().getServer());
+        }
 
         // Destroy cart and remove group
         if (group.size() <= 1) {
