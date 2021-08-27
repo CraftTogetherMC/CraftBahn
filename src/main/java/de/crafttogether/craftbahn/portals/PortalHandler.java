@@ -162,6 +162,7 @@ public class PortalHandler {
                 spawnLoc.getChunk().load();
 
             // Spawn train
+            Message.debug("Spawn train #" + trainID);
             MinecartGroup spawnedTrain = MinecartGroup.spawn(train, spawnLocations);
             TrainProperties trainProperties = spawnedTrain.getProperties();
 
