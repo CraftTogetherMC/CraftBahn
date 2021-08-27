@@ -1,6 +1,7 @@
 package de.crafttogether.craftbahn.portals;
 
 import com.bergerkiller.bukkit.common.config.ConfigurationNode;
+import com.bergerkiller.bukkit.common.entity.CommonEntity;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.controller.spawnable.SpawnableGroup;
@@ -25,6 +26,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Rail;
 import org.bukkit.block.data.Rotatable;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 
 import java.util.*;
@@ -199,12 +201,8 @@ public class PortalHandler {
     }
 
     // Handle joined player if he was a passenger
-    public static void reEnterPassenger(Passenger passenger, PlayerSpawnLocationEvent e) {
-        Player player = Bukkit.getPlayer(passenger.getUUID());
-
-        if (player == null)
-            return;
-
+    public static void reEnterPassenger(Passenger passenger, PlayerJoinEvent e) {
+        Player player = e.getPlayer();
         String trainId = passenger.getTrainId();
         int cartIndex = passenger.getCartIndex();
 
@@ -213,24 +211,26 @@ public class PortalHandler {
         // Try to find train and set player as passenger
         MinecartGroup train = TCHelper.getTrain(trainId);
 
-        if (train != null) {
-            MinecartMember<?> cart = train.get(cartIndex);
+        if (train == null) {
+            Message.debug("Train '" + trainId + "' was not found.");
+            return;
+        }
 
-            if (cart instanceof MinecartMemberRideable) {
-                if (player.isFlying())
-                    player.setFlying(false);
+        MinecartMember<?> cart = train.get(cartIndex);
 
-                e.setSpawnLocation(cart.getBlock().getLocation());
-                cart.getEntity().setPassenger(player);
+        if (cart instanceof MinecartMemberRideable) {
+            if (player.isFlying())
+                player.setFlying(false);
 
-                Message.debug("Set player " + player.getName() + " as passenger of '" + trainId + "' at cartIndex: " + cartIndex);
-                Passenger.remove(passenger.getUUID());
-            }
-            else
-                Message.debug("Cart(" + cartIndex + ") at Train '" + trainId + "' is not rideable.");
+            //e.setSpawnLocation(cart.getEntity().getLocation());
+            player.teleport(cart.getEntity().getLocation());
+            cart.getEntity().setPassenger(player);
+
+            Message.debug("Set player " + player.getName() + " as passenger of '" + trainId + "' at cartIndex: " + cartIndex);
+            Passenger.remove(passenger.getUUID());
         }
         else
-            Message.debug("Train '" + trainId + "' was not found.");
+            Message.debug("Cart(" + cartIndex + ") at Train '" + trainId + "' is not rideable.");
     }
 
     public static void sendToServer(Player player, String server) {
