@@ -144,7 +144,7 @@ public class SignActionPortalIn extends SignAction {
                 Message.debug("Try to send " + playerPassenger.getName() + " to: " + portal.getTargetLocation().toString());
             }
 
-            if (passenger instanceof LivingEntity) {
+            else if (passenger instanceof LivingEntity) {
                 LivingEntity entity = (LivingEntity) passenger;
                 Message.debug("Despawn " + entity.getType().name());
                 entity.remove();

@@ -11,6 +11,7 @@ import com.bergerkiller.bukkit.tc.properties.CartProperties;
 import com.bergerkiller.bukkit.tc.properties.TrainProperties;
 import com.bergerkiller.bukkit.tc.signactions.SignActionSpawn;
 import com.bergerkiller.bukkit.tc.utils.LauncherConfig;
+import com.bergerkiller.generated.net.minecraft.nbt.NBTBaseHandle;
 import com.bergerkiller.generated.net.minecraft.world.entity.EntityHandle;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
@@ -82,13 +83,15 @@ public class PortalHandler {
                     passengerList.add("player;" + passenger.getUniqueId() + ";" + trainID + ";" + member.getIndex());
                 }
 
-                if (passenger instanceof LivingEntity) {
+                else if (passenger instanceof LivingEntity) {
                     livingPassengers.add((LivingEntity) passenger);
                     passengerList.add("livingEntity;" + passenger.getUniqueId() + ";" + trainID + ";" + member.getIndex());
 
-                    EntityHandle entityHandle = EntityHandle.fromBukkit(passenger);
-                    CommonTagCompound tagCompound = CommonTagCompound.create(entityHandle);
-                    entityHandle.loadFromNBT(tagCompound);
+                    // Save entity NBT
+                    EntityHandle entityHandle = CommonEntity.get(passenger).getWrappedHandle();
+                    CommonTagCompound tagCompound = CommonTagCompound.create(entityHandle.getBukkitEntity().getPersistentDataContainer());
+                    entityHandle.saveToNBT(tagCompound);
+
                     passengerData.put(passenger.getUniqueId(), tagCompound.entrySet());
                 }
             }
@@ -129,9 +132,19 @@ public class PortalHandler {
         List<Object> passengers = trainData.getList("train.passengers");
 
         // Add players to passengerQueue
-        for (Object passengerData : passengers) {
-            String[] passenger = ((String) passengerData).split(";");
-            Passenger.register(UUID.fromString(passenger[0]), passenger[1], Integer.parseInt(passenger[2]));
+        for (Object object : passengers) {
+            String[] passengerData = ((String) object).split(";");
+            String type = passengerData[0];
+            UUID uuid = UUID.fromString(passengerData[1]);
+            String trainId = passengerData[2];
+            int cartIndex = Integer.parseInt(passengerData[3]);
+
+            if (type.equals("player"))
+                Passenger.register(uuid, trainId, cartIndex);
+
+            if (type.equals("livingEntity")) {
+                Message.debug("We have Entities to spawn bruh!");
+            }
         }
 
         // Check if world exists
