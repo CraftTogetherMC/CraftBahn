@@ -2,6 +2,7 @@ package de.crafttogether.craftbahn.portals;
 
 import com.bergerkiller.bukkit.common.config.ConfigurationNode;
 import com.bergerkiller.bukkit.common.entity.CommonEntity;
+import com.bergerkiller.bukkit.common.nbt.CommonTag;
 import com.bergerkiller.bukkit.common.nbt.CommonTagCompound;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
@@ -34,7 +35,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 
+import java.io.*;
 import java.util.*;
+import java.util.stream.Stream;
 
 public class PortalHandler {
 
@@ -59,7 +62,7 @@ public class PortalHandler {
         // Get passengers
         List<Player> playerPassengers = new ArrayList<>();
         List<LivingEntity> livingPassengers = new ArrayList<>();
-        Map<UUID, Set> passengerData = new HashMap<>();
+        List<String> passengerData = new ArrayList<>();
         List<String> passengerList = new ArrayList<>();
 
         /* Save & Load Entity NBT
@@ -88,11 +91,19 @@ public class PortalHandler {
                     passengerList.add("livingEntity;" + passenger.getUniqueId() + ";" + trainID + ";" + member.getIndex());
 
                     // Save entity NBT
-                    EntityHandle entityHandle = CommonEntity.get(passenger).getWrappedHandle();
-                    CommonTagCompound tagCompound = CommonTagCompound.create(entityHandle.getBukkitEntity().getPersistentDataContainer());
-                    entityHandle.saveToNBT(tagCompound);
+                    CommonTagCompound tagCompound = new CommonTagCompound();
+                    CommonEntity.get(passenger).getWrappedHandle().saveToNBT(tagCompound);
 
-                    passengerData.put(passenger.getUniqueId(), tagCompound.entrySet());
+                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream(10024);
+
+                    try {
+                        tagCompound.writeToStream(outputStream);
+                        String nbt = outputStream.toString("utf8");
+                        Message.debug(nbt);
+                        passengerData.add(nbt);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -130,19 +141,22 @@ public class PortalHandler {
         List<Object> owners = trainData.getList("train.owners");
         SpawnableGroup train = SpawnableGroup.fromConfig(trainData.getNode("train.properties"));
         List<Object> passengers = trainData.getList("train.passengers");
+        List<Object> passengerData = trainData.getList("train.passengerData");
 
         // Add players to passengerQueue
         for (Object object : passengers) {
-            String[] passengerData = ((String) object).split(";");
-            String type = passengerData[0];
-            UUID uuid = UUID.fromString(passengerData[1]);
-            String trainId = passengerData[2];
-            int cartIndex = Integer.parseInt(passengerData[3]);
+            String[] passengerInfo = ((String) object).split(";");
+            String type = passengerInfo[0];
+            UUID uuid = UUID.fromString(passengerInfo[1]);
+            String trainId = passengerInfo[2];
+            int cartIndex = Integer.parseInt(passengerInfo[3]);
 
             if (type.equals("player"))
                 Passenger.register(uuid, trainId, cartIndex);
 
             if (type.equals("livingEntity")) {
+                for (Object nbt : passengerData)
+                    Message.debug(nbt.toString());
                 Message.debug("We have Entities to spawn bruh!");
             }
         }
