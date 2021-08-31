@@ -33,23 +33,21 @@ public class TrainEnterListener implements Listener {
         }
 
         /* Set View-Distance */
-        //p.setNoTickViewDistance(6);
-        //p.setViewDistance(6);
+        p.setNoTickViewDistance(6);
+        p.setViewDistance(6);
     }
 
     @EventHandler
     public void onVehicleExit(VehicleExitEvent e) {
-        /*
-        Player p = TCHelper.getPlayer(e.getEntered());
+        Player p = TCHelper.getPlayer(e.getExited());
         if (p == null) return;
 
         MinecartMember<?> cart = MinecartMemberStore.getFromEntity(e.getVehicle());
         if (cart == null) return;
-        */
 
         /* Set View-Distance */
-        //p.setNoTickViewDistance(p.getWorld().getNoTickViewDistance());
-        //p.setViewDistance(p.getWorld().getViewDistance());
+        p.setNoTickViewDistance(p.getWorld().getNoTickViewDistance());
+        p.setViewDistance(p.getWorld().getViewDistance());
     }
 
     private void sendEnterMessage(Player p, MinecartMember<?> cart) {
