@@ -4,6 +4,7 @@ Settings:
   Debug: true
 Portals:
   LaunchDelayTicks: 20 #Ticks
+  LaunchDistanceBlocks: 10 #Blocks
 MySQL:
   Host: '127.0.0.1'
   Port: 3306

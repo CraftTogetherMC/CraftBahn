@@ -16,6 +16,7 @@ import de.crafttogether.craftbahn.util.Message;
 import de.crafttogether.craftbahn.util.TCHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -27,6 +28,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.*;
 
@@ -186,10 +189,15 @@ public class PortalHandler {
             for (CartProperties cartProp : spawnedTrain.getProperties())
                 cartProp.setOwners(ownerSet);
 
-            // Launch train
+            // Stop train
+            spawnedTrain.head().getActions().addActionLaunch(facing, LauncherConfig.parse("1b"), 0.0);
+
+            // Launch train after configured delay
             Bukkit.getScheduler().runTaskLaterAsynchronously(CraftBahnPlugin.getInstance(), () -> {
-                double launchSpeed = (trainProperties.getSpeedLimit() > 0) ? trainProperties.getSpeedLimit() : 0.4;
-                spawnedTrain.head().getActions().addActionLaunch(facing, LauncherConfig.parse("10b"), launchSpeed);
+                Message.debug("Launch train after " + CraftBahnPlugin.getInstance().getConfig().getLong("Portals.LaunchDelayTicks") + " ticks over " + CraftBahnPlugin.getInstance().getConfig().getInt("Portals.LaunchDistanceBlocks") + " blocks");
+
+                double launchSpeed = (spawnedTrain.getProperties().getSpeedLimit() > 0) ? spawnedTrain.getProperties().getSpeedLimit() : 0.4;
+                spawnedTrain.head().getActions().addActionLaunch(facing, LauncherConfig.parse(CraftBahnPlugin.getInstance().getConfig().getInt("Portals.LaunchDistanceBlocks") + "b"), launchSpeed);
             }, CraftBahnPlugin.getInstance().getConfig().getLong("Portals.LaunchDelayTicks"));
         });
     }
@@ -207,15 +215,22 @@ public class PortalHandler {
             return;
 
         MinecartMember<?> cart = train.get(cartIndex);
+        PotionEffect blindness = new PotionEffect(PotionEffectType.BLINDNESS, 120, 1);
 
         if (cart instanceof MinecartMemberRideable) {
             if (player.isFlying())
                 player.setFlying(false);
 
+            // Add blindness-effect
+            player.addPotionEffect(blindness);
+
             //e.setSpawnLocation(cart.getEntity().getLocation());
             player.teleport(cart.getEntity().getLocation());
             cart.getEntity().setPassenger(player);
             Passenger.remove(passenger.getUUID());
+
+            // Play Sound
+            player.playSound(player.getLocation(), Sound.BLOCK_PORTAL_TRIGGER, 2f, 1f);
         }
     }
 

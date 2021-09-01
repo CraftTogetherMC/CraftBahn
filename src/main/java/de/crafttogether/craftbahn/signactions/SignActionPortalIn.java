@@ -19,10 +19,13 @@ import de.crafttogether.craftbahn.util.Message;
 import de.crafttogether.craftbahn.util.TCHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.HashMap;
 import java.util.List;
@@ -91,11 +94,11 @@ public class SignActionPortalIn extends SignAction {
     private void displayError(SignActionEvent event) {
         // When not successful, display particles at the sign to indicate such
         BlockFace facingInv = event.getFacing().getOppositeFace();
-        Location effectLocation = event.getSign().getLocation()
+        Location effectLocation = event.getRailLocation()
             .add(0.5, 0.5, 0.5)
             .add(0.3 * facingInv.getModX(), 0.0, 0.3 * facingInv.getModZ());
 
-        Util.spawnDustParticle(effectLocation, 255.0, 255.0, 0.0);
+        Util.spawnParticle(effectLocation, Particle.BARRIER);
         WorldUtil.playSound(effectLocation, SoundEffect.EXTINGUISH, 1.0f, 2.0f);
     }
 
@@ -111,15 +114,15 @@ public class SignActionPortalIn extends SignAction {
             return;
         }
 
-        // Do some effects
-        BlockFace facingInv = event.getFacing().getOppositeFace();
-        Location effectLocation = event.getSign().getLocation()
-                .add(0.5, 0.5, 0.5)
-                .add(0.3 * facingInv.getModX(), 0.0, 0.3 * facingInv.getModZ());
+        // Apply blindness-effect
+        PotionEffect blindness = new PotionEffect(PotionEffectType.BLINDNESS, 40, 1);
 
-        Util.spawnDustParticle(effectLocation, 255.0, 255.0, 0.0);
-        WorldUtil.playSound(effectLocation, SoundEffect.EXTINGUISH, 1.0f, 2.0f);
+        for (MinecartMember<?> member : group) {
+            List<Player> passengers = member.getEntity().getPlayerPassengers();
 
+            for (Player passenger : passengers)
+                passenger.addPotionEffect(blindness);
+        }
 
         // Clear Inventory if needed
         if (event.getLine(3).equalsIgnoreCase("clear"))

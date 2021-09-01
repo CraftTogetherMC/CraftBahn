@@ -8,13 +8,16 @@ import com.bergerkiller.bukkit.tc.controller.MinecartMemberStore;
 import com.bergerkiller.bukkit.tc.controller.type.MinecartMemberChest;
 import com.bergerkiller.bukkit.tc.controller.type.MinecartMemberRideable;
 import com.bergerkiller.bukkit.tc.signactions.SignAction;
+import de.crafttogether.craftbahn.portals.PortalHandler;
 import de.crafttogether.craftbahn.signactions.SignActionPortalIn;
 import de.crafttogether.craftbahn.signactions.SignActionPortalOut;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class TCHelper {
@@ -68,8 +71,6 @@ public class TCHelper {
 
         return null;
     }
-
-
 
     // Clear inventory if given MinecartMember is a chest-minecart
     public static void clearInventory(MinecartMember<?> member) {
