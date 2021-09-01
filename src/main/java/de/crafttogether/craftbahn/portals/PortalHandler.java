@@ -69,6 +69,8 @@ public class PortalHandler {
         */
 
         for (MinecartMember<?> member : group) {
+            Message.debug(member.getEntity().getType().getName() + " (" + member.getEntity().getUniqueId() + ")");
+
             for (Entity passenger : member.getEntity().getPassengers()) {
                 if (passenger instanceof Player) {
                     playerPassengers.add((Player) passenger);
@@ -171,6 +173,9 @@ public class PortalHandler {
             Message.debug("Spawn train #" + trainID);
             MinecartGroup spawnedTrain = MinecartGroup.spawn(train, spawnLocations);
             TrainProperties trainProperties = spawnedTrain.getProperties();
+
+            for (MinecartMember<?> member : spawnedTrain)
+                Message.debug(member.getEntity().getType().getName() + " (" + member.getEntity().getUniqueId() + ")");
 
             // Clear Inventory if needed
             if (sign.getLine(3).equalsIgnoreCase("clear"))
