@@ -193,7 +193,7 @@ public class PortalHandler {
             spawnedTrain.head().getActions().addActionLaunch(facing, LauncherConfig.parse("1b"), 0.0);
 
             // Launch train after configured delay
-            Bukkit.getScheduler().runTaskLaterAsynchronously(CraftBahnPlugin.getInstance(), () -> {
+            Bukkit.getScheduler().runTaskLater(CraftBahnPlugin.getInstance(), () -> {
                 Message.debug("Launch train after " + CraftBahnPlugin.getInstance().getConfig().getLong("Portals.LaunchDelayTicks") + " ticks over " + CraftBahnPlugin.getInstance().getConfig().getInt("Portals.LaunchDistanceBlocks") + " blocks");
 
                 double launchSpeed = (spawnedTrain.getProperties().getSpeedLimit() > 0) ? spawnedTrain.getProperties().getSpeedLimit() : 0.4;
