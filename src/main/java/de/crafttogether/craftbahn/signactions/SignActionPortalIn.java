@@ -41,16 +41,12 @@ public class SignActionPortalIn extends SignAction {
         if (!event.isPowered()) return;
 
         // Train arrives sign
-        if (!pendingTeleports.containsKey(event.getGroup()) && event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasGroup()) {
-            Message.debug("#trainEnter");
+        if (!pendingTeleports.containsKey(event.getGroup()) && event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasGroup())
             onTrainEnter(event);
-        }
 
         // Cart arrives sign
-        if (pendingTeleports.containsKey(event.getGroup()) && event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasMember()) {
-            Message.debug("#cartEnter");
+        if (pendingTeleports.containsKey(event.getGroup()) && event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasMember())
             onCartEnter(event);
-        }
     }
 
     @Override
@@ -110,9 +106,20 @@ public class SignActionPortalIn extends SignAction {
 
         if (portal == null || portal.getTargetLocation() == null) {
             TCHelper.sendMessage(event.getGroup(), "§cCouldn't find an §rPortal-Exit §cfor §r'§e" + portalName + "§r'§c!");
+            displayError(event);
             group.destroy();
             return;
         }
+
+        // Do some effects
+        BlockFace facingInv = event.getFacing().getOppositeFace();
+        Location effectLocation = event.getSign().getLocation()
+                .add(0.5, 0.5, 0.5)
+                .add(0.3 * facingInv.getModX(), 0.0, 0.3 * facingInv.getModZ());
+
+        Util.spawnDustParticle(effectLocation, 255.0, 255.0, 0.0);
+        WorldUtil.playSound(effectLocation, SoundEffect.EXTINGUISH, 1.0f, 2.0f);
+
 
         // Clear Inventory if needed
         if (event.getLine(3).equalsIgnoreCase("clear"))
@@ -132,7 +139,6 @@ public class SignActionPortalIn extends SignAction {
         MinecartGroup group = event.getGroup();
         Portal portal = pendingTeleports.get(group);
 
-        Message.debug("Look for passengers in #" + event.getMember().getIndex());
         if (portal == null) {
             Message.debug("Portal is null");
             return;
@@ -140,16 +146,11 @@ public class SignActionPortalIn extends SignAction {
 
         MinecartMember<?> member = event.getMember();
 
-        Message.debug("entered cart is a " + member.getEntity().getType().name() + "(" + member.getEntity().getUniqueId() + ")");
-
         for (Entity passenger : member.getEntity().getEntity().getPassengers()) {
 
             if (passenger instanceof Player) {
                 Player playerPassenger = (Player) passenger;
                 PortalHandler.sendToServer(playerPassenger, portal.getTargetLocation().getServer());
-
-                Message.debug(playerPassenger, "Try to send you to: " + portal.getTargetLocation().toString());
-                Message.debug("Try to send " + playerPassenger.getName() + " to: " + portal.getTargetLocation().toString());
             }
 
             else if (passenger instanceof LivingEntity) {
