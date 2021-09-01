@@ -109,15 +109,15 @@ public class PortalHandler {
         double y = (double) trainData.get("target.y");
         double z = (double) trainData.get("target.z");
 
-        ConfigurationNode trainConfig = trainData.getNode("train.properties");
-        Message.debug(trainConfig.toString());
-
         Location targetLocation = new Location(world, x, y, z);
         String trainID = (String) trainData.get("train.id");
         String trainNewName = (String) trainData.get("train.newName");
         List<Object> owners = trainData.getList("train.owners");
-        SpawnableGroup train = SpawnableGroup.fromConfig(trainConfig);
+        ConfigurationNode trainConfig = trainData.getNode("train.properties");
         List<Object> passengers = trainData.getList("train.passengers");
+
+        // Load train from received config
+        SpawnableGroup train = SpawnableGroup.fromConfig(trainConfig);
 
         // Add players to passengerQueue
         for (Object passengerData : passengers) {
@@ -166,6 +166,7 @@ public class PortalHandler {
                 return;
             }
 
+            // Load Chunks
             SpawnableGroup.SpawnLocationList spawnLocations = train.findSpawnLocations(railBlock, facing.getDirection(), SpawnableGroup.SpawnMode.DEFAULT);
             spawnLocations.loadChunks();
 
@@ -173,10 +174,6 @@ public class PortalHandler {
             Message.debug("Spawn train #" + trainID);
             MinecartGroup spawnedTrain = train.spawn(spawnLocations);
             TrainProperties trainProperties = spawnedTrain.getProperties();
-
-            // (Debug) Log uuids
-            for (MinecartMember<?> member : spawnedTrain)
-                Message.debug(member.getEntity().getType().getName() + " (" + member.getEntity().getUniqueId() + ")");
 
             // Clear Inventory if needed
             if (sign.getLine(3).equalsIgnoreCase("clear"))
@@ -193,8 +190,10 @@ public class PortalHandler {
                 cartProp.setOwners(ownerSet);
 
             // Launch train
-            double launchSpeed = (trainProperties.getSpeedLimit() > 0) ? trainProperties.getSpeedLimit() : 0.4;
-            spawnedTrain.head().getActions().addActionLaunch(facing, LauncherConfig.parse("10b"), launchSpeed);
+            Bukkit.getScheduler().runTaskLaterAsynchronously(CraftBahnPlugin.getInstance(), () -> {
+                double launchSpeed = (trainProperties.getSpeedLimit() > 0) ? trainProperties.getSpeedLimit() : 0.4;
+                spawnedTrain.head().getActions().addActionLaunch(facing, LauncherConfig.parse("10b"), launchSpeed);
+            }, CraftBahnPlugin.getInstance().getConfig().getLong("Portals.LaunchDelayTicks"));
         });
     }
 

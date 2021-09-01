@@ -2,6 +2,8 @@ Settings:
   Port: 5000
   ServerName: 'lobby'
   Debug: true
+Portals:
+  LaunchDelayTicks: 20 #Ticks
 MySQL:
   Host: '127.0.0.1'
   Port: 3306
