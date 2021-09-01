@@ -142,7 +142,7 @@ public class SignActionPortalIn extends SignAction {
 
         Message.debug("entered cart is a " + member.getEntity().getType().name() + "(" + member.getEntity().getUniqueId() + ")");
 
-        for (Entity passenger : member.getEntity().getPassengers()) {
+        for (Entity passenger : member.getEntity().getEntity().getPassengers()) {
 
             if (passenger instanceof Player) {
                 Player playerPassenger = (Player) passenger;
