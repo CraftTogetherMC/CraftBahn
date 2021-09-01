@@ -109,11 +109,14 @@ public class PortalHandler {
         double y = (double) trainData.get("target.y");
         double z = (double) trainData.get("target.z");
 
+        ConfigurationNode trainConfig = trainData.getNode("train.properties");
+        Message.debug(trainConfig.toString());
+
         Location targetLocation = new Location(world, x, y, z);
         String trainID = (String) trainData.get("train.id");
         String trainNewName = (String) trainData.get("train.newName");
         List<Object> owners = trainData.getList("train.owners");
-        SpawnableGroup train = SpawnableGroup.fromConfig(trainData.getNode("train.properties"));
+        SpawnableGroup train = SpawnableGroup.fromConfig(trainConfig);
         List<Object> passengers = trainData.getList("train.passengers");
 
         // Add players to passengerQueue
@@ -163,17 +166,15 @@ public class PortalHandler {
                 return;
             }
 
-            List<Location> spawnLocations = SignActionSpawn.getSpawnPositions(railLoc, false, facing, train.getMembers());
-
-            // load chunks
-            for(Location spawnLoc : spawnLocations)
-                spawnLoc.getChunk().load();
+            SpawnableGroup.SpawnLocationList spawnLocations = train.findSpawnLocations(railBlock, facing.getDirection(), SpawnableGroup.SpawnMode.DEFAULT);
+            spawnLocations.loadChunks();
 
             // Spawn train
             Message.debug("Spawn train #" + trainID);
-            MinecartGroup spawnedTrain = MinecartGroup.spawn(train, spawnLocations);
+            MinecartGroup spawnedTrain = train.spawn(spawnLocations);
             TrainProperties trainProperties = spawnedTrain.getProperties();
 
+            // (Debug) Log uuids
             for (MinecartMember<?> member : spawnedTrain)
                 Message.debug(member.getEntity().getType().getName() + " (" + member.getEntity().getUniqueId() + ")");
 
