@@ -172,6 +172,7 @@ public class PortalHandler {
             // Spawn train
             Message.debug("Spawn train #" + trainID);
             MinecartGroup spawnedTrain = train.spawn(spawnLocations);
+            spawnedTrains.put(trainID, spawnedTrain);
 
             // Clear Inventory if needed
             if (sign.getLine(3).equalsIgnoreCase("clear"))
