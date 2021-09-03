@@ -28,6 +28,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 
 import java.util.*;
 
@@ -197,7 +198,7 @@ public class PortalHandler {
     }
 
     // Handle joined player if he was a passenger
-    public static void reEnterPassenger(Passenger passenger, PlayerJoinEvent e) {
+    public static void reEnterPassenger(Passenger passenger, PlayerSpawnLocationEvent e) {
         Player player = e.getPlayer();
         String trainId = passenger.getTrainId();
         int cartIndex = passenger.getCartIndex();
@@ -222,9 +223,15 @@ public class PortalHandler {
             // Add blindness-effect
             player.addPotionEffect(blindness);
 
-            //e.setSpawnLocation(cart.getEntity().getLocation());
+            e.setSpawnLocation(cart.getEntity().getLocation());
             cart.getEntity().setPassenger(player);
+
+            // Remove Passenger from list
             Passenger.remove(passenger.getUUID());
+
+            // Remove spawnedTrain from list
+            if (Passenger.get(trainId).size() < 1)
+                spawnedTrains.remove(trainId);
 
             // Play Sound
             player.playSound(player.getLocation(), Sound.BLOCK_PORTAL_TRIGGER, 5f, 1f);
