@@ -31,7 +31,7 @@ public class PlayerSpawnListener implements Listener {
         Passenger passenger = Passenger.get(e.getPlayer().getUniqueId());
 
         if (passenger != null) {
-            MinecartGroup train = TCHelper.getTrain(passenger.getTrainId());
+            MinecartGroup train = PortalHandler.getSpawnedTrain(passenger.getTrainId());
 
             if (train == null)
                 return;

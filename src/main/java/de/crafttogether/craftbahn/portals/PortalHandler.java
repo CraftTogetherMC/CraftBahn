@@ -6,8 +6,6 @@ import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.controller.spawnable.SpawnableGroup;
 import com.bergerkiller.bukkit.tc.controller.type.MinecartMemberRideable;
 import com.bergerkiller.bukkit.tc.properties.CartProperties;
-import com.bergerkiller.bukkit.tc.properties.TrainProperties;
-import com.bergerkiller.bukkit.tc.utils.LauncherConfig;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import de.crafttogether.CraftBahnPlugin;
@@ -34,6 +32,7 @@ import org.bukkit.potion.PotionEffectType;
 import java.util.*;
 
 public class PortalHandler {
+    private static HashMap<String, MinecartGroup> spawnedTrains = new HashMap<>();
 
     public static void transmitTrain(MinecartGroup group, Portal portal) {
         // Save train and get properties
@@ -204,7 +203,7 @@ public class PortalHandler {
         int cartIndex = passenger.getCartIndex();
 
         // Try to find train and set player as passenger
-        MinecartGroup train = TCHelper.getTrain(trainId);
+        MinecartGroup train = PortalHandler.getSpawnedTrain(trainId);
 
 
         if (train == null) {
@@ -242,5 +241,13 @@ public class PortalHandler {
         out.writeUTF("Connect");
         out.writeUTF(server);
         player.sendPluginMessage(CraftBahnPlugin.getInstance(), "BungeeCord", out.toByteArray());
+    }
+
+    public static MinecartGroup getSpawnedTrain(String id) {
+        return spawnedTrains.get(id);
+    }
+
+    public static Collection<MinecartGroup> getSpawnedTrains() {
+        return spawnedTrains.values();
     }
 }
