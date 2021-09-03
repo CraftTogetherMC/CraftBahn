@@ -102,38 +102,37 @@ public class PortalHandler {
     }
 
     public static void receiveTrain(ConfigurationNode trainData) {
-        String worldName = ((String) trainData.get("target.world"));
-        World world = Bukkit.getWorld(worldName);
-
-        double x = (double) trainData.get("target.x");
-        double y = (double) trainData.get("target.y");
-        double z = (double) trainData.get("target.z");
-
-        Location targetLocation = new Location(world, x, y, z);
-        String trainID = (String) trainData.get("train.id");
-        String trainNewName = (String) trainData.get("train.newName");
-        List<Object> owners = trainData.getList("train.owners");
-        ConfigurationNode trainConfig = trainData.getNode("train.properties");
-        List<Object> passengers = trainData.getList("train.passengers");
-
-        // Load train from received config
-        SpawnableGroup train = SpawnableGroup.fromConfig(trainConfig);
-
-        // Add players to passengerQueue
-        for (Object passengerData : passengers) {
-            String[] passenger = ((String) passengerData).split(";");
-            Passenger.register(UUID.fromString(passenger[0]), passenger[1], Integer.parseInt(passenger[2]));
-        }
-
-        // Check if world exists
-        if (world == null) {
-            Passenger.sendMessage(trainID, "§cWorld '" + worldName + "' was not found!", 2);
-            return;
-        }
-
         // Use scheduler to be sync with main-thread
         Bukkit.getServer().getScheduler().runTask(CraftBahnPlugin.getInstance(), () -> {
-            
+            String worldName = ((String) trainData.get("target.world"));
+            World world = Bukkit.getWorld(worldName);
+
+            double x = (double) trainData.get("target.x");
+            double y = (double) trainData.get("target.y");
+            double z = (double) trainData.get("target.z");
+
+            Location targetLocation = new Location(world, x, y, z);
+            String trainID = (String) trainData.get("train.id");
+            String trainNewName = (String) trainData.get("train.newName");
+            List<Object> owners = trainData.getList("train.owners");
+            ConfigurationNode trainConfig = trainData.getNode("train.properties");
+            List<Object> passengers = trainData.getList("train.passengers");
+
+            // Add players to passengerQueue
+            for (Object passengerData : passengers) {
+                String[] passenger = ((String) passengerData).split(";");
+                Passenger.register(UUID.fromString(passenger[0]), passenger[1], Integer.parseInt(passenger[2]));
+            }
+
+            // Check if world exists
+            if (world == null) {
+                Passenger.sendMessage(trainID, "§cWorld '" + worldName + "' was not found!", 2);
+                return;
+            }
+
+            // Load train from received config
+            SpawnableGroup train = SpawnableGroup.fromConfig(trainConfig);
+
             /* Look for "portal-out"-sign */
             Block signBlock = targetLocation.getBlock();
             Sign sign;
@@ -173,7 +172,6 @@ public class PortalHandler {
             // Spawn train
             Message.debug("Spawn train #" + trainID);
             MinecartGroup spawnedTrain = train.spawn(spawnLocations);
-            TrainProperties trainProperties = spawnedTrain.getProperties();
 
             // Clear Inventory if needed
             if (sign.getLine(3).equalsIgnoreCase("clear"))
@@ -190,15 +188,12 @@ public class PortalHandler {
                 cartProp.setOwners(ownerSet);
 
             // Stop train
-            spawnedTrain.head().getActions().addActionLaunch(facing, LauncherConfig.parse("1b"), 0.0);
+            spawnedTrain.head().stop();
 
-            // Launch train after configured delay
-            Bukkit.getScheduler().runTaskLater(CraftBahnPlugin.getInstance(), () -> {
-                Message.debug("Launch train after " + CraftBahnPlugin.getInstance().getConfig().getLong("Portals.LaunchDelayTicks") + " ticks over " + CraftBahnPlugin.getInstance().getConfig().getInt("Portals.LaunchDistanceBlocks") + " blocks");
-
-                double launchSpeed = (spawnedTrain.getProperties().getSpeedLimit() > 0) ? spawnedTrain.getProperties().getSpeedLimit() : 0.4;
-                spawnedTrain.head().getActions().addActionLaunch(facing, LauncherConfig.parse(CraftBahnPlugin.getInstance().getConfig().getInt("Portals.LaunchDistanceBlocks") + "b"), launchSpeed);
-            }, CraftBahnPlugin.getInstance().getConfig().getLong("Portals.LaunchDelayTicks"));
+            //Bukkit.getScheduler().runTaskLater(CraftBahnPlugin.getInstance(), () -> {
+            //    Message.debug("Launch train after 100 ticks over " + CraftBahnPlugin.getInstance().getConfig().getInt("Portals.LaunchDistanceBlocks") + " blocks at speed: " + launchSpeed);
+                spawnedTrain.head().getActions().addActionLaunch(facing, CraftBahnPlugin.getInstance().getConfig().getDouble("Portals.LaunchDistanceBlocks"), CraftBahnPlugin.getInstance().getConfig().getDouble("Portals.LaunchSpeed"));
+            //}, 100L);
         });
     }
 
@@ -211,8 +206,12 @@ public class PortalHandler {
         // Try to find train and set player as passenger
         MinecartGroup train = TCHelper.getTrain(trainId);
 
-        if (train == null)
+
+        if (train == null) {
+            Message.debug(player.getName() + " -> Train #" + trainId + " not found");
+            Message.debug(player, "Train #" + trainId + " not found");
             return;
+        }
 
         MinecartMember<?> cart = train.get(cartIndex);
         PotionEffect blindness = new PotionEffect(PotionEffectType.BLINDNESS, 120, 1);
@@ -225,12 +224,15 @@ public class PortalHandler {
             player.addPotionEffect(blindness);
 
             //e.setSpawnLocation(cart.getEntity().getLocation());
-            player.teleport(cart.getEntity().getLocation());
             cart.getEntity().setPassenger(player);
             Passenger.remove(passenger.getUUID());
 
             // Play Sound
-            player.playSound(player.getLocation(), Sound.BLOCK_PORTAL_TRIGGER, 2f, 1f);
+            player.playSound(player.getLocation(), Sound.BLOCK_PORTAL_TRIGGER, 5f, 1f);
+        }
+        else {
+            Message.debug(player.getName() + " -> Cart is not ridable");
+            Message.debug(player, "Cart is not ridable");
         }
     }
 

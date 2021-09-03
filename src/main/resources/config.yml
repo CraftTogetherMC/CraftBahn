@@ -3,8 +3,9 @@ Settings:
   ServerName: 'lobby'
   Debug: true
 Portals:
-  LaunchDelayTicks: 20 #Ticks
-  LaunchDistanceBlocks: 10 #Blocks
+  LaunchSpeed: 0.4
+  LaunchDelayTicks: 20.0 # Ticks
+  LaunchDistanceBlocks: 10.0 # Blocks
 MySQL:
   Host: '127.0.0.1'
   Port: 3306
