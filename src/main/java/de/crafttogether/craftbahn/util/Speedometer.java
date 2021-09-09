@@ -12,7 +12,7 @@ import java.util.LinkedList;
 
 public class Speedometer implements Runnable {
     private LinkedList<Player> players;
-    private BukkitTask task = null;
+    private BukkitTask task;
 
     public Speedometer() {
         this.players = new LinkedList<>();
