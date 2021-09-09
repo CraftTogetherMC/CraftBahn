@@ -40,7 +40,12 @@ public class Speedometer implements Runnable {
 
     public void sendActionBars() {
         for(Player p : players){
-            p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(String.format("§e%.3f §6Blöcke/s", calcVelocity(p))));
+            double velocity = calcVelocity(p);
+
+            if (velocity > 0)
+                p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(String.format("§e%.3f §6Blöcke/s", calcVelocity(p))));
+            else
+                p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(""));
         }
     }
 
