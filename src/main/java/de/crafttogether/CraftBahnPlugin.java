@@ -130,6 +130,9 @@ public final class CraftBahnPlugin extends JavaPlugin {
         // Unregister SignActions (TrainCarts)
         TCHelper.unregisterActionSigns();
 
+        // Stop Speedometer
+        speedometer.stop();
+
         // Close server
         if (server != null)
             server.close();
