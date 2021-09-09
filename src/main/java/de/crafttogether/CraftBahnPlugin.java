@@ -159,5 +159,5 @@ public final class CraftBahnPlugin extends JavaPlugin {
     public String getServerName() { return serverName; }
     public static CraftBahnPlugin getInstance() { return plugin; }
 
-    public Speedometer getSpeedometer(){ return speedometer;}
+    public Speedometer getSpeedometer() { return speedometer; }
 }
