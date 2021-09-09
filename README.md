@@ -30,10 +30,11 @@
 - ~~ICS: Items löschen beim Port in die Creative-Welt~~
 - ~~Bestehende Daten aus altem Plugin importieren (php)~~
 
-**Probleme:**
+**Todo / Probleme:**
 - CBPortals: Beim PlayerSpawnLocationEvent gibt es Probleme beim Entity-Tracking(?) wenn der Spieler schon hier zum passenger einer Entity wird
 
 - **Ideen:**
+- Speedometer per Befehl ausschaltbar machen (Wahlweise nur für die aktuelle Fahr oder Dauerhaft)
 - Allgemein: Ausgabe im Chat was gespawned wurde (Minecart oder Traincart) wenn man ein Minecart placed
 - CBPortals: Zug nach teleport für eine kurze konfigurierbare Zeit anhalten. (Für sauberes Chunkloading) // Ist das noch notwendig?
 - CBPortals: "Besserer" Übergang (z.B. durch Blindness-Effekt)
