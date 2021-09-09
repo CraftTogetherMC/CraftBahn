@@ -199,23 +199,26 @@ public class PortalHandler {
     }
 
     // Handle joined player if he was a passenger
-    public static void reEnterPassenger(Passenger passenger, PlayerSpawnLocationEvent e) {
+    public static void reEnterPassenger(Passenger passenger, PlayerJoinEvent e) {
         Player player = e.getPlayer();
         String trainId = passenger.getTrainId();
         int cartIndex = passenger.getCartIndex();
 
+        Message.debug(e.getPlayer().getName() + " -> Try to find train #" + trainId);
+
         // Try to find train and set player as passenger
         MinecartGroup train = PortalHandler.getSpawnedTrain(trainId);
 
-
         if (train == null) {
             Message.debug(player.getName() + " -> Train #" + trainId + " not found");
-            Message.debug(player, "Train #" + trainId + " not found");
+            Message.debug(player, " -> Train #" + trainId + " not found");
             return;
         }
+;
+        Message.debug(e.getPlayer().getName() + " -> Try to find a seat at index: " + cartIndex + "/" + train.size());
 
         MinecartMember<?> cart = train.get(cartIndex);
-        PotionEffect blindness = new PotionEffect(PotionEffectType.BLINDNESS, 120, 1);
+        PotionEffect blindness = new PotionEffect(PotionEffectType.BLINDNESS, 60, 1);
 
         if (cart instanceof MinecartMemberRideable) {
             if (player.isFlying())
@@ -224,7 +227,6 @@ public class PortalHandler {
             // Add blindness-effect
             player.addPotionEffect(blindness);
 
-            e.setSpawnLocation(cart.getEntity().getLocation());
             cart.getEntity().setPassenger(player);
 
             // Remove Passenger from list
@@ -236,6 +238,8 @@ public class PortalHandler {
 
             // Play Sound
             player.playSound(player.getLocation(), Sound.BLOCK_PORTAL_TRIGGER, 5f, 1f);
+
+            Message.debug(e.getPlayer().getName() + " -> entered #" + trainId);
         }
         else {
             Message.debug(player.getName() + " -> Cart is not ridable");

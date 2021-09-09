@@ -25,7 +25,7 @@ public class Message {
     }
 
     public static void debug(Player p, String message) {
-        if (!CraftBahnPlugin.getInstance().getConfig().getBoolean("debug") || !p.hasPermission("craftbahn.debug")) return;
+        if (!CraftBahnPlugin.getInstance().getConfig().getBoolean("Settings.debug") || !p.hasPermission("craftbahn.debug")) return;
         p.sendMessage(ChatColor.translateAlternateColorCodes('&', "&4&l[Debug]: &e" + message));
     }
 
