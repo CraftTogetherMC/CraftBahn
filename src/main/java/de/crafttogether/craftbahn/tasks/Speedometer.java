@@ -70,15 +70,15 @@ public class Speedometer implements Runnable {
                 minuten = (time-sekunden)/60;
                 if (distance > 5) {
                     if (time > 3){
-                        p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(String.format("§e%.3f §6Blöcke/s §8| §e%.1f §6Blöcke bis \"%s\" §8| §6ETA: §e%d:%02d", velocity, distance, destinationName, minuten, sekunden)));
+                        p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(String.format("§e%.1f §6Blöcke/s §8| §e%.0f §6Blöcke bis \"%s\" §8| §6ETA: §e%d:%02d", velocity, distance, destinationName, minuten, sekunden)));
                     } else {
-                        p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(String.format("§e%.3f §6Blöcke/s §8| §e%.1f §6Blöcke bis \"%s\"", velocity, distance, destinationName)));
+                        p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(String.format("§e%.1f §6Blöcke/s §8| §e%.0f §6Blöcke bis \"%s\"", velocity, distance, destinationName)));
                     }
                 } else {
-                    p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(String.format("§e%.3f §6Blöcke/s", velocity)));
+                    p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(String.format("§e%.1f §6Blöcke/s", velocity)));
                 }
             } else if (distance > 5) {
-                p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(String.format("§e%.1f §6Blöcke bis \"%s\"", distance, destinationName)));
+                p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(String.format("§e%.0f §6Blöcke bis \"%s\"", distance, destinationName)));
             } else {
                 p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(""));
             }
