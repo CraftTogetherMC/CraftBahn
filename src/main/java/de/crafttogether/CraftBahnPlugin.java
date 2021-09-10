@@ -9,7 +9,7 @@ import de.crafttogether.craftbahn.listener.TrainEnterListener;
 import de.crafttogether.craftbahn.net.Client;
 import de.crafttogether.craftbahn.net.Server;
 import de.crafttogether.craftbahn.portals.PortalStorage;
-import de.crafttogether.craftbahn.util.Speedometer;
+import de.crafttogether.craftbahn.tasks.Speedometer;
 import de.crafttogether.craftbahn.util.TCHelper;
 import de.crafttogether.mysql.MySQLAdapter;
 import de.crafttogether.mysql.MySQLConfig;

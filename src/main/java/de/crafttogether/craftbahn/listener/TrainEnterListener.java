@@ -4,7 +4,6 @@ import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.controller.MinecartMemberStore;
 import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.util.Message;
-import de.crafttogether.craftbahn.util.Speedometer;
 import de.crafttogether.craftbahn.util.TCHelper;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
