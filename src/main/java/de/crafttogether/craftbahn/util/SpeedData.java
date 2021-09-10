@@ -99,11 +99,11 @@ public class SpeedData {
         PathProvider provider = TrainCarts.plugin.getPathProvider();
         walker.setLoopFilter(true);
         double distance = 0;
-        while (provider.getRailInfo(walker.getState()) != PathRailInfo.NODE && walker.hasNext()) {
+        while (provider.getRailInfo(walker.getState()) == PathRailInfo.NONE && walker.hasNext()) {
             walker.next();
             distance++;
         }
-        if (!walker.hasNext()) {
+        if (!walker.hasNext() || provider.getRailInfo(walker.getState()) == PathRailInfo.BLOCKED) {
             return -1;
         }
         //Message.debug(player, "Node was found at:" + walker.current.getLocation().toString());
