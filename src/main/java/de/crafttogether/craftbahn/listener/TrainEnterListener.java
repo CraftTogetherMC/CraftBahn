@@ -33,7 +33,9 @@ public class TrainEnterListener implements Listener {
             sendEnterMessage(p, cart);
         }
         //Add player to Speedometer
-        CraftBahnPlugin.getInstance().getSpeedometer().add(p);
+        if (p.hasPermission("craftbahn.speedometer"))
+            CraftBahnPlugin.getInstance().getSpeedometer().add(p);
+
         /* Set View-Distance */
         //p.setNoTickViewDistance(6);
         //p.setViewDistance(6);
