@@ -63,8 +63,17 @@ public class Speedometer implements Runnable {
             double distance = data.getDistance();
             String destinationName = data.getDestinationName();
             if (velocity > 0) {
+                int minuten = 0;
+                int sekunden = 0;
+                int time = (int) (distance/velocity);
+                sekunden = time % 60;
+                minuten = (time-sekunden)/60;
                 if (distance > 5) {
-                    p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(String.format("§e%.3f §6Blöcke/s §8| §e%.1f §6Blöcke bis \"%s\"", velocity, distance, destinationName)));
+                    if (time > 3){
+                        p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(String.format("§e%.3f §6Blöcke/s §8| §e%.1f §6Blöcke bis \"%s\" §8| §6ETA: §e%d:%02d", velocity, distance, destinationName, minuten, sekunden)));
+                    } else {
+                        p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(String.format("§e%.3f §6Blöcke/s §8| §e%.1f §6Blöcke bis \"%s\"", velocity, distance, destinationName)));
+                    }
                 } else {
                     p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(String.format("§e%.3f §6Blöcke/s", velocity)));
                 }

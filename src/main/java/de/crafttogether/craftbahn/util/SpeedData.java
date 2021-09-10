@@ -13,6 +13,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 
 public class SpeedData {
     private Player player;
@@ -20,12 +21,15 @@ public class SpeedData {
     private String destinationName;
     private Location lastLoc;
     private double velocity;
+    private Vector direction;
+    private int multiplicator;
     private static double distOffset = 3;
 
     public SpeedData(Player player) {
         this.player = player;
         this.destinationName = TCHelper.getTrain(player).getProperties().getDestination();
         this.lastLoc = TCHelper.getTrain(player).head().getBlock().getLocation();
+        this.direction = TCHelper.getTrain(player).head().getDirection().getDirection().normalize();
         calcDistance();
         calcVelocity();
     }
@@ -77,15 +81,27 @@ public class SpeedData {
         Block rail = train.head().getRailTracker().getBlock();
         double distance1 = getDistanceFromWalker(new TrackMovingPoint(rail.getLocation(), train.head().getDirection().getDirection()));
         double distance2 = getDistanceFromWalker(new TrackMovingPoint(rail.getLocation(), train.head().getDirection().getOppositeFace().getDirection()));
-
+        this.multiplicator = 1;
         if (distance1 > distance2) {
-            if (distance2 > 0) this.setDistance(distance2); //Check if distance2 is -1
-            else this.setDistance(distance1);
+            if (distance2 > 0){
+                this.setDistance(distance2); //Check if distance2 is -1
+                this.direction = train.head().getDirection().getOppositeFace().getDirection().normalize();
+            }
+            else{
+                this.setDistance(distance1);
+                this.direction = train.head().getDirection().getDirection().normalize();
+            }
             return;
         }
         if (distance2 > distance1) {
-            if (distance1 > 0) this.setDistance(distance1); //Check if distance1 is -1
-            else this.setDistance(distance2);
+            if (distance1 > 0){
+                this.setDistance(distance1); //Check if distance1 is -1
+                this.direction = train.head().getDirection().getDirection().normalize();
+            }
+            else{
+                this.setDistance(distance2);
+                this.direction = train.head().getDirection().getOppositeFace().getDirection().normalize();
+            }
             return;
         }
 
@@ -135,8 +151,15 @@ public class SpeedData {
             calcDistance();
         }
         calcVelocity();
+
+        //Check if cart is moving forward
+        Vector newDirection = train.head().getDirection().getDirection().normalize();
+        if (this.direction.add(newDirection).length() <= 1){
+            this.multiplicator *= -1;
+        }
+        this.direction = newDirection;
         Location newLoc = train.head().getBlock().getLocation();
-        this.distance -= newLoc.distance(this.lastLoc);
+        this.distance -= this.multiplicator * newLoc.distance(this.lastLoc);
         if (this.distance < 0) {
             this.distance = 0;
         }
