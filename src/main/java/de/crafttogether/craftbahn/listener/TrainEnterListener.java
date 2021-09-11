@@ -34,9 +34,9 @@ public class TrainEnterListener implements Listener {
             sendEnterMessage(p, cart);
         }
 
-        //Add train to Speedometer
+        // Add Speedometer for train if no one exists
         Speedometer speedometer = CraftBahnPlugin.getInstance().getSpeedometer();
-        if (!speedometer.exists(cart.getGroup()))
+        if (speedometer.get(cart.getGroup()) == null)
             speedometer.add(cart.getGroup());
 
         /* Set View-Distance */
@@ -54,7 +54,7 @@ public class TrainEnterListener implements Listener {
         if (cart == null) return;
 
         // Delete train in Speedometer if last player exits
-        if (TCHelper.getPlayerPassengers(cart.getGroup()).size() <= 1) // Maybe not correct
+        if (TCHelper.getPlayerPassengers(cart.getGroup()).size() <= 1)
             CraftBahnPlugin.getInstance().getSpeedometer().remove(cart.getGroup());
 
         /* Set View-Distance */

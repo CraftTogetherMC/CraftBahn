@@ -125,12 +125,28 @@ public class TCHelper {
             sendActionbar(member, message);
     }
 
+    // Send permission-based actionbar to all passengers of a train
+    public static void sendActionbar(MinecartGroup group, String permission, String message) {
+        for (MinecartMember<?> member : group)
+            sendActionbar(member, permission, message);
+    }
+
     // Send actionBar to all passengers of a cart
     public static void sendActionbar(MinecartMember<?> member, String message) {
         CommonEntity<?> vehicle = CommonEntity.get(member.getEntity().getEntity());
 
         for (Object passenger : vehicle.getPlayerPassengers()) {
             if (passenger instanceof Player player)
+                player.sendActionBar(Component.text(message));
+        }
+    }
+
+    // Send permission-based actionbar to all passengers of a cart
+    public static void sendActionbar(MinecartMember<?> member, String permission, String message) {
+        CommonEntity<?> vehicle = CommonEntity.get(member.getEntity().getEntity());
+
+        for (Object passenger : vehicle.getPlayerPassengers()) {
+            if (passenger instanceof Player player && player.hasPermission(permission))
                 player.sendActionBar(Component.text(message));
         }
     }

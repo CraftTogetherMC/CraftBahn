@@ -2,6 +2,7 @@ package de.crafttogether.craftbahn.tasks;
 
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import de.crafttogether.CraftBahnPlugin;
+import de.crafttogether.craftbahn.util.Message;
 import de.crafttogether.craftbahn.util.SpeedData;
 import de.crafttogether.craftbahn.util.TCHelper;
 import org.bukkit.Bukkit;
@@ -30,20 +31,32 @@ public class Speedometer implements Runnable {
     }
 
     public void add(MinecartGroup train) {
-        if (!exists(train))
-            trains.add(new SpeedData(train));
+        if (get(train) != null) return;
+
+        Message.debug("ADD SPEEDOMETER FOR TRAIN: " + train.getProperties().getTrainName());
+        trains.add(new SpeedData(train));
     }
 
-    public boolean exists(MinecartGroup train) {
-        if (trains.contains(train))
-            return true;
+    public SpeedData get(MinecartGroup train) {
+        SpeedData speedData = null;
 
-        return false;
+        for (SpeedData data : trains) {
+            if (data.getTrain().getProperties().getTrainName().equals(train.getProperties().getTrainName()))
+                speedData = data;
+        }
+
+        return speedData;
     }
 
     public void remove(MinecartGroup train) {
+        SpeedData data = get(train);
+        if (data == null) return;
+
+        // Clear actionbar for all players
         TCHelper.sendActionbar(train, "");
-        trains.remove(train);
+
+        Message.debug("REMOVE SPEEDOMETER FOR TRAIN: " + train.getProperties().getTrainName());
+        trains.remove(data);
     }
 
     public void sendActionBars() {
@@ -63,19 +76,19 @@ public class Speedometer implements Runnable {
 
                 if (distance > 5) {
                     if (time > 3)
-                        TCHelper.sendActionbar(train, String.format("§e%.1f §6Blöcke/s §8| §e%.0f §6Blöcke bis \"%s\" §8| §6ETA: §e%d:%02d", velocity, distance, destinationName, minuten, sekunden));
+                        TCHelper.sendActionbar(train, "craftbahn.speedometer", String.format("§e%.1f §6Blöcke/s §8| §e%.0f §6Blöcke bis \"%s\" §8| §6ETA: §e%d:%02d", velocity, distance, destinationName, minuten, sekunden));
                     else
-                        TCHelper.sendActionbar(train, String.format("§e%.1f §6Blöcke/s §8| §e%.0f §6Blöcke bis \"%s\"", velocity, distance, destinationName));
+                        TCHelper.sendActionbar(train, "craftbahn.speedometer", String.format("§e%.1f §6Blöcke/s §8| §e%.0f §6Blöcke bis \"%s\"", velocity, distance, destinationName));
                 }
 
                 else
-                    TCHelper.sendActionbar(train, String.format("§e%.1f §6Blöcke/s", velocity));
+                    TCHelper.sendActionbar(train, "craftbahn.speedometer", String.format("§e%.1f §6Blöcke/s", velocity));
             }
 
             else if (distance > 5)
-                TCHelper.sendActionbar(train, String.format("§e%.0f §6Blöcke bis \"%s\"", distance, destinationName));
+                TCHelper.sendActionbar(train, "craftbahn.speedometer", String.format("§e%.0f §6Blöcke bis \"%s\"", distance, destinationName));
             else
-                TCHelper.sendActionbar(train, "");
+                TCHelper.sendActionbar(train, "craftbahn.speedometer", "");
         }
     }
 
