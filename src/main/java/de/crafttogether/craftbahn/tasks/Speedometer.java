@@ -76,9 +76,9 @@ public class Speedometer implements Runnable {
 
                 if (distance > 5) {
                     if (time > 3)
-                        TCHelper.sendActionbar(train, "craftbahn.speedometer", String.format("§e%.1f §6Blöcke/s §8| §e%.0f §6Blöcke bis \"&e%s\" §8| §6ETA: §e%d:%02d", velocity, distance, destinationName, minuten, sekunden));
+                        TCHelper.sendActionbar(train, "craftbahn.speedometer", String.format("§e%.1f §6Blöcke/s §8| §e%.0f §6Blöcke bis \"§e%s\" §8| §6ETA: §e%d:%02d", velocity, distance, destinationName, minuten, sekunden));
                     else
-                        TCHelper.sendActionbar(train, "craftbahn.speedometer", String.format("§e%.1f §6Blöcke/s §8| §e%.0f §6Blöcke bis \"&e%s\"", velocity, distance, destinationName));
+                        TCHelper.sendActionbar(train, "craftbahn.speedometer", String.format("§e%.1f §6Blöcke/s §8| §e%.0f §6Blöcke bis \"§e%s\"", velocity, distance, destinationName));
                 }
 
                 else
