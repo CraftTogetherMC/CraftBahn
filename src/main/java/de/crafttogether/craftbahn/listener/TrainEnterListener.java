@@ -34,7 +34,7 @@ public class TrainEnterListener implements Listener {
             sendEnterMessage(p, cart);
         }
 
-        //Add player to Speedometer
+        //Add train to Speedometer
         Speedometer speedometer = CraftBahnPlugin.getInstance().getSpeedometer();
         if (!speedometer.exists(cart.getGroup()))
             speedometer.add(cart.getGroup());
@@ -53,7 +53,7 @@ public class TrainEnterListener implements Listener {
         MinecartMember<?> cart = MinecartMemberStore.getFromEntity(e.getVehicle());
         if (cart == null) return;
 
-        // Delete Player in Speedometer if last player exits
+        // Delete train in Speedometer if last player exits
         if (TCHelper.getPlayerPassengers(cart.getGroup()).size() <= 1) // Maybe not correct
             CraftBahnPlugin.getInstance().getSpeedometer().remove(cart.getGroup());
 
