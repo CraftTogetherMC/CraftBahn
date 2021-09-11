@@ -94,8 +94,14 @@ public class SpeedData {
         double offsets[] = {offset1, offset2, offset3, offset4};
         Message.debug(String.format("%.0f %.0f %.0f %.0f", offset1, offset2, offset3, offset4));
         Arrays.sort(offsets);
-        distance1 -= offsets[offsets.length - 1];
-        distance2 -= offsets[offsets.length - 1];
+        int idx = -1;
+        for(double offset : offsets){
+            idx++;
+            if(offset < 0) continue;
+            break;
+        }
+        distance1 -= offsets[idx];
+        distance2 -= offsets[idx];
         this.multiplicator = 1;
         if (distance1 > distance2) {
             if (distance2 > 0) {
@@ -158,21 +164,28 @@ public class SpeedData {
         PathProvider provider = TrainCarts.plugin.getPathProvider();
         walker.setLoopFilter(true);
         double distance = 0;
-        boolean stationFound = false;
+        //Check if same block has signs
+        boolean stationFound = checkForSignTypeFromWalker(walker, "station");
+
         while (walker.hasNext() && !stationFound && distance < 50) {
             walker.next();
             distance++;
-            for (RailSignCache.TrackedSign sign : walker.getState().railSigns()) {
-                //Message.debug(this.player, "\'" + sign.sign.getLine(1) + "\'");
-                if (sign.sign.getLine(1).equals("station")) {
-                    stationFound = true;
-                    Message.debug(player, "Station gefunden");
-                }
-            }
+            stationFound = checkForSignTypeFromWalker(walker, "station");
         }
         if (!stationFound) return -1;
 
         return distance;
+    }
+
+    private boolean checkForSignTypeFromWalker(TrackMovingPoint walker, String signType) {
+        for (RailSignCache.TrackedSign sign : walker.getState().railSigns()) {
+            //Message.debug(this.player, "\'" + sign.sign.getLine(1) + "\'");
+            if (sign.sign.getLine(1).contains(signType)) {
+                Message.debug(player, String.format("SignType \"%s\" found", signType));
+                return true;
+            }
+        }
+        return false;
     }
 
     public void update() {
