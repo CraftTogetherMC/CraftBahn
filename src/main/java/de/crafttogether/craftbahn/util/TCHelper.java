@@ -9,9 +9,17 @@ import com.bergerkiller.bukkit.tc.controller.type.MinecartMemberChest;
 import com.bergerkiller.bukkit.tc.signactions.SignAction;
 import de.crafttogether.craftbahn.signactions.SignActionPortalIn;
 import de.crafttogether.craftbahn.signactions.SignActionPortalOut;
+import net.kyori.adventure.audience.MessageType;
+import net.kyori.adventure.text.Component;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class TCHelper {
     private static SignActionPortalIn signActionPortalIn;
@@ -79,6 +87,22 @@ public class TCHelper {
             clearInventory(member);
     }
 
+
+    // Get all player-passengers from a train
+    public static Collection<Player> getPlayerPassengers(MinecartGroup group) {
+        Collection<Player> passengers = new ArrayList<>();
+
+        for (MinecartMember<?> member : group)
+            passengers.addAll(member.getEntity().getPlayerPassengers());
+
+        return passengers;
+    }
+
+    // Get all player-passengers from a cart
+    public static Collection<Player> getPlayerPassengers(MinecartMember<?> member) {
+        return member.getEntity().getPlayerPassengers();
+    }
+
     // Send message to all passengers of a train
     public static void sendMessage(MinecartGroup group, String message) {
         for (MinecartMember<?> member : group)
@@ -91,7 +115,39 @@ public class TCHelper {
 
         for (Object passenger : vehicle.getPlayerPassengers()) {
             if (passenger instanceof Player player)
-                player.sendMessage(message);
+                player.sendMessage(Component.text(message));
+        }
+    }
+
+    // Send actionbar to all passengers of a train
+    public static void sendActionbar(MinecartGroup group, String message) {
+        for (MinecartMember<?> member : group)
+            sendActionbar(member, message);
+    }
+
+    // Send actionBar to all passengers of a cart
+    public static void sendActionbar(MinecartMember<?> member, String message) {
+        CommonEntity<?> vehicle = CommonEntity.get(member.getEntity().getEntity());
+
+        for (Object passenger : vehicle.getPlayerPassengers()) {
+            if (passenger instanceof Player player)
+                player.sendActionBar(Component.text(message));
+        }
+    }
+
+    // Send debug-message to all passengers of a train
+    public static void sendDebugMessage(MinecartGroup group, String message) {
+        for (MinecartMember<?> member : group)
+            sendDebugMessage(member, message);
+    }
+
+    // Send debug-message to all passengers of a cart
+    public static void sendDebugMessage(MinecartMember member, String message) {
+        CommonEntity<?> vehicle = CommonEntity.get(member.getEntity().getEntity());
+
+        for (Object passenger : vehicle.getPlayerPassengers()) {
+            if (passenger instanceof Player player)
+                Message.debug(player, message);
         }
     }
 }

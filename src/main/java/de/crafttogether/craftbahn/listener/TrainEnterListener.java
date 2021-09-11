@@ -3,6 +3,7 @@ package de.crafttogether.craftbahn.listener;
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.controller.MinecartMemberStore;
 import de.crafttogether.CraftBahnPlugin;
+import de.crafttogether.craftbahn.tasks.Speedometer;
 import de.crafttogether.craftbahn.util.Message;
 import de.crafttogether.craftbahn.util.TCHelper;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -32,9 +33,11 @@ public class TrainEnterListener implements Listener {
             cart.getProperties().setEnterMessage("");
             sendEnterMessage(p, cart);
         }
+
         //Add player to Speedometer
-        if (p.hasPermission("craftbahn.speedometer"))
-            CraftBahnPlugin.getInstance().getSpeedometer().add(p);
+        Speedometer speedometer = CraftBahnPlugin.getInstance().getSpeedometer();
+        if (p.hasPermission("craftbahn.speedometer") && !speedometer.exists(cart.getGroup()))
+            speedometer.add(cart.getGroup());
 
         /* Set View-Distance */
         //p.setNoTickViewDistance(6);
@@ -50,12 +53,13 @@ public class TrainEnterListener implements Listener {
         MinecartMember<?> cart = MinecartMemberStore.getFromEntity(e.getVehicle());
         if (cart == null) return;
 
+        // Delete Player in Speedometer if last player exits
+        if (TCHelper.getPlayerPassengers(cart.getGroup()).size() <= 1) // Maybe not correct
+            CraftBahnPlugin.getInstance().getSpeedometer().remove(cart.getGroup());
 
         /* Set View-Distance */
         //p.setNoTickViewDistance(p.getWorld().getNoTickViewDistance());
         //p.setViewDistance(p.getWorld().getViewDistance());
-        //Delete Player in Speedometer
-        CraftBahnPlugin.getInstance().getSpeedometer().remove(p);
     }
 
     private void sendEnterMessage(Player p, MinecartMember<?> cart) {
