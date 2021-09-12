@@ -162,11 +162,18 @@ public class SpeedData {
         while (walker.hasNext() && !stationFound && distance < 50) {
             walker.next();
             distance++;
+
             for (RailSignCache.TrackedSign sign : walker.getState().railSigns()) {
-                //TCHelper.sendDebugMessage(train, "'" + sign.sign.getLine(1) + "'");
-                if (sign.sign.getLine(1).equals("station")) {
+                // Looking for CraftBahn-Station-Marker
+                if (sign.sign.getLine(0).equalsIgnoreCase("[CraftBahn]") && sign.sign.getLine(1).equalsIgnoreCase("station")) {
                     stationFound = true;
-                    TCHelper.sendDebugMessage(train, "Station gefunden");
+                    TCHelper.sendDebugMessage(train, "CB-Station gefunden");
+                }
+
+                // Looking for Tag-Sign (property -> removetag -> onTrack)
+                if ((sign.sign.getLine(2).equalsIgnoreCase("remtag") || sign.sign.getLine(2).equalsIgnoreCase("removetag")) && sign.sign.getLine(3).equals("onTrack")) {
+                    stationFound = true;
+                    TCHelper.sendDebugMessage(train, "Tag-Sign (remove onTrack) gefunden");
                 }
             }
         }
