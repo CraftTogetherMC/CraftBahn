@@ -224,7 +224,7 @@ public class Commands implements TabExecutor {
             }
 
             else if (args[0].equalsIgnoreCase("info")) {
-                if (!p.hasPermission("ctdestinations.edit.remove")) {
+                if (!p.hasPermission("ctdestinations.edit.info")) {
                     sendMessage(p, "&cDazu hast du keine Berechtigung.");
                     return true;
                 }
