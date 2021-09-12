@@ -4,6 +4,7 @@ import de.crafttogether.craftbahn.commands.Commands;
 import de.crafttogether.craftbahn.commands.ListCommand;
 import de.crafttogether.craftbahn.commands.MobEnterCommand;
 import de.crafttogether.craftbahn.destinations.DestinationStorage;
+import de.crafttogether.craftbahn.listener.MissingPathConnectionListener;
 import de.crafttogether.craftbahn.listener.PlayerSpawnListener;
 import de.crafttogether.craftbahn.listener.TrainEnterListener;
 import de.crafttogether.craftbahn.net.Client;
@@ -77,6 +78,7 @@ public final class CraftBahnPlugin extends JavaPlugin {
         // Register Listener
         getServer().getPluginManager().registerEvents(new TrainEnterListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerSpawnListener(), this);
+        getServer().getPluginManager().registerEvents(new MissingPathConnectionListener(), this);
 
         // Register PluginChannel
         this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
