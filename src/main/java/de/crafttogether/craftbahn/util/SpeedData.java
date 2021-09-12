@@ -73,8 +73,10 @@ public class SpeedData {
         //Find first node from position
         Block rail = this.train.head().getRailTracker().getBlock();
         double distance1 = getDistanceFromWalker(new TrackMovingPoint(rail.getLocation(), this.train.head().getDirection().getDirection()));
-        double distance2 = getDistanceFromWalker(new TrackMovingPoint(rail.getLocation(), this.train.head().getDirection().getOppositeFace().getDirection()));
-
+        double distance2 = -1;
+        if (this.velocity == 0) {
+            distance2 = getDistanceFromWalker(new TrackMovingPoint(rail.getLocation(), this.train.head().getDirection().getOppositeFace().getDirection()));
+        }
         PathProvider provider = TrainCarts.plugin.getPathProvider();
         PathNode destination = provider.getWorld(rail.getWorld()).getNodeByName(destinationName);
 
