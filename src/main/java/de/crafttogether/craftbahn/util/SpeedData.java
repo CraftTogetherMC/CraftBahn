@@ -3,7 +3,6 @@ package de.crafttogether.craftbahn.util;
 import com.bergerkiller.bukkit.tc.TrainCarts;
 import com.bergerkiller.bukkit.tc.cache.RailSignCache;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
-import com.bergerkiller.bukkit.tc.controller.components.RailPiece;
 import com.bergerkiller.bukkit.tc.controller.components.RailState;
 import com.bergerkiller.bukkit.tc.pathfinding.PathConnection;
 import com.bergerkiller.bukkit.tc.pathfinding.PathNode;
@@ -21,7 +20,8 @@ public class SpeedData {
     private double distance;
     private String destinationName;
     private Location lastLoc;
-    private double velocity;
+    private double realVelocity;
+    private double smoothVelocity;
     private Vector direction;
     private int multiplicator;
     private static double distOffset = 3;
@@ -38,12 +38,25 @@ public class SpeedData {
     public MinecartGroup getTrain() {
         return train;
     }
-    public double getVelocity() {
-        return velocity;
+
+    public double getRealVelocity() {
+        return realVelocity;
     }
+
+    public void setRealVelocity(double realVelocity) {
+        this.realVelocity = realVelocity;
+    }
+
+    public double getSmoothVelocity() { return smoothVelocity; }
+
+    public void setSmoothVelocity(double smoothVelocity) {
+        this.smoothVelocity = smoothVelocity;
+    }
+
     public double getDistance() {
         return distance;
     }
+
     public String getDestinationName() {
         return destinationName;
     }
@@ -51,18 +64,19 @@ public class SpeedData {
     public void setTrain(MinecartGroup train) {
         this.train = train;
     }
-    public void setVelocity(double velocity) {
-        this.velocity = velocity;
-    }
+
+
     public void setDistance(double distance) {
         this.distance = distance - distOffset;
     }
+
     public void setDestinationName(String destinationName) {
         this.destinationName = destinationName;
     }
 
     private void calcVelocity() {
-        this.setVelocity(this.train.head().getRealSpeedLimited() * 20);
+        this.setRealVelocity(this.train.head().getRealSpeedLimited() * 20);
+        this.setSmoothVelocity(lerp(this.getSmoothVelocity(), this.getRealVelocity(), 0.2));
     }
 
     private void calcDistance() {
@@ -74,7 +88,7 @@ public class SpeedData {
         Block rail = this.train.head().getRailTracker().getBlock();
         double distance1 = getDistanceFromWalker(new TrackMovingPoint(rail.getLocation(), this.train.head().getDirection().getDirection()));
         double distance2 = -1;
-        if (this.velocity == 0) {
+        if (this.realVelocity == 0) {
             distance2 = getDistanceFromWalker(new TrackMovingPoint(rail.getLocation(), this.train.head().getDirection().getOppositeFace().getDirection()));
         }
         PathProvider provider = TrainCarts.plugin.getPathProvider();
@@ -90,9 +104,9 @@ public class SpeedData {
 
         Arrays.sort(offsets);
         int idx = -1;
-        for(double offset : offsets){
+        for (double offset : offsets) {
             idx++;
-            if(offset < 0) continue;
+            if (offset < 0) continue;
             break;
         }
         distance1 -= offsets[idx];
@@ -189,6 +203,9 @@ public class SpeedData {
         return false;
     }
 
+    private double lerp(double a, double b, double f){
+        return a + f * (b-a);
+    }
     public void update() {
         String newName = this.train.getProperties().getDestination();
 

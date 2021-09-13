@@ -63,26 +63,27 @@ public class Speedometer implements Runnable {
         for (SpeedData data : trains) {
             MinecartGroup train = data.getTrain();
             String destinationName = data.getDestinationName();
-            double velocity = data.getVelocity();
+            double realVelocity = data.getRealVelocity();
+            double smoothedVelocity = data.getSmoothVelocity();
             double distance = data.getDistance();
 
-            if (velocity > 0) {
+            if (realVelocity > 0) {
                 int minuten = 0;
                 int sekunden = 0;
-                int time = (int) (distance/velocity);
+                int time = (int) (distance/smoothedVelocity);
 
                 sekunden = time % 60;
                 minuten = (time-sekunden)/60;
 
                 if (distance > 5) {
                     if (time > 3)
-                        TCHelper.sendActionbar(train, "craftbahn.speedometer", String.format("§e%.1f §6Blöcke/s §8| §e%.0f §6Blöcke bis \"§e%s\" §8| §6ETA: §e%d:%02d", velocity, distance, destinationName, minuten, sekunden));
+                        TCHelper.sendActionbar(train, "craftbahn.speedometer", String.format("§e%.1f §6Blöcke/s §8| §e%.0f §6Blöcke bis \"§e%s\" §8| §6ETA: §e%d:%02d", realVelocity, distance, destinationName, minuten, sekunden));
                     else
-                        TCHelper.sendActionbar(train, "craftbahn.speedometer", String.format("§e%.1f §6Blöcke/s §8| §e%.0f §6Blöcke bis \"§e%s\"", velocity, distance, destinationName));
+                        TCHelper.sendActionbar(train, "craftbahn.speedometer", String.format("§e%.1f §6Blöcke/s §8| §e%.0f §6Blöcke bis \"§e%s\"", realVelocity, distance, destinationName));
                 }
 
                 else
-                    TCHelper.sendActionbar(train, "craftbahn.speedometer", String.format("§e%.1f §6Blöcke/s", velocity));
+                    TCHelper.sendActionbar(train, "craftbahn.speedometer", String.format("§e%.1f §6Blöcke/s", realVelocity));
             }
 
             else if (distance > 5)
