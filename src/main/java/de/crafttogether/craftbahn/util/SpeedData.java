@@ -3,7 +3,6 @@ package de.crafttogether.craftbahn.util;
 import com.bergerkiller.bukkit.tc.TrainCarts;
 import com.bergerkiller.bukkit.tc.cache.RailSignCache;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
-import com.bergerkiller.bukkit.tc.controller.components.RailPiece;
 import com.bergerkiller.bukkit.tc.controller.components.RailState;
 import com.bergerkiller.bukkit.tc.pathfinding.PathConnection;
 import com.bergerkiller.bukkit.tc.pathfinding.PathNode;
@@ -21,7 +20,8 @@ public class SpeedData {
     private double distance;
     private String destinationName;
     private Location lastLoc;
-    private double velocity;
+    private double realVelocity;
+    private double smoothVelocity;
     private Vector direction;
     private int multiplicator;
     private static double distOffset = 3;
@@ -38,12 +38,25 @@ public class SpeedData {
     public MinecartGroup getTrain() {
         return train;
     }
-    public double getVelocity() {
-        return velocity;
+
+    public double getRealVelocity() {
+        return realVelocity;
     }
+
+    public void setRealVelocity(double realVelocity) {
+        this.realVelocity = realVelocity;
+    }
+
+    public double getSmoothVelocity() { return smoothVelocity; }
+
+    public void setSmoothVelocity(double smoothVelocity) {
+        this.smoothVelocity = smoothVelocity;
+    }
+
     public double getDistance() {
         return distance;
     }
+
     public String getDestinationName() {
         return destinationName;
     }
@@ -51,18 +64,19 @@ public class SpeedData {
     public void setTrain(MinecartGroup train) {
         this.train = train;
     }
-    public void setVelocity(double velocity) {
-        this.velocity = velocity;
-    }
+
+
     public void setDistance(double distance) {
         this.distance = distance - distOffset;
     }
+
     public void setDestinationName(String destinationName) {
         this.destinationName = destinationName;
     }
 
     private void calcVelocity() {
-        this.setVelocity(this.train.head().getRealSpeedLimited() * 20);
+        this.setRealVelocity(this.train.head().getRealSpeedLimited() * 20);
+        this.setSmoothVelocity(lerp(this.getSmoothVelocity(), this.getRealVelocity(), 0.2));
     }
 
     private void calcDistance() {
@@ -73,8 +87,10 @@ public class SpeedData {
         //Find first node from position
         Block rail = this.train.head().getRailTracker().getBlock();
         double distance1 = getDistanceFromWalker(new TrackMovingPoint(rail.getLocation(), this.train.head().getDirection().getDirection()));
-        double distance2 = getDistanceFromWalker(new TrackMovingPoint(rail.getLocation(), this.train.head().getDirection().getOppositeFace().getDirection()));
-
+        double distance2 = -1;
+        if (this.realVelocity == 0) {
+            distance2 = getDistanceFromWalker(new TrackMovingPoint(rail.getLocation(), this.train.head().getDirection().getOppositeFace().getDirection()));
+        }
         PathProvider provider = TrainCarts.plugin.getPathProvider();
         PathNode destination = provider.getWorld(rail.getWorld()).getNodeByName(destinationName);
 
@@ -87,8 +103,14 @@ public class SpeedData {
         Message.debug(String.format("%.0f %.0f %.0f %.0f", offset1, offset2, offset3, offset4));
 
         Arrays.sort(offsets);
-        distance1 -= offsets[offsets.length - 1];
-        distance2 -= offsets[offsets.length - 1];
+        int idx = -1;
+        for (double offset : offsets) {
+            idx++;
+            if (offset < 0) continue;
+            break;
+        }
+        distance1 -= offsets[idx];
+        distance2 -= offsets[idx];
         this.multiplicator = 1;
 
         if (distance1 > distance2) {
@@ -157,31 +179,33 @@ public class SpeedData {
         PathProvider provider = TrainCarts.plugin.getPathProvider();
         walker.setLoopFilter(true);
         double distance = 0;
-        boolean stationFound = false;
+        //Check if same block has signs
+        boolean stationFound = checkForSignTypeFromWalker(walker, "station");
 
         while (walker.hasNext() && !stationFound && distance < 50) {
             walker.next();
             distance++;
-
-            for (RailSignCache.TrackedSign sign : walker.getState().railSigns()) {
-                // Looking for CraftBahn-Station-Marker
-                if (sign.sign.getLine(0).equalsIgnoreCase("[CraftBahn]") && sign.sign.getLine(1).equalsIgnoreCase("station")) {
-                    stationFound = true;
-                    TCHelper.sendDebugMessage(train, "CB-Station gefunden");
-                }
-
-                // Looking for Tag-Sign (property -> removetag -> onTrack)
-                if ((sign.sign.getLine(2).equalsIgnoreCase("remtag") || sign.sign.getLine(2).equalsIgnoreCase("removetag")) && sign.sign.getLine(3).equals("onTrack")) {
-                    stationFound = true;
-                    TCHelper.sendDebugMessage(train, "Tag-Sign (remove onTrack) gefunden");
-                }
-            }
+            stationFound = checkForSignTypeFromWalker(walker, "station");
         }
         if (!stationFound) return -1;
 
         return distance;
     }
 
+    private boolean checkForSignTypeFromWalker(TrackMovingPoint walker, String signType) {
+        for (RailSignCache.TrackedSign sign : walker.getState().railSigns()) {
+            //Message.debug(this.player, "\'" + sign.sign.getLine(1) + "\'");
+            if (sign.sign.getLine(1).contains(signType)) {
+                TCHelper.sendDebugMessage(this.train, String.format("SignType \"%s\" found", signType));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private double lerp(double a, double b, double f){
+        return a + f * (b-a);
+    }
     public void update() {
         String newName = this.train.getProperties().getDestination();
 
