@@ -1,5 +1,6 @@
 package de.crafttogether.craftbahn.commands;
 
+import com.bergerkiller.bukkit.common.BlockLocation;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.destinations.Destination;
@@ -15,7 +16,9 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -533,8 +536,16 @@ public class Commands implements TabExecutor {
                     return true;
                 }
 
+                Set<Material> railBlocks = new HashSet<>(Arrays.asList(Material.RAIL, Material.ACTIVATOR_RAIL, Material.DETECTOR_RAIL, Material.POWERED_RAIL));
+                Block railBlock = p.getTargetBlock(railBlocks, 16);
+
+                if (railBlock == null) {
+                    sendMessage(p, "&6CraftBahn &8» &cBitte visiere die Schiene der Station des Ankunftsgleises an");
+                    return true;
+                }
+
                 Destination dest = destinationStorage.getDestination(args[1], CraftBahnPlugin.getInstance().getServerName());
-                dest.setLocation(CTLocation.fromBukkitLocation(p.getLocation()));
+                dest.setLocation(CTLocation.fromBukkitLocation(railBlock.getLocation()));
 
                 // Speichern
                 Player finalP = p;
