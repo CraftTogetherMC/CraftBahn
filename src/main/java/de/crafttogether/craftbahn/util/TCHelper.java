@@ -6,6 +6,8 @@ import com.bergerkiller.bukkit.tc.controller.MinecartGroupStore;
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.controller.MinecartMemberStore;
 import com.bergerkiller.bukkit.tc.controller.type.MinecartMemberChest;
+import com.bergerkiller.bukkit.tc.properties.TrainProperties;
+import com.bergerkiller.bukkit.tc.properties.TrainPropertiesStore;
 import com.bergerkiller.bukkit.tc.signactions.SignAction;
 import de.crafttogether.craftbahn.signactions.SignActionPortalIn;
 import de.crafttogether.craftbahn.signactions.SignActionPortalOut;
@@ -64,6 +66,7 @@ public class TCHelper {
     }
 
     // Get train by name
+    /*
     public static MinecartGroup getTrain(String trainName) {
         for (MinecartGroup group : MinecartGroupStore.getGroups()) {
             if (group.getProperties().getTrainName().equals(trainName))
@@ -71,6 +74,11 @@ public class TCHelper {
         }
 
         return null;
+    }*/
+
+    public static MinecartGroup getTrain(String trainName) {
+        TrainProperties trainProperties = TrainPropertiesStore.get(trainName);
+        return (trainProperties == null) ? null : trainProperties.getHolder();
     }
 
     // Clear inventory if given MinecartMember is a chest-minecart

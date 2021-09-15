@@ -30,29 +30,33 @@ public class Speedometer implements Runnable {
             this.task.cancel();
     }
 
-    public void add(MinecartGroup train) {
-        if (get(train) != null) return;
+    public void add(String trainName) {
+        if (get(trainName) != null) return;
 
-        Message.debug("ADD SPEEDOMETER FOR TRAIN: " + train.getProperties().getTrainName());
-        trains.add(new SpeedData(train));
+        Message.debug("ADD SPEEDOMETER FOR TRAIN: " + trainName);
+        try {
+            trains.add(new SpeedData(trainName));
+        }
+        catch (Exception ignore) { }
     }
 
-    public SpeedData get(MinecartGroup train) {
+    public SpeedData get(String trainName) {
         SpeedData speedData = null;
 
         for (SpeedData data : trains) {
-            if (data.getTrain().getProperties().getTrainName().equals(train.getProperties().getTrainName()))
+            if (data.getTrainName().equals(trainName))
                 speedData = data;
         }
 
         return speedData;
     }
 
-    public void remove(MinecartGroup train) {
-        SpeedData data = get(train);
+    public void remove(String trainName) {
+        SpeedData data = get(trainName);
         if (data == null) return;
 
         // Clear actionbar for all players
+        MinecartGroup train = TCHelper.getTrain(trainName);
         TCHelper.sendActionbar(train, "");
 
         Message.debug("REMOVE SPEEDOMETER FOR TRAIN: " + train.getProperties().getTrainName());
@@ -61,7 +65,7 @@ public class Speedometer implements Runnable {
 
     public void sendActionBars() {
         for (SpeedData data : trains) {
-            MinecartGroup train = data.getTrain();
+            MinecartGroup train = TCHelper.getTrain(data.getTrainName());
             String destinationName = data.getDestinationName();
             double realVelocity = data.getRealVelocity();
             double smoothedVelocity = data.getSmoothVelocity();

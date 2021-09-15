@@ -6,6 +6,7 @@ import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.tasks.Speedometer;
 import de.crafttogether.craftbahn.util.Message;
 import de.crafttogether.craftbahn.util.TCHelper;
+import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -35,9 +36,10 @@ public class TrainEnterListener implements Listener {
         }
 
         // Add Speedometer for train if no one exists
+        String trainName = cart.getGroup().getProperties().getTrainName();
         Speedometer speedometer = CraftBahnPlugin.getInstance().getSpeedometer();
-        if (speedometer.get(cart.getGroup()) == null)
-            speedometer.add(cart.getGroup());
+        if (speedometer.get(trainName) == null)
+            speedometer.add(trainName);
 
         /* Set View-Distance */
         //p.setNoTickViewDistance(6);
@@ -55,7 +57,10 @@ public class TrainEnterListener implements Listener {
 
         // Delete train in Speedometer if last player exits
         if (TCHelper.getPlayerPassengers(cart.getGroup()).size() <= 1)
-            CraftBahnPlugin.getInstance().getSpeedometer().remove(cart.getGroup());
+            CraftBahnPlugin.getInstance().getSpeedometer().remove(cart.getGroup().getProperties().getTrainName());
+
+        // Clear ActionBar
+        p.sendActionBar(Component.text(""));
 
         /* Set View-Distance */
         //p.setNoTickViewDistance(p.getWorld().getNoTickViewDistance());

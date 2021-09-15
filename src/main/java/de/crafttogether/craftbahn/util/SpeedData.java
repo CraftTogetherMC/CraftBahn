@@ -9,6 +9,7 @@ import com.bergerkiller.bukkit.tc.pathfinding.PathNode;
 import com.bergerkiller.bukkit.tc.pathfinding.PathProvider;
 import com.bergerkiller.bukkit.tc.pathfinding.PathRailInfo;
 import com.bergerkiller.bukkit.tc.utils.TrackMovingPoint;
+import de.crafttogether.CraftBahnPlugin;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.util.Vector;
@@ -16,7 +17,7 @@ import org.bukkit.util.Vector;
 import java.util.Arrays;
 
 public class SpeedData {
-    private MinecartGroup train;
+    private String trainName;
     private double distance;
     private String destinationName;
     private Location lastLoc;
@@ -26,17 +27,26 @@ public class SpeedData {
     private int multiplicator;
     private static double distOffset = 3;
 
-    public SpeedData(MinecartGroup train) {
-        this.train = train;
+    public class TrainNotFoundExeption extends Exception {
+        public TrainNotFoundExeption(String trainName) {
+            super("Couldn't find '" + trainName + "'");
+        }
+    }
+
+    public SpeedData(String trainName) throws TrainNotFoundExeption {
+        MinecartGroup train = TCHelper.getTrain(trainName);
+        if (train == null) throw new TrainNotFoundExeption(trainName);
+
+        this.trainName = trainName;
         this.destinationName = train.getProperties().getDestination();
         this.lastLoc = train.head().getBlock().getLocation();
         this.direction = train.head().getDirection().getDirection().normalize();
-        calcDistance();
-        calcVelocity();
+        calcDistance(train);
+        calcVelocity(train);
     }
 
-    public MinecartGroup getTrain() {
-        return train;
+    public String getTrainName() {
+        return trainName;
     }
 
     public double getRealVelocity() {
@@ -61,10 +71,9 @@ public class SpeedData {
         return destinationName;
     }
 
-    public void setTrain(MinecartGroup train) {
-        this.train = train;
+    public void setTrainName(String trainName) {
+        this.trainName = trainName;
     }
-
 
     public void setDistance(double distance) {
         this.distance = distance - distOffset;
@@ -74,22 +83,22 @@ public class SpeedData {
         this.destinationName = destinationName;
     }
 
-    private void calcVelocity() {
-        this.setRealVelocity(this.train.head().getRealSpeedLimited() * 20);
+    private void calcVelocity(MinecartGroup train) {
+        this.setRealVelocity(train.head().getRealSpeedLimited() * 20);
         this.setSmoothVelocity(lerp(this.getSmoothVelocity(), this.getRealVelocity(), 0.2));
     }
 
-    private void calcDistance() {
+    private void calcDistance(MinecartGroup train) {
         if (destinationName.equals("")) {
             return;
         }
 
         //Find first node from position
-        Block rail = this.train.head().getRailTracker().getBlock();
-        double distance1 = getDistanceFromWalker(new TrackMovingPoint(rail.getLocation(), this.train.head().getDirection().getDirection()));
+        Block rail = train.head().getRailTracker().getBlock();
+        double distance1 = getDistanceFromWalker(new TrackMovingPoint(rail.getLocation(), train.head().getDirection().getDirection()));
         double distance2 = -1;
         if (this.realVelocity == 0) {
-            distance2 = getDistanceFromWalker(new TrackMovingPoint(rail.getLocation(), this.train.head().getDirection().getOppositeFace().getDirection()));
+            distance2 = getDistanceFromWalker(new TrackMovingPoint(rail.getLocation(), train.head().getDirection().getOppositeFace().getDirection()));
         }
         PathProvider provider = TrainCarts.plugin.getPathProvider();
         PathNode destination = provider.getWorld(rail.getWorld()).getNodeByName(destinationName);
@@ -171,7 +180,7 @@ public class SpeedData {
             return distance;
         }
 
-        TCHelper.sendDebugMessage(train, "Dein Ziel wurde nicht gefunden");
+        TCHelper.sendDebugMessage(TCHelper.getTrain(this.trainName), "Dein Ziel wurde nicht gefunden");
         return 0;
     }
 
@@ -196,7 +205,7 @@ public class SpeedData {
         for (RailSignCache.TrackedSign sign : walker.getState().railSigns()) {
             //Message.debug(this.player, "\'" + sign.sign.getLine(1) + "\'");
             if (sign.sign.getLine(1).contains(signType)) {
-                TCHelper.sendDebugMessage(this.train, String.format("SignType \"%s\" found", signType));
+                TCHelper.sendDebugMessage(TCHelper.getTrain(this.trainName), String.format("SignType \"%s\" found", signType));
                 return true;
             }
         }
@@ -206,20 +215,30 @@ public class SpeedData {
     private double lerp(double a, double b, double f){
         return a + f * (b-a);
     }
+
     public void update() {
-        String newName = this.train.getProperties().getDestination();
+        MinecartGroup train = TCHelper.getTrain(this.trainName);
+
+        // Stop calculation if train no longer exists
+        if (train == null) {
+            CraftBahnPlugin.getInstance().getSpeedometer().remove(trainName);
+            return;
+        }
+
+        String newName = train.getProperties().getDestination();
 
         if (!newName.equals(this.destinationName)) {
-            setDestinationName(this.train.getProperties().getDestination());
+            setDestinationName(train.getProperties().getDestination());
 
             if (this.destinationName.equals("")) {
                 this.distance = 0;
                 return;
             }
-            calcDistance();
+
+            calcDistance(train);
         }
 
-        calcVelocity();
+        calcVelocity(train);
 
         //Check if cart is moving forward
         Vector newDirection = train.head().getDirection().getDirection().normalize();
