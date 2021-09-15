@@ -21,6 +21,13 @@ public class Message {
         return new TextComponent(ComponentSerializer.parse("{text: \"\n\"}"));
     }
 
+    public static String capitalize(String name) {
+        String firstLetter = name.substring(0, 1);
+        String remainingLetters = name.substring(1);
+        firstLetter = firstLetter.toUpperCase();
+        return firstLetter + remainingLetters;
+    }
+
     public void broadcast(List<Player> players, String message) {
         for (Player p : players)
             p.sendMessage(ChatColor.translateAlternateColorCodes('&', message));

@@ -149,7 +149,7 @@ public class DestinationList {
                 row++;
             }
 
-            page.addExtra(Message.format("&6CraftBahn &8» &7# &6&l" + capitalize(serverName) + ":"));
+            page.addExtra(Message.format("&6CraftBahn &8» &7# &6&l" + Message.capitalize(serverName) + ":"));
             page.addExtra(Message.newLine());
 
             row = row + 2;
@@ -341,13 +341,6 @@ public class DestinationList {
         }
 
         player.sendMessage(message);
-    }
-
-    private String capitalize(String name) {
-        String firstLetter = name.substring(0, 1);
-        String remainingLetters = name.substring(1);
-        firstLetter = firstLetter.toUpperCase();
-        return firstLetter + remainingLetters;
     }
 
     public void showOwner(boolean show) {
