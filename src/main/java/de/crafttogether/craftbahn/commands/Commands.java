@@ -1,10 +1,7 @@
 package de.crafttogether.craftbahn.commands;
 
 import com.bergerkiller.bukkit.common.BlockLocation;
-import com.bergerkiller.bukkit.tc.cache.RailPieceCache;
-import com.bergerkiller.bukkit.tc.cache.RailSignCache;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
-import com.bergerkiller.bukkit.tc.controller.components.RailPiece;
 import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.destinations.Destination;
 import de.crafttogether.craftbahn.destinations.DestinationList;
@@ -540,34 +537,15 @@ public class Commands implements TabExecutor {
                 }
 
                 Set<Material> railBlocks = new HashSet<>(Arrays.asList(Material.RAIL, Material.ACTIVATOR_RAIL, Material.DETECTOR_RAIL, Material.POWERED_RAIL));
-                Block targetBlock = p.getTargetBlock(null, 16);
+                Block railBlock = p.getTargetBlock(railBlocks, 16);
 
-                if (!railBlocks.contains(targetBlock.getType())) {
+                if (railBlock == null) {
                     sendMessage(p, "&6CraftBahn &8» &cBitte visiere die Schiene der Station des Ankunftsgleises an");
                     return true;
                 }
 
-                RailPiece railPiece = RailPiece.create(targetBlock);
-                boolean stationFound = false;
-
-                if (!railPiece.isNone()) {
-                    railPiece.verifySigns();
-                    RailSignCache.TrackedSign[] signs = railPiece.signs();
-
-                    for (RailSignCache.TrackedSign sign : signs) {
-                        Message.debug(p, "found: " + sign.sign.getLine(1));
-                        if (sign.sign.getLine(1).equalsIgnoreCase("station"))
-                            stationFound = true;
-                    }
-                }
-
-                if (!stationFound) {
-                    sendMessage(p, "&6CraftBahn &8» &cEs wurde keine Station gefunden!");
-                    return true;
-                }
-
                 Destination dest = destinationStorage.getDestination(args[1], CraftBahnPlugin.getInstance().getServerName());
-                dest.setLocation(CTLocation.fromBukkitLocation(targetBlock.getLocation()));
+                dest.setLocation(CTLocation.fromBukkitLocation(railBlock.getLocation()));
 
                 // Speichern
                 Player finalP = p;
