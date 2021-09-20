@@ -32,6 +32,7 @@
 
 **Todo / Probleme:**
 - CBPortals: Beim PlayerSpawnLocationEvent gibt es Probleme beim Entity-Tracking(?) wenn der Spieler schon hier zum passenger einer Entity wird
+- `/fze tp` - (eindeutige) Fehlermeldung, wenn sich das Fahrziel auf einem anderen Server befindet
 
 - **Ideen:**
 - Speedometer per Befehl ausschaltbar machen (Wahlweise nur für die aktuelle Fahr oder Dauerhaft)
