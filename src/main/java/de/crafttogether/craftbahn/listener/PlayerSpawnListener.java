@@ -47,9 +47,6 @@ public class PlayerSpawnListener implements Listener {
                 return;
             }
 
-            if (train == null)
-                return;
-
             Message.debug(e.getPlayer().getName() + " -> SpawnLocation set!");
             e.setSpawnLocation(train.get(passenger.getCartIndex()).getEntity().getLocation());
         }
