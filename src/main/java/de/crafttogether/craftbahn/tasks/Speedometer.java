@@ -6,15 +6,21 @@ import de.crafttogether.craftbahn.util.Message;
 import de.crafttogether.craftbahn.util.SpeedData;
 import de.crafttogether.craftbahn.util.TCHelper;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 
 public class Speedometer implements Runnable {
     private LinkedList<SpeedData> trains;
+    public HashMap<String, Location> markerParticles;
     private BukkitTask task;
 
     public Speedometer() {
+        this.markerParticles = new HashMap<>();
         this.trains = new LinkedList<>();
         this.task = Bukkit.getScheduler().runTaskTimer(CraftBahnPlugin.getInstance(), this, 20L, 5L);
     }
@@ -23,6 +29,13 @@ public class Speedometer implements Runnable {
     public void run() {
         updateData();
         sendActionBars();
+
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (!p.hasPermission("craftbahn.debug")) continue;
+
+            for (Location particleLocation : markerParticles.values())
+                p.spawnParticle(Particle.BARRIER, particleLocation, 1);
+        }
     }
 
     public void stop() {
@@ -60,6 +73,7 @@ public class Speedometer implements Runnable {
         TCHelper.sendActionbar(train, "");
 
         Message.debug("REMOVE SPEEDOMETER FOR TRAIN: " + train.getProperties().getTrainName());
+        markerParticles.remove(train.getProperties().getTrainName());
         trains.remove(data);
     }
 
@@ -101,5 +115,4 @@ public class Speedometer implements Runnable {
         for (SpeedData data : trains)
             data.update();
     }
-
 }

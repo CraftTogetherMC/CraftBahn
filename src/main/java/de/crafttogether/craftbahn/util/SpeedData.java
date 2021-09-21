@@ -10,9 +10,12 @@ import com.bergerkiller.bukkit.tc.pathfinding.PathProvider;
 import com.bergerkiller.bukkit.tc.pathfinding.PathRailInfo;
 import com.bergerkiller.bukkit.tc.utils.TrackMovingPoint;
 import de.crafttogether.CraftBahnPlugin;
+import de.crafttogether.craftbahn.tasks.Speedometer;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
@@ -97,9 +100,11 @@ public class SpeedData {
         Block rail = train.head().getRailTracker().getBlock();
         double distance1 = getDistanceFromWalker(new TrackMovingPoint(rail.getLocation(), train.head().getDirection().getDirection()));
         double distance2 = -1;
+
         if (this.realVelocity == 0) {
             distance2 = getDistanceFromWalker(new TrackMovingPoint(rail.getLocation(), train.head().getDirection().getOppositeFace().getDirection()));
         }
+
         PathProvider provider = TrainCarts.plugin.getPathProvider();
         PathNode destination = provider.getWorld(rail.getWorld()).getNodeByName(destinationName);
 
@@ -107,17 +112,18 @@ public class SpeedData {
         double offset2 = findStationFromWalker(new TrackMovingPoint(destination.location.getLocation(), new Vector(-1, 0, 0)));
         double offset3 = findStationFromWalker(new TrackMovingPoint(destination.location.getLocation(), new Vector(0, 0, 1)));
         double offset4 = findStationFromWalker(new TrackMovingPoint(destination.location.getLocation(), new Vector(0, 0, -1)));
-        double offsets[] = {offset1, offset2, offset3, offset4};
-
-        Message.debug(String.format("%.0f %.0f %.0f %.0f", offset1, offset2, offset3, offset4));
-
+        double[] offsets = {offset1, offset2, offset3, offset4};
         Arrays.sort(offsets);
+
+        TCHelper.sendDebugMessage(train, String.format("%.0f %.0f %.0f %.0f", offset1, offset2, offset3, offset4));
+
         int idx = -1;
         for (double offset : offsets) {
             idx++;
             if (offset < 0) continue;
             break;
         }
+
         distance1 -= offsets[idx];
         distance2 -= offsets[idx];
         this.multiplicator = 1;
@@ -180,39 +186,51 @@ public class SpeedData {
             return distance;
         }
 
-        TCHelper.sendDebugMessage(TCHelper.getTrain(this.trainName), "Dein Ziel wurde nicht gefunden");
+        TCHelper.sendDebugMessage(this.trainName, "Das Ziel '" + this.destinationName + "' wurde nicht gefunden");
         return 0;
     }
 
     private double findStationFromWalker(TrackMovingPoint walker) {
-        PathProvider provider = TrainCarts.plugin.getPathProvider();
         walker.setLoopFilter(true);
-        double distance = 0;
-        //Check if same block has signs
-        boolean stationFound = checkForSignTypeFromWalker(walker, "station");
 
-        while (walker.hasNext() && !stationFound && distance < 50) {
+        double distance = 0;
+        boolean stationFound = findStationSign(walker);
+
+        while (walker.hasNext() && !stationFound && distance < 100) {
             walker.next();
             distance++;
-            stationFound = checkForSignTypeFromWalker(walker, "station");
+            stationFound = findStationSign(walker);
         }
-        if (!stationFound) return -1;
+
+        if (!stationFound)
+            return -1;
 
         return distance;
     }
 
-    private boolean checkForSignTypeFromWalker(TrackMovingPoint walker, String signType) {
+    private boolean findStationSign(TrackMovingPoint walker) {
         for (RailSignCache.TrackedSign sign : walker.getState().railSigns()) {
-            //Message.debug(this.player, "\'" + sign.sign.getLine(1) + "\'");
-            if (sign.sign.getLine(1).contains(signType)) {
-                TCHelper.sendDebugMessage(TCHelper.getTrain(this.trainName), String.format("SignType \"%s\" found", signType));
-                return true;
-            }
+
+            if (!sign.sign.getLine(1).toLowerCase().startsWith("station"))
+                continue;
+
+            TCHelper.sendDebugMessage(this.trainName, "SignType " + sign.sign.getLine(1) + " found");
+            TCHelper.sendDebugMessage(this.trainName, "'" + sign.sign.getLine(0) + "' -> '" + sign.sign.getLine(1) + "' -> '" + sign.sign.getLine(2) + "' -> '" + sign.sign.getLine(3) + "'");
+
+            // Spawn markerParticle (debug)
+            BlockFace facing = walker.getState().enterFace();
+            Location effectLocation = sign.railBlock.getLocation()
+                .add(0.5, 0.5, 0.5)
+                .add(0.3 * facing.getModX(), 0.0, 0.3 * facing.getModZ());
+
+            CraftBahnPlugin.getInstance().getSpeedometer().markerParticles.put(this.trainName, effectLocation);
+            return true;
         }
+
         return false;
     }
 
-    private double lerp(double a, double b, double f){
+    private double lerp(double a, double b, double f) {
         return a + f * (b-a);
     }
 
