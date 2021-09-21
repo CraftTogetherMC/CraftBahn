@@ -11,6 +11,7 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -48,16 +49,25 @@ public class TrainEnterListener implements Listener {
 
     @EventHandler
     public void onVehicleExit(VehicleExitEvent e) {
-
         Player p = TCHelper.getPlayer(e.getExited());
         if (p == null) return;
 
         MinecartMember<?> cart = MinecartMemberStore.getFromEntity(e.getVehicle());
         if (cart == null) return;
 
-        // Delete train in Speedometer if last player exits
-        if (TCHelper.getPlayerPassengers(cart.getGroup()).size() <= 1)
+        // Check if train has no more passengers
+        if (TCHelper.getPlayerPassengers(cart.getGroup()).size() <= 1) {
+            // Remove Speedometer if activated
             CraftBahnPlugin.getInstance().getSpeedometer().remove(cart.getGroup().getProperties().getTrainName());
+
+            // Destroy train if it's tagged as "onTrack" and moving
+            Bukkit.getScheduler().runTaskLater(CraftBahnPlugin.getInstance(), () -> {
+                boolean onTrack = cart.getGroup().getProperties().getTags().contains("onTrack");
+
+                if (onTrack && cart.isMoving())
+                    cart.getGroup().destroy();
+            }, 20L*5);
+        }
 
         // Clear ActionBar
         p.sendActionBar(Component.text(""));
