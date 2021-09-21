@@ -160,6 +160,12 @@ public class TCHelper {
     }
 
     // Send debug-message to all passengers of a train
+    public static void sendDebugMessage(String trainName, String message) {
+        MinecartGroup train = getTrain(trainName);
+        if (train != null) sendDebugMessage(train, message);
+    }
+
+    // Send debug-message to all passengers of a train
     public static void sendDebugMessage(MinecartGroup group, String message) {
         for (MinecartMember<?> member : group)
             sendDebugMessage(member, message);
