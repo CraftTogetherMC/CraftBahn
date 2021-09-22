@@ -12,9 +12,12 @@ import de.crafttogether.craftbahn.net.Client;
 import de.crafttogether.craftbahn.net.Server;
 import de.crafttogether.craftbahn.portals.PortalStorage;
 import de.crafttogether.craftbahn.tasks.Speedometer;
+import de.crafttogether.craftbahn.util.Message;
 import de.crafttogether.craftbahn.util.TCHelper;
 import de.crafttogether.mysql.MySQLAdapter;
 import de.crafttogether.mysql.MySQLConfig;
+import di.dicore.DIApi;
+import di.internal.exception.NoApiException;
 import org.bukkit.Bukkit;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -28,6 +31,7 @@ public final class CraftBahnPlugin extends JavaPlugin {
 
     private String serverName;
     private DynmapAPI dynmap;
+    private DIApi discordApi;
 
     private MySQLAdapter MySQLAdapter;
     private PortalStorage portalStorage;
@@ -64,6 +68,12 @@ public final class CraftBahnPlugin extends JavaPlugin {
 
         if (!getServer().getPluginManager().isPluginEnabled("dynmap")) {
             plugin.getLogger().warning("Couldn't find Dynmap");
+            Bukkit.getServer().getPluginManager().disablePlugin(plugin);
+            return;
+        }
+
+        if (!getServer().getPluginManager().isPluginEnabled("DICore")) {
+            plugin.getLogger().warning("Couldn't find DICore (Discord Integration Project)");
             Bukkit.getServer().getPluginManager().disablePlugin(plugin);
             return;
         }
@@ -111,6 +121,14 @@ public final class CraftBahnPlugin extends JavaPlugin {
             return;
         }
 
+        // Initialize Discord-Integration
+        try {
+            discordApi = new DIApi(this, this.getClassLoader());
+        } catch (NoApiException e) {
+            getLogger().warning("Unable to initialize Discord-Integration");
+            e.printStackTrace();
+        }
+
         // Initialize MySQLAdapter
         MySQLAdapter = new MySQLAdapter(this, myCfg);
 
@@ -155,6 +173,7 @@ public final class CraftBahnPlugin extends JavaPlugin {
 
     public MySQLAdapter getMySQLAdapter() { return MySQLAdapter; }
     public DynmapAPI getDynmap() { return dynmap; }
+    public DIApi getDiscordApi() { return discordApi; }
 
     public PortalStorage getPortalStorage() { return portalStorage; }
     public DestinationStorage getDestinationStorage() { return destinationStorage; }
