@@ -33,8 +33,10 @@ public class Speedometer implements Runnable {
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (!p.hasPermission("craftbahn.debug")) continue;
 
-            for (Location particleLocation : markerParticles.values())
-                p.spawnParticle(Particle.BARRIER, particleLocation, 1);
+            for (Location particleLocation : markerParticles.values()) {
+                if (particleLocation.getChunk().isLoaded())
+                    p.spawnParticle(Particle.BARRIER, particleLocation, 1);
+            }
         }
     }
 
