@@ -16,9 +16,11 @@ import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -161,23 +163,48 @@ public class TCHelper {
 
     // Send debug-message to all passengers of a train
     public static void sendDebugMessage(String trainName, String message) {
+        sendDebugMessage(trainName, Component.text(message));
+    }
+
+    // Send debug-message to all passengers of a train
+    public static void sendDebugMessage(String trainName, Component message) {
         MinecartGroup train = getTrain(trainName);
         if (train != null) sendDebugMessage(train, message);
     }
 
     // Send debug-message to all passengers of a train
     public static void sendDebugMessage(MinecartGroup group, String message) {
+        sendDebugMessage(group, Component.text(message));
+    }
+
+    // Send debug-message to all passengers of a cart
+    public static void sendDebugMessage(MinecartMember<?> member, String message) {
+        sendDebugMessage(member, Component.text(message));
+    }
+
+    // Send debug-message to all passengers of a train
+    public static void sendDebugMessage(MinecartGroup group, Component message) {
         for (MinecartMember<?> member : group)
             sendDebugMessage(member, message);
     }
 
     // Send debug-message to all passengers of a cart
-    public static void sendDebugMessage(MinecartMember member, String message) {
+    public static void sendDebugMessage(MinecartMember<?> member, Component message) {
         CommonEntity<?> vehicle = CommonEntity.get(member.getEntity().getEntity());
 
         for (Object passenger : vehicle.getPlayerPassengers()) {
             if (passenger instanceof Player player)
                 Message.debug(player, message);
         }
+    }
+
+    public static BlockFace getDirection(String junctionName) {
+        return switch (junctionName) {
+            default -> null;
+            case "n" -> BlockFace.NORTH;
+            case "o" -> BlockFace.EAST;
+            case "s" -> BlockFace.SOUTH;
+            case "w" -> BlockFace.WEST;
+        };
     }
 }

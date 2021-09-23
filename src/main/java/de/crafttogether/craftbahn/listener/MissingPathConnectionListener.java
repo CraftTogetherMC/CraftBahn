@@ -9,6 +9,7 @@ import di.dicore.DIApi;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.kyori.adventure.text.event.ClickEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -49,7 +50,7 @@ public class MissingPathConnectionListener implements Listener {
         MessageEmbed embed = getEmbed(train, loc, passengers);
 
         TextChannel chanel = channelOpt.get();
-        chanel.sendMessage(embed);
+        MessageAction message = chanel.sendMessage(embed);
     }
 
     private static MessageEmbed getEmbed(MinecartGroup train, Location loc, String passengers) {

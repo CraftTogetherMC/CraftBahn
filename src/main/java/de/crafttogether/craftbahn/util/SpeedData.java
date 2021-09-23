@@ -10,14 +10,20 @@ import com.bergerkiller.bukkit.tc.pathfinding.PathProvider;
 import com.bergerkiller.bukkit.tc.pathfinding.PathRailInfo;
 import com.bergerkiller.bukkit.tc.utils.TrackMovingPoint;
 import de.crafttogether.CraftBahnPlugin;
-import de.crafttogether.craftbahn.tasks.Speedometer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.ChatColor;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 public class SpeedData {
     private String trainName;
@@ -108,10 +114,10 @@ public class SpeedData {
         PathProvider provider = TrainCarts.plugin.getPathProvider();
         PathNode destination = provider.getWorld(rail.getWorld()).getNodeByName(destinationName);
 
-        double offset1 = findStationFromWalker(new TrackMovingPoint(destination.location.getLocation(), new Vector(1, 0, 0)));
-        double offset2 = findStationFromWalker(new TrackMovingPoint(destination.location.getLocation(), new Vector(-1, 0, 0)));
-        double offset3 = findStationFromWalker(new TrackMovingPoint(destination.location.getLocation(), new Vector(0, 0, 1)));
-        double offset4 = findStationFromWalker(new TrackMovingPoint(destination.location.getLocation(), new Vector(0, 0, -1)));
+        double offset1 = -1;//findStationFromWalker(new TrackMovingPoint(destination.location.getLocation(), new Vector(1, 0, 0)));
+        double offset2 = -1;//findStationFromWalker(new TrackMovingPoint(destination.location.getLocation(), new Vector(-1, 0, 0)));
+        double offset3 = -1;//findStationFromWalker(new TrackMovingPoint(destination.location.getLocation(), new Vector(0, 0, 1)));
+        double offset4 = -1;//findStationFromWalker(new TrackMovingPoint(destination.location.getLocation(), new Vector(0, 0, -1)));
         double[] offsets = {offset1, offset2, offset3, offset4};
         Arrays.sort(offsets);
 
@@ -178,8 +184,31 @@ public class SpeedData {
         if (destination != null) {
             if (node != destination) {
                 PathConnection[] connections = node.findRoute(destination);
+                Collections.reverse(Arrays.asList(connections));
+                int junctions = 0;
+
+
                 for (PathConnection connection : connections) {
-                    distance += connection.distance;
+                    double stationDistance = -1;
+                    junctions++;
+
+                    Location loc = connection.destination.location.getLocation();
+                    ClickEvent tpEvent = ClickEvent.runCommand("/cmi tppos " + loc.getX() + " " + loc.getY() + " " + loc.getZ() + " " + loc.getWorld().getName());
+                    Component message = Component.text("Ziel: " + connection.destination.getName()).clickEvent(tpEvent).color(NamedTextColor.DARK_GREEN);
+
+                    TCHelper.sendDebugMessage(trainName, message);
+
+
+                    if (junctions <= 3) {
+                        BlockFace walkerDirection = TCHelper.getDirection(connection.junctionName);
+                        TCHelper.sendDebugMessage(trainName, walkerDirection.name());
+                        stationDistance = findStationFromWalker(new TrackMovingPoint(destination.location.getLocation(), walkerDirection.getDirection()));
+                    }
+
+                    if (stationDistance != -1)
+                        distance += stationDistance;
+                    else
+                        distance += connection.distance;
                 }
             }
 
