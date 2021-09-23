@@ -180,7 +180,7 @@ public class SpeedData {
 
                     if (stationDistance != -1) {
                         distance += stationDistance;
-                        break;
+                        return distance;
                     }
 
                     else
@@ -188,10 +188,12 @@ public class SpeedData {
                 }
             }
 
-            Location loc = node.location.getLocation();
-            ClickEvent tpEvent = ClickEvent.runCommand("/cmi tppos " + loc.getX() + " " + loc.getY() + " " + loc.getZ() + " " + loc.getWorld().getName());
-            Component message = Component.text("Start: " + node.getName()).clickEvent(tpEvent).color(NamedTextColor.DARK_GREEN);
-            TCHelper.sendDebugMessage(trainName, message);
+            if (findStation) {
+                Location loc = node.location.getLocation();
+                ClickEvent tpEvent = ClickEvent.runCommand("/cmi tppos " + loc.getX() + " " + loc.getY() + " " + loc.getZ() + " " + loc.getWorld().getName());
+                Component message = Component.text("Start: " + node.getName()).clickEvent(tpEvent).color(NamedTextColor.DARK_GREEN);
+                TCHelper.sendDebugMessage(trainName, message);
+            }
 
             return distance;
         }
