@@ -183,6 +183,7 @@ public class SpeedData {
 
         if (destination != null) {
             if (node != destination) {
+
                 PathConnection[] connections = node.findRoute(destination);
                 Collections.reverse(Arrays.asList(connections));
                 int junctions = 0;
@@ -194,14 +195,13 @@ public class SpeedData {
 
                     Location loc = connection.destination.location.getLocation();
                     ClickEvent tpEvent = ClickEvent.runCommand("/cmi tppos " + loc.getX() + " " + loc.getY() + " " + loc.getZ() + " " + loc.getWorld().getName());
-                    Component message = Component.text("Ziel: " + connection.destination.getName()).clickEvent(tpEvent).color(NamedTextColor.DARK_GREEN);
-
+                    Component message = Component.text("Nächstes Ziel: " + connection.destination.getName()).clickEvent(tpEvent).color(NamedTextColor.DARK_GREEN);
                     TCHelper.sendDebugMessage(trainName, message);
 
+                    BlockFace walkerDirection = TCHelper.getDirection(connection.junctionName);
+                    TCHelper.sendDebugMessage(trainName, walkerDirection.name());
 
                     if (junctions <= 3) {
-                        BlockFace walkerDirection = TCHelper.getDirection(connection.junctionName);
-                        TCHelper.sendDebugMessage(trainName, walkerDirection.name());
                         stationDistance = findStationFromWalker(new TrackMovingPoint(destination.location.getLocation(), walkerDirection.getDirection()));
                     }
 
@@ -210,6 +210,11 @@ public class SpeedData {
                     else
                         distance += connection.distance;
                 }
+
+                Location loc = node.location.getLocation();
+                ClickEvent tpEvent = ClickEvent.runCommand("/cmi tppos " + loc.getX() + " " + loc.getY() + " " + loc.getZ() + " " + loc.getWorld().getName());
+                Component message = Component.text("Start: " + node.getName()).clickEvent(tpEvent).color(NamedTextColor.DARK_GREEN);
+                TCHelper.sendDebugMessage(trainName, message);
             }
 
             return distance;
