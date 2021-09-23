@@ -202,7 +202,7 @@ public class TCHelper {
         return switch (junctionName) {
             default -> null;
             case "n" -> BlockFace.NORTH;
-            case "o" -> BlockFace.EAST;
+            case "e" -> BlockFace.EAST;
             case "s" -> BlockFace.SOUTH;
             case "w" -> BlockFace.WEST;
         };

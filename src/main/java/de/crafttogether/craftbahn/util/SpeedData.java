@@ -1,5 +1,6 @@
 package de.crafttogether.craftbahn.util;
 
+import com.bergerkiller.bukkit.common.utils.CommonUtil;
 import com.bergerkiller.bukkit.tc.TrainCarts;
 import com.bergerkiller.bukkit.tc.cache.RailSignCache;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
@@ -13,16 +14,12 @@ import de.crafttogether.CraftBahnPlugin;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.ChatColor;
-import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.util.Vector;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 
 public class SpeedData {
@@ -32,24 +29,23 @@ public class SpeedData {
     private Location lastLoc;
     private double realVelocity;
     private double smoothVelocity;
-    private Vector direction;
-    private int multiplicator;
-    private static double distOffset = 3;
+    private BlockFace direction;
+    private int multiplier;
 
-    public class TrainNotFoundExeption extends Exception {
-        public TrainNotFoundExeption(String trainName) {
+    public static class TrainNotFoundException extends Exception {
+        public TrainNotFoundException(String trainName) {
             super("Couldn't find '" + trainName + "'");
         }
     }
 
-    public SpeedData(String trainName) throws TrainNotFoundExeption {
+    public SpeedData(String trainName) throws TrainNotFoundException {
         MinecartGroup train = TCHelper.getTrain(trainName);
-        if (train == null) throw new TrainNotFoundExeption(trainName);
+        if (train == null) throw new TrainNotFoundException(trainName);
 
         this.trainName = trainName;
         this.destinationName = train.getProperties().getDestination();
         this.lastLoc = train.head().getBlock().getLocation();
-        this.direction = train.head().getDirection().getDirection().normalize();
+        this.direction = train.head().getDirection();
         calcDistance(train);
         calcVelocity(train);
     }
@@ -57,90 +53,56 @@ public class SpeedData {
     public String getTrainName() {
         return trainName;
     }
-
-    public double getRealVelocity() {
-        return realVelocity;
-    }
-
-    public void setRealVelocity(double realVelocity) {
-        this.realVelocity = realVelocity;
-    }
-
-    public double getSmoothVelocity() { return smoothVelocity; }
-
-    public void setSmoothVelocity(double smoothVelocity) {
-        this.smoothVelocity = smoothVelocity;
-    }
-
-    public double getDistance() {
-        return distance;
-    }
-
     public String getDestinationName() {
         return destinationName;
     }
-
-    public void setTrainName(String trainName) {
-        this.trainName = trainName;
+    public double getDistance() {
+        return distance;
     }
-
-    public void setDistance(double distance) {
-        this.distance = distance - distOffset;
+    public double getRealVelocity() {
+        return realVelocity;
     }
+    public double getSmoothVelocity() { return smoothVelocity; }
 
     public void setDestinationName(String destinationName) {
         this.destinationName = destinationName;
     }
-
+    public void setDistance(double distance) {
+        this.distance = distance;
+    }
+    public void setSmoothVelocity(double smoothVelocity) {
+        this.smoothVelocity = smoothVelocity;
+    }
+    public void setRealVelocity(double realVelocity) {
+        this.realVelocity = realVelocity;
+    }
+    
     private void calcVelocity(MinecartGroup train) {
         this.setRealVelocity(train.head().getRealSpeedLimited() * 20);
         this.setSmoothVelocity(lerp(this.getSmoothVelocity(), this.getRealVelocity(), 0.2));
     }
 
     private void calcDistance(MinecartGroup train) {
-        if (destinationName.equals("")) {
+        if (destinationName.equals(""))
             return;
-        }
 
         //Find first node from position
         Block rail = train.head().getRailTracker().getBlock();
         double distance1 = getDistanceFromWalker(new TrackMovingPoint(rail.getLocation(), train.head().getDirection().getDirection()));
         double distance2 = -1;
 
-        if (this.realVelocity == 0) {
+        if (this.realVelocity == 0)
             distance2 = getDistanceFromWalker(new TrackMovingPoint(rail.getLocation(), train.head().getDirection().getOppositeFace().getDirection()));
-        }
 
-        PathProvider provider = TrainCarts.plugin.getPathProvider();
-        PathNode destination = provider.getWorld(rail.getWorld()).getNodeByName(destinationName);
-
-        double offset1 = -1;//findStationFromWalker(new TrackMovingPoint(destination.location.getLocation(), new Vector(1, 0, 0)));
-        double offset2 = -1;//findStationFromWalker(new TrackMovingPoint(destination.location.getLocation(), new Vector(-1, 0, 0)));
-        double offset3 = -1;//findStationFromWalker(new TrackMovingPoint(destination.location.getLocation(), new Vector(0, 0, 1)));
-        double offset4 = -1;//findStationFromWalker(new TrackMovingPoint(destination.location.getLocation(), new Vector(0, 0, -1)));
-        double[] offsets = {offset1, offset2, offset3, offset4};
-        Arrays.sort(offsets);
-
-        TCHelper.sendDebugMessage(train, String.format("%.0f %.0f %.0f %.0f", offset1, offset2, offset3, offset4));
-
-        int idx = -1;
-        for (double offset : offsets) {
-            idx++;
-            if (offset < 0) continue;
-            break;
-        }
-
-        distance1 -= offsets[idx];
-        distance2 -= offsets[idx];
-        this.multiplicator = 1;
+        this.multiplier = 1; // ?
 
         if (distance1 > distance2) {
             if (distance2 > 0) {
                 this.setDistance(distance2); //Check if distance2 is -1
-                this.direction = train.head().getDirection().getOppositeFace().getDirection().normalize();
+                this.direction = train.head().getDirection().getOppositeFace();
             } else {
                 this.setDistance(distance1);
-                this.direction = train.head().getDirection().getDirection().normalize();
+                this.direction = train.head().getDirection();
             }
             return;
         }
@@ -148,10 +110,10 @@ public class SpeedData {
         if (distance2 > distance1) {
             if (distance1 > 0) {
                 this.setDistance(distance1); //Check if distance1 is -1
-                this.direction = train.head().getDirection().getDirection().normalize();
+                this.direction = train.head().getDirection();
             } else {
                 this.setDistance(distance2);
-                this.direction = train.head().getDirection().getOppositeFace().getDirection().normalize();
+                this.direction = train.head().getDirection().getOppositeFace();
             }
             return;
         }
@@ -174,54 +136,57 @@ public class SpeedData {
             return -1;
         }
 
-        //Message.debug(player, "Node was found at:" + walker.current.getLocation().toString());
-        //Route from found node to destination
-        //and add all distances from connections
+        // Route from found node to destination
         RailState state = walker.getState();
         PathNode node = provider.getWorld(state.railWorld()).getNodeAtRail(state.railBlock());
-        PathNode destination = node.getWorld().getNodeByName(destinationName);
+        PathNode destination = node.getWorld().getNodeByName(this.destinationName);
 
-        if (destination != null) {
-            if (node != destination) {
+        // Walk from node to destination
+        if (destination != null && node != destination) {
+            PathConnection[] connections = node.findRoute(destination);
+            double visitedConnections = 0;
 
-                PathConnection[] connections = node.findRoute(destination);
-                Collections.reverse(Arrays.asList(connections));
-                int junctions = 0;
+            for (int i = connections.length -1; i >= 0; i--) {
+                PathConnection connection = connections[i];
+                double stationDistance = -1;
 
+                Location loc = connection.destination.location.getLocation();
+                ClickEvent tpEvent = ClickEvent.runCommand("/cmi tppos " + loc.getX() + " " + loc.getY() + " " + loc.getZ() + " " + loc.getWorld().getName());
+                Component message = Component.text("Nächstes Ziel: " + connection.destination.getName()).clickEvent(tpEvent).color(NamedTextColor.DARK_GREEN);
+                TCHelper.sendDebugMessage(trainName, message);
 
-                for (PathConnection connection : connections) {
-                    double stationDistance = -1;
-                    junctions++;
+                BlockFace walkerDirection = TCHelper.getDirection(connection.junctionName);
+                TCHelper.sendDebugMessage(trainName, walkerDirection.name());
 
-                    Location loc = connection.destination.location.getLocation();
-                    ClickEvent tpEvent = ClickEvent.runCommand("/cmi tppos " + loc.getX() + " " + loc.getY() + " " + loc.getZ() + " " + loc.getWorld().getName());
-                    Component message = Component.text("Nächstes Ziel: " + connection.destination.getName()).clickEvent(tpEvent).color(NamedTextColor.DARK_GREEN);
-                    TCHelper.sendDebugMessage(trainName, message);
-
-                    BlockFace walkerDirection = TCHelper.getDirection(connection.junctionName);
-                    TCHelper.sendDebugMessage(trainName, walkerDirection.name());
-
-                    if (junctions <= 3) {
-                        stationDistance = findStationFromWalker(new TrackMovingPoint(destination.location.getLocation(), walkerDirection.getDirection()));
-                    }
-
-                    if (stationDistance != -1)
-                        distance += stationDistance;
-                    else
-                        distance += connection.distance;
+                // Check 3 last connections for station
+                if (visitedConnections < 3) {
+                    Message.debug("Exploring connection to " + connection.destination.getName());
+                    visitedConnections++;
+                    stationDistance = findStationFromWalker(new TrackMovingPoint(destination.location.getLocation(), walkerDirection.getDirection()));
                 }
 
-                Location loc = node.location.getLocation();
-                ClickEvent tpEvent = ClickEvent.runCommand("/cmi tppos " + loc.getX() + " " + loc.getY() + " " + loc.getZ() + " " + loc.getWorld().getName());
-                Component message = Component.text("Start: " + node.getName()).clickEvent(tpEvent).color(NamedTextColor.DARK_GREEN);
-                TCHelper.sendDebugMessage(trainName, message);
+                if (stationDistance != -1) {
+                    distance += stationDistance;
+                    return distance;
+                }
+                else
+                    distance += connection.distance;
             }
+
+            Location loc = node.location.getLocation();
+            ClickEvent tpEvent = ClickEvent.runCommand("/cmi tppos " + loc.getX() + " " + loc.getY() + " " + loc.getZ() + " " + loc.getWorld().getName());
+            Component message = Component.text("Start: " + node.getName()).clickEvent(tpEvent).color(NamedTextColor.DARK_GREEN);
+            TCHelper.sendDebugMessage(trainName, message);
 
             return distance;
         }
 
-        TCHelper.sendDebugMessage(this.trainName, "Das Ziel '" + this.destinationName + "' wurde nicht gefunden");
-        return 0;
+        else {
+            if (destination == null)
+                TCHelper.sendDebugMessage(this.trainName, "Das Ziel '" + this.destinationName + "' wurde nicht gefunden");
+
+            return -1;
+        }
     }
 
     private double findStationFromWalker(TrackMovingPoint walker) {
@@ -230,7 +195,7 @@ public class SpeedData {
         double distance = 0;
         boolean stationFound = findStationSign(walker);
 
-        while (walker.hasNext() && !stationFound && distance < 100) {
+        while (walker.hasNext() && !stationFound) {
             walker.next();
             distance++;
             stationFound = findStationSign(walker);
@@ -245,11 +210,15 @@ public class SpeedData {
     private boolean findStationSign(TrackMovingPoint walker) {
         for (RailSignCache.TrackedSign sign : walker.getState().railSigns()) {
 
+            TCHelper.sendDebugMessage(this.trainName, "'" + sign.sign.getLine(0) + "' -> '" + sign.sign.getLine(1) + "' -> '" + sign.sign.getLine(2) + "' -> '" + sign.sign.getLine(3) + "'");
+
             if (!sign.sign.getLine(1).toLowerCase().startsWith("station"))
                 continue;
 
-            TCHelper.sendDebugMessage(this.trainName, "SignType " + sign.sign.getLine(1) + " found");
-            TCHelper.sendDebugMessage(this.trainName, "'" + sign.sign.getLine(0) + "' -> '" + sign.sign.getLine(1) + "' -> '" + sign.sign.getLine(2) + "' -> '" + sign.sign.getLine(3) + "'");
+            Location loc = sign.sign.getLocation();;
+            ClickEvent tpEvent = ClickEvent.runCommand("/cmi tppos " + loc.getX() + " " + loc.getY() + " " + loc.getZ() + " " + loc.getWorld().getName());
+            Component message = Component.text("Station found at: " + loc.getX() + " " + loc.getY() + " " + loc.getZ()).clickEvent(tpEvent).color(NamedTextColor.GOLD);
+            TCHelper.sendDebugMessage(trainName, message);
 
             // Spawn markerParticle (debug)
             BlockFace facing = walker.getState().enterFace();
@@ -293,15 +262,15 @@ public class SpeedData {
         calcVelocity(train);
 
         //Check if cart is moving forward
-        Vector newDirection = train.head().getDirection().getDirection().normalize();
-        if (this.direction.add(newDirection).length() <= 1) {
-            this.multiplicator *= -1;
+        BlockFace newDirection = train.head().getDirection();
+        if (this.direction.getDirection().add(newDirection.getDirection()).length() <= 1) {
+            this.multiplier *= -1;
         }
 
         this.direction = newDirection;
         Location newLoc = train.head().getBlock().getLocation();
 
-        this.distance -= this.multiplicator * newLoc.distance(this.lastLoc);
+        this.distance -= this.multiplier * newLoc.distance(this.lastLoc);
         if (this.distance < 0) {
             this.distance = 0;
         }
