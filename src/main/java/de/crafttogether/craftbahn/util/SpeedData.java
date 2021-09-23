@@ -86,43 +86,51 @@ public class SpeedData {
         if (destinationName.equals(""))
             return;
 
-        //Find first node from position
+        // Determine moving direction
         Block rail = train.head().getRailTracker().getBlock();
-        double distance1 = getDistanceFromWalker(new TrackMovingPoint(rail.getLocation(), train.head().getDirection().getDirection()));
+        double distance = 0;
+        double distance1 = getDistanceFromWalker(new TrackMovingPoint(rail.getLocation(), train.head().getDirection().getDirection()), false);
         double distance2 = -1;
 
         if (this.realVelocity == 0)
-            distance2 = getDistanceFromWalker(new TrackMovingPoint(rail.getLocation(), train.head().getDirection().getOppositeFace().getDirection()));
+            distance2 = getDistanceFromWalker(new TrackMovingPoint(rail.getLocation(), train.head().getDirection().getOppositeFace().getDirection()), false);
 
         this.multiplier = 1; // ?
 
         if (distance1 > distance2) {
             if (distance2 > 0) {
-                this.setDistance(distance2); //Check if distance2 is -1
                 this.direction = train.head().getDirection().getOppositeFace();
+                distance = distance2;
             } else {
-                this.setDistance(distance1);
                 this.direction = train.head().getDirection();
+                distance = distance1;
             }
-            return;
         }
 
         if (distance2 > distance1) {
             if (distance1 > 0) {
-                this.setDistance(distance1); //Check if distance1 is -1
                 this.direction = train.head().getDirection();
+                distance = distance1;
             } else {
-                this.setDistance(distance2);
                 this.direction = train.head().getDirection().getOppositeFace();
+                distance = distance2;
             }
-            return;
         }
 
-        TCHelper.sendDebugMessage(train, "Couldn't find a node");
-        this.setDistance(0);
+        // Try to determine distance to station
+        double stationDistance = getDistanceFromWalker(new TrackMovingPoint(rail.getLocation(), this.direction.getDirection()), true);
+        if (stationDistance != -1)
+            distance = stationDistance;
+
+        if (distance == -1) {
+            TCHelper.sendDebugMessage(train, "Couldn't find a node");
+            distance = -1;
+        }
+
+        this.setDistance(distance);
     }
 
-    private double getDistanceFromWalker(TrackMovingPoint walker) {
+    private double getDistanceFromWalker(TrackMovingPoint walker, boolean findStation) {
         PathProvider provider = TrainCarts.plugin.getPathProvider();
         walker.setLoopFilter(true);
         double distance = 0;
@@ -148,29 +156,36 @@ public class SpeedData {
 
             for (int i = connections.length -1; i >= 0; i--) {
                 PathConnection connection = connections[i];
-                double stationDistance = -1;
 
-                Location loc = connection.destination.location.getLocation();
-                ClickEvent tpEvent = ClickEvent.runCommand("/cmi tppos " + loc.getX() + " " + loc.getY() + " " + loc.getZ() + " " + loc.getWorld().getName());
-                Component message = Component.text("Nächstes Ziel: " + connection.destination.getName()).clickEvent(tpEvent).color(NamedTextColor.DARK_GREEN);
-                TCHelper.sendDebugMessage(trainName, message);
-
-                BlockFace walkerDirection = TCHelper.getDirection(connection.junctionName);
-                TCHelper.sendDebugMessage(trainName, walkerDirection.name());
-
-                // Check 3 last connections for station
-                if (visitedConnections < 3 && connections[i - 1] != null) {
-                    Message.debug("Exploring connection to " + connection.destination.getName());
-                    visitedConnections++;
-                    stationDistance = findStationFromWalker(new TrackMovingPoint(connections[i - 1].destination.location.getLocation(), walkerDirection.getDirection()));
-                }
-
-                if (stationDistance != -1) {
-                    distance += stationDistance;
-                    return distance;
-                }
-                else
+                if (!findStation)
                     distance += connection.distance;
+
+                else {
+                    double stationDistance = -1;
+
+                    Location loc = connection.destination.location.getLocation();
+                    ClickEvent tpEvent = ClickEvent.runCommand("/cmi tppos " + loc.getX() + " " + loc.getY() + " " + loc.getZ() + " " + loc.getWorld().getName());
+                    Component message = Component.text("Nächstes Ziel: " + connection.destination.getName()).clickEvent(tpEvent).color(NamedTextColor.DARK_GREEN);
+                    TCHelper.sendDebugMessage(trainName, message);
+
+                    BlockFace walkerDirection = TCHelper.getDirection(connection.junctionName);
+                    TCHelper.sendDebugMessage(trainName, walkerDirection.name());
+
+                    // Check 3 last connections for station
+                    if (visitedConnections < 3 && connections[i - 1] != null) {
+                        Message.debug("Exploring connection to " + connection.destination.getName());
+                        visitedConnections++;
+                        stationDistance = findStationFromWalker(new TrackMovingPoint(connections[i - 1].destination.location.getLocation(), walkerDirection.getDirection()));
+                    }
+
+                    if (stationDistance != -1) {
+                        distance += stationDistance;
+                        break;
+                    }
+
+                    else
+                        distance += connection.distance;
+                }
             }
 
             Location loc = node.location.getLocation();
