@@ -159,10 +159,10 @@ public class SpeedData {
                 TCHelper.sendDebugMessage(trainName, walkerDirection.name());
 
                 // Check 3 last connections for station
-                if (visitedConnections < 3) {
+                if (visitedConnections < 3 && connections[i - 1] != null) {
                     Message.debug("Exploring connection to " + connection.destination.getName());
                     visitedConnections++;
-                    stationDistance = findStationFromWalker(new TrackMovingPoint(destination.location.getLocation(), walkerDirection.getDirection()));
+                    stationDistance = findStationFromWalker(new TrackMovingPoint(connections[i - 1].destination.location.getLocation(), walkerDirection.getDirection()));
                 }
 
                 if (stationDistance != -1) {
