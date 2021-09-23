@@ -173,7 +173,7 @@ public class SpeedData {
 
                     // Check 3 last connections for station
                     if (visitedConnections < 3 && connections[i - 1] != null) {
-                        Message.debug("Exploring connection to " + connection.destination.getName());
+                        TCHelper.sendDebugMessage(trainName, Component.text("Exploring connection from " + connections[i - 1].destination.getName() + " to " + connection.destination.getName()).color(NamedTextColor.YELLOW));
                         visitedConnections++;
                         stationDistance = findStationFromWalker(new TrackMovingPoint(connections[i - 1].destination.location.getLocation(), walkerDirection.getDirection()));
                     }
