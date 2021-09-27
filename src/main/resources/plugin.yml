@@ -2,7 +2,7 @@ name: CraftBahn
 version: ${project.version}
 main: de.crafttogether.CraftBahnPlugin
 api-version: 1.13
-depend: [ MySQLAdapter, dynmap, BKCommonLib, Train_Carts, DICore ]
+depend: [ CTMySQLAdapter, dynmap, BKCommonLib, Train_Carts, DICore ]
 authors: [J0schlZ]
 website: https://craft-together.de/
 description: Ich mag Züge
