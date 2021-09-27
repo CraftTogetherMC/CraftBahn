@@ -5,8 +5,8 @@ import com.bergerkiller.bukkit.tc.events.MissingPathConnectionEvent;
 import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.util.Message;
 import de.crafttogether.craftbahn.util.TCHelper;
-import di.dicore.DIApi;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
@@ -31,7 +31,11 @@ public class MissingPathConnectionListener implements Listener {
         String passengers = "";
         for (Player p : TCHelper.getPlayerPassengers(train))
             passengers += p.getName() + ", ";
-        passengers = passengers.substring(0, passengers.length() -2);
+
+        if (passengers.isEmpty())
+            passengers = "Keine";
+        else
+            passengers = passengers.substring(0, passengers.length() -2);
 
         ClickEvent tpEvent = ClickEvent.runCommand("/cmi tppos " + loc.getX() + " " + loc.getY() + " " + loc.getZ() + " " + loc.getWorld().getName());
 
@@ -41,30 +45,32 @@ public class MissingPathConnectionListener implements Listener {
             Message.debug(p, Message.parse("&6Zugname: &e" + trainName).clickEvent(tpEvent));
             Message.debug(p, Message.parse("&6Passagiere: &e" + passengers).clickEvent(tpEvent));
             Message.debug(p, Message.parse("&6Position: &e" + loc.getWorld().getName() + ", " + loc.getBlockX() + ", " + loc.getY() + ", " + loc.getZ()).clickEvent(tpEvent));
-            Message.debug(p, Message.parse("&6Der Zug kam von: &e" + train.head().getDirection().getOppositeFace().name()).clickEvent(tpEvent));
+            Message.debug(p, Message.parse("&6Herkunft: &e" + train.head().getDirection().getOppositeFace().name()).clickEvent(tpEvent));
         }
 
-        DIApi api = CraftBahnPlugin.getInstance().getDiscordApi();
-        Optional<TextChannel> channelOpt = Optional.ofNullable(api.getCoreController().getDiscordApi().getTextChannelById(123));
+        JDA api = CraftBahnPlugin.getInstance().getDiscordBot().getApi();
+        Optional<TextChannel> channelOpt = Optional.ofNullable(api.getTextChannelById("757206318389002240"));
 
         MessageEmbed embed = getEmbed(train, loc, passengers);
 
-        TextChannel chanel = channelOpt.get();
-        MessageAction message = chanel.sendMessage(embed);
+        TextChannel channel = channelOpt.get();
+        channel.sendMessage(embed).complete();
     }
 
     private static MessageEmbed getEmbed(MinecartGroup train, Location loc, String passengers) {
-        DIApi api = CraftBahnPlugin.getInstance().getDiscordApi();
         EmbedBuilder embed = (new EmbedBuilder()).setColor(Color.BLUE);
 
         embed.setTitle("Achtung! Zugunglück!!");
+        embed.setAuthor("CraftBahn");
         embed.appendDescription("Fahrziel wurde nicht gefunden!");
+        embed.setFooter("/tppos " + loc.getBlockX() + " " + loc.getY() + " " + loc.getZ() + " " + loc.getWorld().getName());
 
         embed.addField("Zugname", train.getProperties().getTrainName(), true);
         embed.addField("Fahrziel", train.getProperties().getDestination(), true);
         embed.addField("Passagiere", passengers, true);
-        embed.addField("Zug kam aus", train.head().getDirection().getOppositeFace().name(), true);
+        embed.addField("Herkunft", train.head().getDirection().getOppositeFace().name(), true);
         embed.addField("Position", loc.getWorld().getName() + ", " + loc.getBlockX() + ", " + loc.getY() + ", " + loc.getZ(), true);
+        embed.addField("", loc.getWorld().getName() + ", " + loc.getBlockX() + ", " + loc.getY() + ", " + loc.getZ(), true);
 
         return embed.build();
     }

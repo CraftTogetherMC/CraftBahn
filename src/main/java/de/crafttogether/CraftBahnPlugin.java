@@ -1,6 +1,5 @@
 package de.crafttogether;
 
-import com.bergerkiller.bukkit.tc.TrainCarts;
 import de.crafttogether.craftbahn.commands.Commands;
 import de.crafttogether.craftbahn.commands.ListCommand;
 import de.crafttogether.craftbahn.commands.MobEnterCommand;
@@ -12,12 +11,11 @@ import de.crafttogether.craftbahn.net.Client;
 import de.crafttogether.craftbahn.net.Server;
 import de.crafttogether.craftbahn.portals.PortalStorage;
 import de.crafttogether.craftbahn.tasks.Speedometer;
-import de.crafttogether.craftbahn.util.Message;
 import de.crafttogether.craftbahn.util.TCHelper;
-import de.crafttogether.mysql.MySQLAdapter;
 import de.crafttogether.mysql.MySQLConfig;
-import di.dicore.DIApi;
-import di.internal.exception.NoApiException;
+import de.crafttogether.mysql.MySQLPool;
+import di.dicore.BukkitApplication;
+import di.internal.entity.DiscordBot;
 import org.bukkit.Bukkit;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -31,9 +29,9 @@ public final class CraftBahnPlugin extends JavaPlugin {
 
     private String serverName;
     private DynmapAPI dynmap;
-    private DIApi discordApi;
+    private DiscordBot discordBot;
 
-    private MySQLAdapter MySQLAdapter;
+    private MySQLPool mySQLPool;
     private PortalStorage portalStorage;
     private DestinationStorage destinationStorage;
 
@@ -48,8 +46,8 @@ public final class CraftBahnPlugin extends JavaPlugin {
         plugin = this;
 
         /* Check dependencies */
-        if (!getServer().getPluginManager().isPluginEnabled("MySQLAdapter")) {
-            plugin.getLogger().warning("Couldn't find MySQLAdapter");
+        if (!getServer().getPluginManager().isPluginEnabled("CTMySQLAdapter")) {
+            plugin.getLogger().warning("Couldn't find CTMySQLAdapter");
             Bukkit.getServer().getPluginManager().disablePlugin(plugin);
             return;
         }
@@ -121,16 +119,10 @@ public final class CraftBahnPlugin extends JavaPlugin {
             return;
         }
 
-        // Initialize Discord-Integration
-        try {
-            discordApi = new DIApi(this, this.getClassLoader());
-        } catch (NoApiException e) {
-            getLogger().warning("Unable to initialize Discord-Integration");
-            e.printStackTrace();
-        }
+        discordBot = BukkitApplication.getInternalController().getBot();
 
         // Initialize MySQLAdapter
-        MySQLAdapter = new MySQLAdapter(this, myCfg);
+        mySQLPool = new MySQLPool(this, myCfg);
 
         // Initialize Storage-Adapter
         portalStorage = new PortalStorage();
@@ -140,11 +132,11 @@ public final class CraftBahnPlugin extends JavaPlugin {
         server = new Server();
         server.listen(config.getInt("Settings.Port"));
 
-        // Register SignActions (TrainCarts)
-        TCHelper.registerActionSigns();
-
         // Start Speedometer
         speedometer = new Speedometer();
+
+        // Register SignActions (TrainCarts)
+        TCHelper.registerActionSigns();
     }
 
     public void onDisable() {
@@ -152,7 +144,8 @@ public final class CraftBahnPlugin extends JavaPlugin {
         TCHelper.unregisterActionSigns();
 
         // Stop Speedometer
-        speedometer.stop();
+        if (speedometer != null)
+            speedometer.stop();
 
         // Close server
         if (server != null)
@@ -162,8 +155,8 @@ public final class CraftBahnPlugin extends JavaPlugin {
         Client.closeAll();
 
         // Shutdown MySQL-Adapter
-        if(MySQLAdapter != null)
-            MySQLAdapter.disconnect();
+        if(mySQLPool != null)
+            mySQLPool.close();
     }
 
     private void registerCommand(String cmd, TabExecutor executor) {
@@ -171,9 +164,9 @@ public final class CraftBahnPlugin extends JavaPlugin {
         Objects.requireNonNull(getCommand(cmd)).setTabCompleter(executor);
     }
 
-    public MySQLAdapter getMySQLAdapter() { return MySQLAdapter; }
+    public MySQLPool getMySQLPool() { return mySQLPool; }
     public DynmapAPI getDynmap() { return dynmap; }
-    public DIApi getDiscordApi() { return discordApi; }
+    public DiscordBot getDiscordBot() { return discordBot; }
 
     public PortalStorage getPortalStorage() { return portalStorage; }
     public DestinationStorage getDestinationStorage() { return destinationStorage; }
