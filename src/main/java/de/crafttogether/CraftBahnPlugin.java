@@ -12,8 +12,8 @@ import de.crafttogether.craftbahn.net.Server;
 import de.crafttogether.craftbahn.portals.PortalStorage;
 import de.crafttogether.craftbahn.tasks.Speedometer;
 import de.crafttogether.craftbahn.util.TCHelper;
+import de.crafttogether.mysql.MySQLAdapter;
 import de.crafttogether.mysql.MySQLConfig;
-import de.crafttogether.mysql.MySQLPool;
 import di.dicore.BukkitApplication;
 import di.internal.entity.DiscordBot;
 import org.bukkit.Bukkit;
@@ -31,7 +31,7 @@ public final class CraftBahnPlugin extends JavaPlugin {
     private DynmapAPI dynmap;
     private DiscordBot discordBot;
 
-    private MySQLPool mySQLPool;
+    private MySQLAdapter mySQLAdapter;
     private PortalStorage portalStorage;
     private DestinationStorage destinationStorage;
 
@@ -122,7 +122,7 @@ public final class CraftBahnPlugin extends JavaPlugin {
         discordBot = BukkitApplication.getInternalController().getBot();
 
         // Initialize MySQLAdapter
-        mySQLPool = new MySQLPool(this, myCfg);
+        mySQLAdapter = new MySQLAdapter(this, myCfg);
 
         // Initialize Storage-Adapter
         portalStorage = new PortalStorage();
@@ -155,8 +155,8 @@ public final class CraftBahnPlugin extends JavaPlugin {
         Client.closeAll();
 
         // Shutdown MySQL-Adapter
-        if(mySQLPool != null)
-            mySQLPool.close();
+        if(mySQLAdapter != null)
+            mySQLAdapter.disconnect();
     }
 
     private void registerCommand(String cmd, TabExecutor executor) {
@@ -164,7 +164,7 @@ public final class CraftBahnPlugin extends JavaPlugin {
         Objects.requireNonNull(getCommand(cmd)).setTabCompleter(executor);
     }
 
-    public MySQLPool getMySQLPool() { return mySQLPool; }
+    public MySQLAdapter getMySQLAdapter() { return mySQLAdapter; }
     public DynmapAPI getDynmap() { return dynmap; }
     public DiscordBot getDiscordBot() { return discordBot; }
 
