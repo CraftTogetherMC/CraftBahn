@@ -6,16 +6,24 @@ import com.bergerkiller.bukkit.tc.controller.MinecartGroupStore;
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.controller.MinecartMemberStore;
 import com.bergerkiller.bukkit.tc.controller.type.MinecartMemberChest;
-import com.bergerkiller.bukkit.tc.controller.type.MinecartMemberRideable;
+import com.bergerkiller.bukkit.tc.properties.TrainProperties;
+import com.bergerkiller.bukkit.tc.properties.TrainPropertiesStore;
 import com.bergerkiller.bukkit.tc.signactions.SignAction;
 import de.crafttogether.craftbahn.signactions.SignActionPortalIn;
 import de.crafttogether.craftbahn.signactions.SignActionPortalOut;
+import net.kyori.adventure.audience.MessageType;
+import net.kyori.adventure.text.Component;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.ChatColor;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 public class TCHelper {
     private static SignActionPortalIn signActionPortalIn;
@@ -60,6 +68,7 @@ public class TCHelper {
     }
 
     // Get train by name
+    /*
     public static MinecartGroup getTrain(String trainName) {
         for (MinecartGroup group : MinecartGroupStore.getGroups()) {
             if (group.getProperties().getTrainName().equals(trainName))
@@ -67,28 +76,11 @@ public class TCHelper {
         }
 
         return null;
-    }
+    }*/
 
-    public static List<Player> getPlayerPassengers(MinecartMember<?> member) {
-        List<Player> passengers = new ArrayList<>();
-        CommonEntity entity = CommonEntity.get(member.getEntity().getEntity());
-
-        if (!(member instanceof MinecartMemberRideable))
-            return passengers;
-
-        for (Object passenger : entity.getPlayerPassengers())
-            passengers.add((Player) passenger);
-
-        return passengers;
-    }
-
-    public static List<Player> getPlayerPassengers(MinecartGroup group) {
-        List<Player> passengers = new ArrayList<>();
-
-        for (MinecartMember member : group)
-            passengers.addAll(getPlayerPassengers(member));
-
-        return passengers;
+    public static MinecartGroup getTrain(String trainName) {
+        TrainProperties trainProperties = TrainPropertiesStore.get(trainName);
+        return (trainProperties == null) ? null : trainProperties.getHolder();
     }
 
     // Clear inventory if given MinecartMember is a chest-minecart
@@ -105,6 +97,22 @@ public class TCHelper {
             clearInventory(member);
     }
 
+
+    // Get all player-passengers from a train
+    public static Collection<Player> getPlayerPassengers(MinecartGroup group) {
+        Collection<Player> passengers = new ArrayList<>();
+
+        for (MinecartMember<?> member : group)
+            passengers.addAll(member.getEntity().getPlayerPassengers());
+
+        return passengers;
+    }
+
+    // Get all player-passengers from a cart
+    public static Collection<Player> getPlayerPassengers(MinecartMember<?> member) {
+        return member.getEntity().getPlayerPassengers();
+    }
+
     // Send message to all passengers of a train
     public static void sendMessage(MinecartGroup group, String message) {
         for (MinecartMember<?> member : group)
@@ -117,7 +125,86 @@ public class TCHelper {
 
         for (Object passenger : vehicle.getPlayerPassengers()) {
             if (passenger instanceof Player player)
-                player.sendMessage(message);
+                player.sendMessage(Component.text(message));
         }
+    }
+
+    // Send actionbar to all passengers of a train
+    public static void sendActionbar(MinecartGroup group, String message) {
+        for (MinecartMember<?> member : group)
+            sendActionbar(member, message);
+    }
+
+    // Send permission-based actionbar to all passengers of a train
+    public static void sendActionbar(MinecartGroup group, String permission, String message) {
+        for (MinecartMember<?> member : group)
+            sendActionbar(member, permission, message);
+    }
+
+    // Send actionBar to all passengers of a cart
+    public static void sendActionbar(MinecartMember<?> member, String message) {
+        CommonEntity<?> vehicle = CommonEntity.get(member.getEntity().getEntity());
+
+        for (Object passenger : vehicle.getPlayerPassengers()) {
+            if (passenger instanceof Player player)
+                player.sendActionBar(Component.text(message));
+        }
+    }
+
+    // Send permission-based actionbar to all passengers of a cart
+    public static void sendActionbar(MinecartMember<?> member, String permission, String message) {
+        CommonEntity<?> vehicle = CommonEntity.get(member.getEntity().getEntity());
+
+        for (Object passenger : vehicle.getPlayerPassengers()) {
+            if (passenger instanceof Player player && player.hasPermission(permission))
+                player.sendActionBar(Component.text(message));
+        }
+    }
+
+    // Send debug-message to all passengers of a train
+    public static void sendDebugMessage(String trainName, String message) {
+        sendDebugMessage(trainName, Component.text(message));
+    }
+
+    // Send debug-message to all passengers of a train
+    public static void sendDebugMessage(String trainName, Component message) {
+        MinecartGroup train = getTrain(trainName);
+        if (train != null) sendDebugMessage(train, message);
+    }
+
+    // Send debug-message to all passengers of a train
+    public static void sendDebugMessage(MinecartGroup group, String message) {
+        sendDebugMessage(group, Component.text(message));
+    }
+
+    // Send debug-message to all passengers of a cart
+    public static void sendDebugMessage(MinecartMember<?> member, String message) {
+        sendDebugMessage(member, Component.text(message));
+    }
+
+    // Send debug-message to all passengers of a train
+    public static void sendDebugMessage(MinecartGroup group, Component message) {
+        for (MinecartMember<?> member : group)
+            sendDebugMessage(member, message);
+    }
+
+    // Send debug-message to all passengers of a cart
+    public static void sendDebugMessage(MinecartMember<?> member, Component message) {
+        CommonEntity<?> vehicle = CommonEntity.get(member.getEntity().getEntity());
+
+        for (Object passenger : vehicle.getPlayerPassengers()) {
+            if (passenger instanceof Player player)
+                Message.debug(player, message);
+        }
+    }
+
+    public static BlockFace getDirection(String junctionName) {
+        return switch (junctionName) {
+            default -> null;
+            case "n" -> BlockFace.NORTH;
+            case "e" -> BlockFace.EAST;
+            case "s" -> BlockFace.SOUTH;
+            case "w" -> BlockFace.WEST;
+        };
     }
 }

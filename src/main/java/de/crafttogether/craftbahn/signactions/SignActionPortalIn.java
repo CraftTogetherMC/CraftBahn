@@ -7,7 +7,6 @@ import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.events.SignActionEvent;
 import com.bergerkiller.bukkit.tc.events.SignChangeActionEvent;
-import com.bergerkiller.bukkit.tc.properties.standard.type.CollisionMobCategory;
 import com.bergerkiller.bukkit.tc.properties.standard.type.CollisionOptions;
 import com.bergerkiller.bukkit.tc.signactions.SignAction;
 import com.bergerkiller.bukkit.tc.signactions.SignActionType;
@@ -19,10 +18,13 @@ import de.crafttogether.craftbahn.util.Message;
 import de.crafttogether.craftbahn.util.TCHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.HashMap;
 import java.util.List;
@@ -91,11 +93,11 @@ public class SignActionPortalIn extends SignAction {
     private void displayError(SignActionEvent event) {
         // When not successful, display particles at the sign to indicate such
         BlockFace facingInv = event.getFacing().getOppositeFace();
-        Location effectLocation = event.getSign().getLocation()
+        Location effectLocation = event.getRailLocation()
             .add(0.5, 0.5, 0.5)
             .add(0.3 * facingInv.getModX(), 0.0, 0.3 * facingInv.getModZ());
 
-        Util.spawnDustParticle(effectLocation, 255.0, 255.0, 0.0);
+        Util.spawnParticle(effectLocation, Particle.BARRIER);
         WorldUtil.playSound(effectLocation, SoundEffect.EXTINGUISH, 1.0f, 2.0f);
     }
 
@@ -106,8 +108,19 @@ public class SignActionPortalIn extends SignAction {
 
         if (portal == null || portal.getTargetLocation() == null) {
             TCHelper.sendMessage(event.getGroup(), "§cCouldn't find an §rPortal-Exit §cfor §r'§e" + portalName + "§r'§c!");
+            displayError(event);
             group.destroy();
             return;
+        }
+
+        // Apply blindness-effect
+        PotionEffect blindness = new PotionEffect(PotionEffectType.BLINDNESS, 40, 1);
+
+        for (MinecartMember<?> member : group) {
+            List<Player> passengers = member.getEntity().getPlayerPassengers();
+
+            for (Player passenger : passengers)
+                passenger.addPotionEffect(blindness);
         }
 
         // Clear Inventory if needed
@@ -128,27 +141,24 @@ public class SignActionPortalIn extends SignAction {
         MinecartGroup group = event.getGroup();
         Portal portal = pendingTeleports.get(group);
 
-        if (portal == null)
+        if (portal == null) {
+            Message.debug("Portal is null");
             return;
+        }
 
         MinecartMember<?> member = event.getMember();
 
-        // Iterate passengers
-        for (Entity passenger : member.getEntity().getPassengers()) {
+        for (Entity passenger : member.getEntity().getEntity().getPassengers()) {
 
             if (passenger instanceof Player) {
                 Player playerPassenger = (Player) passenger;
                 PortalHandler.sendToServer(playerPassenger, portal.getTargetLocation().getServer());
-
-                Message.debug(playerPassenger, "Try to send you to: " + portal.getTargetLocation().toString());
-                Message.debug("Try to send " + playerPassenger.getName() + " to: " + portal.getTargetLocation().toString());
             }
 
             else if (passenger instanceof LivingEntity) {
-                LivingEntity entity = (LivingEntity) passenger;
-                Message.debug("Despawn " + entity.getType().name());
-                entity.remove();
+                // Coming Soon
             }
+
         }
 
         // Destroy cart and remove group

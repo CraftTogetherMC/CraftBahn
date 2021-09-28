@@ -2,12 +2,16 @@ package de.crafttogether.craftbahn.listener;
 
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.controller.MinecartMemberStore;
+import de.crafttogether.CraftBahnPlugin;
+import de.crafttogether.craftbahn.tasks.Speedometer;
 import de.crafttogether.craftbahn.util.Message;
 import de.crafttogether.craftbahn.util.TCHelper;
+import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -32,9 +36,15 @@ public class TrainEnterListener implements Listener {
             sendEnterMessage(p, cart);
         }
 
+        // Add Speedometer for train if no one exists
+        String trainName = cart.getGroup().getProperties().getTrainName();
+        Speedometer speedometer = CraftBahnPlugin.getInstance().getSpeedometer();
+        if (speedometer.get(trainName) == null)
+            speedometer.add(trainName);
+
         /* Set View-Distance */
-        p.setNoTickViewDistance(6);
-        p.setViewDistance(6);
+        //p.setNoTickViewDistance(6);
+        //p.setViewDistance(6);
     }
 
     @EventHandler
@@ -45,9 +55,26 @@ public class TrainEnterListener implements Listener {
         MinecartMember<?> cart = MinecartMemberStore.getFromEntity(e.getVehicle());
         if (cart == null) return;
 
+        // Check if train has no more passengers
+        if (TCHelper.getPlayerPassengers(cart.getGroup()).size() <= 1) {
+            // Remove Speedometer if activated
+            CraftBahnPlugin.getInstance().getSpeedometer().remove(cart.getGroup().getProperties().getTrainName());
+
+            // Destroy train if it's tagged as "onTrack" and moving
+            Bukkit.getScheduler().runTaskLater(CraftBahnPlugin.getInstance(), () -> {
+                boolean onTrack = cart.getGroup().getProperties().getTags().contains("onTrack");
+
+                if (onTrack && cart.isMoving())
+                    cart.getGroup().destroy();
+            }, 20L*5);
+        }
+
+        // Clear ActionBar
+        p.sendActionBar(Component.text(""));
+
         /* Set View-Distance */
-        p.setNoTickViewDistance(p.getWorld().getNoTickViewDistance());
-        p.setViewDistance(p.getWorld().getViewDistance());
+        //p.setNoTickViewDistance(p.getWorld().getNoTickViewDistance());
+        //p.setViewDistance(p.getWorld().getViewDistance());
     }
 
     private void sendEnterMessage(Player p, MinecartMember<?> cart) {

@@ -20,7 +20,7 @@ public class Client extends Thread {
     public Client(int port) {
 
         try {
-            clientSocket = new Socket("localhost", port);
+            clientSocket = new Socket("127.0.0.1", port);
             outputStream = clientSocket.getOutputStream();
         } catch (ConnectException e) {
             if (!e.getMessage().equalsIgnoreCase("connection refused")) {
@@ -56,8 +56,8 @@ public class Client extends Thread {
             pw.write(output);
             pw.flush();
 
-            //Message.debug("Sent:");
-            //Message.debug(output);
+            Message.debug("Sent:");
+            Message.debug(output);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
