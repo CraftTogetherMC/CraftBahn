@@ -147,18 +147,13 @@ public class SignActionPortalIn extends SignAction {
         }
 
         MinecartMember<?> member = event.getMember();
-
         for (Entity passenger : member.getEntity().getEntity().getPassengers()) {
 
-            if (passenger instanceof Player) {
-                Player playerPassenger = (Player) passenger;
-                PortalHandler.sendToServer(playerPassenger, portal.getTargetLocation().getServer());
-            }
+            if (passenger instanceof Player)
+                PortalHandler.sendPlayerToServer((Player) passenger, portal);
 
-            else if (passenger instanceof LivingEntity) {
-                // Coming Soon
-            }
-
+            else if (passenger instanceof LivingEntity)
+                PortalHandler.sendEntityToServer((LivingEntity) passenger, portal);
         }
 
         // Destroy cart and remove group

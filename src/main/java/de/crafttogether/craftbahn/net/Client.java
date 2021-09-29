@@ -79,6 +79,13 @@ public class Client extends Thread {
         }
     }
 
+    public OutputStream getOutputStream() {
+        if (!isConnected())
+            return null;
+
+        return outputStream;
+    }
+
     public static Collection<Client> getActiveClients() {
         return Client.activeClients;
     }

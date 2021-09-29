@@ -4,7 +4,6 @@ import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import de.crafttogether.craftbahn.portals.Passenger;
 import de.crafttogether.craftbahn.portals.PortalHandler;
 import de.crafttogether.craftbahn.util.Message;
-import de.crafttogether.craftbahn.util.TCHelper;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;

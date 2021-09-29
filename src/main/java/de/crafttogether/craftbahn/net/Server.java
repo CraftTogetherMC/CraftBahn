@@ -1,9 +1,17 @@
 package de.crafttogether.craftbahn.net;
 
+import com.avaje.ebeaninternal.server.deploy.BeanDescriptor;
 import com.bergerkiller.bukkit.common.config.ConfigurationNode;
+import com.bergerkiller.bukkit.common.nbt.CommonTagCompound;
+import com.bergerkiller.generated.net.minecraft.world.entity.EntityHandle;
 import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.portals.PortalHandler;
 import de.crafttogether.craftbahn.util.Message;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.EntityType;
+import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,12 +22,35 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.UUID;
 
 public class Server extends Thread {
     private int port;
     private ServerSocket serverSocket;
     private boolean listen;
     private ArrayList<Socket> clients;
+
+    public static class MessageReceiveEvent extends Event {
+        private static final HandlerList HANDLERS = new HandlerList();
+
+        String sender;
+        String message;
+
+        public MessageReceiveEvent(String sender, String message, boolean isAsynchronous) {
+            super(isAsynchronous);
+            this.sender = sender;
+            this.message = message;
+        }
+
+        public String getSender() { return sender; }
+        public String getMessage() { return message; }
+
+        @NotNull
+        @Override
+        public HandlerList getHandlers() { return HANDLERS; }
+        public static HandlerList getHandlerList() { return HANDLERS; }
+    }
 
     public void listen(int port) {
         this.port = port;
@@ -54,8 +85,8 @@ public class Server extends Thread {
                 if (connection == null)
                     continue;
 
-                String ip = connection.getInetAddress().getHostAddress();
-                Message.debug(ip + " connected.");
+                String senderAddress = connection.getInetAddress().getHostAddress();
+                Message.debug(senderAddress + " connected.");
 
                 try {
                     inputStream = connection.getInputStream();
@@ -63,18 +94,35 @@ public class Server extends Thread {
                     StringBuilder received = new StringBuilder();
 
                     String inputLine;
-                    while ((inputLine = reader.readLine()) != null)
-                        received.append(inputLine + "\r\n");
 
-                    Message.debug("Received:");
-                    Message.debug(received.toString());
+                    while ((inputLine = reader.readLine()) != null) {
 
-                    // Deserialize received Data
-                    ConfigurationNode data = new ConfigurationNode();
-                    data.loadFromString(received.toString()); // Deserialize received ConfigurationNode
+                        if (inputLine.startsWith("entity")) {
+                            String[] entityInfo = inputLine.split(";");
+                            if (!entityInfo[0].equals("entity")) continue;
 
-                    // Process received information
-                    PortalHandler.receiveTrain(data);
+                            UUID uuid = UUID.fromString(entityInfo[1]);
+                            EntityType entityType = EntityType.valueOf(entityInfo[2]);
+
+                            Message.debug("ENTITY RECEIVED BRUH!!! (" + entityType + ") <33");
+                            CommonTagCompound tagCompound = CommonTagCompound.readFromStream(inputStream);
+                            Bukkit.getScheduler().runTask(CraftBahnPlugin.getInstance(), () -> PortalHandler.receiveEntity(uuid, entityType, tagCompound));
+                            return;
+                        }
+
+                        received.append(inputLine).append("\r\n");
+                    }
+
+
+                    //Message.debug("Received:");
+                    //Message.debug(received.toString());
+
+                    ConfigurationNode dataPacket = new ConfigurationNode();
+                    dataPacket.loadFromString(received.toString());
+                    String type = dataPacket.get("type", String.class);
+
+                    if ("trainData".equals(type))
+                        Bukkit.getScheduler().runTask(CraftBahnPlugin.getInstance(), () -> PortalHandler.receiveTrain(dataPacket.getNode("body")));
                 }
 
                 catch (Exception ex) {
@@ -82,8 +130,9 @@ public class Server extends Thread {
                 }
 
                 finally {
-                    Message.debug("Closing connection. (" + connection.getInetAddress().getAddress() + ")");
+                    Message.debug("Closing connection. (" + Arrays.toString(connection.getInetAddress().getAddress()) + ")");
 
+                    assert reader != null;
                     reader.close();
                     inputStream.close();
 
