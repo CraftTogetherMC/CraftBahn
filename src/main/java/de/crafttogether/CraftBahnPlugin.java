@@ -119,7 +119,8 @@ public final class CraftBahnPlugin extends JavaPlugin {
             return;
         }
 
-        discordBot = BukkitApplication.getInternalController().getBot();
+        if (BukkitApplication.getInternalController() != null)
+            discordBot = BukkitApplication.getInternalController().getBot();
 
         // Initialize MySQLAdapter
         mySQLAdapter = new MySQLAdapter(this, myCfg);

@@ -48,13 +48,15 @@ public class MissingPathConnectionListener implements Listener {
             Message.debug(p, Message.parse("&6Herkunft: &e" + train.head().getDirection().getOppositeFace().name()).clickEvent(tpEvent));
         }
 
-        JDA api = CraftBahnPlugin.getInstance().getDiscordBot().getApi();
-        Optional<TextChannel> channelOpt = Optional.ofNullable(api.getTextChannelById("757206318389002240"));
+        if (CraftBahnPlugin.getInstance().getDiscordBot() != null) {
+            JDA api = CraftBahnPlugin.getInstance().getDiscordBot().getApi();
+            Optional<TextChannel> channelOpt = Optional.ofNullable(api.getTextChannelById("757206318389002240"));
 
-        MessageEmbed embed = getEmbed(train, loc, passengers);
+            MessageEmbed embed = getEmbed(train, loc, passengers);
 
-        TextChannel channel = channelOpt.get();
-        channel.sendMessage(embed).complete();
+            TextChannel channel = channelOpt.get();
+            channel.sendMessage(embed).complete();
+        }
     }
 
     private static MessageEmbed getEmbed(MinecartGroup train, Location loc, String passengers) {
