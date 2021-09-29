@@ -72,10 +72,10 @@ public class Speedometer implements Runnable {
 
         // Clear actionbar for all players
         MinecartGroup train = TCHelper.getTrain(trainName);
-        TCHelper.sendActionbar(train, "");
+        if (train != null) TCHelper.sendActionbar(train, "");
 
-        Message.debug("REMOVE SPEEDOMETER FOR TRAIN: " + train.getProperties().getTrainName());
-        markerParticles.remove(train.getProperties().getTrainName());
+        Message.debug("REMOVE SPEEDOMETER FOR TRAIN: " + trainName);
+        markerParticles.remove(trainName);
         trains.remove(data);
     }
 

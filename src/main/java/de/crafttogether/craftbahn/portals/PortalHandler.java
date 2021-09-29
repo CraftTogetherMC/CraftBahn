@@ -42,7 +42,7 @@ import java.io.PrintWriter;
 import java.util.*;
 
 public class PortalHandler {
-    private static HashMap<String, MinecartGroup> spawnedTrains = new HashMap<>();
+    private static List<String> spawnedTrains = new ArrayList<>();
 
     public static void transmitTrain(MinecartGroup group, Portal portal) {
         // Save train and get properties
@@ -187,16 +187,16 @@ public class PortalHandler {
         spawnLocations.loadChunks();
 
         // Spawn train
-        Message.debug("Spawn train " + trainNewName + "#" + trainID);
+        Message.debug("Spawn train " + trainNewName + " #" + trainID);
         MinecartGroup spawnedTrain = train.spawn(spawnLocations);
-        spawnedTrains.put(trainID, spawnedTrain);
+
+        // Set trainName
+        spawnedTrain.getProperties().setTrainName(trainID);
+        spawnedTrains.add(trainID);
 
         // Clear Inventory if needed
         if (sign.getLine(3).equalsIgnoreCase("clear"))
             TCHelper.clearInventory(spawnedTrain);
-
-        // Set trainName
-        spawnedTrain.getProperties().setTrainName(trainID);
 
         // Set owners
         for (CartProperties cartProp : spawnedTrain.getProperties())
@@ -231,9 +231,18 @@ public class PortalHandler {
         entityHandle.loadFromNBT(entityNBT);
 
         // Set as passenger
-
         Message.debug("Set as passenger of train....");
-        train.get(passenger.getCartIndex()).getEntity().setPassenger(spawnedEntity);
+        MinecartMember<?> cart = train.get(passenger.getCartIndex());
+
+        // Add passeneger to cart
+        cart.getEntity().setPassenger(spawnedEntity);
+
+        Bukkit.getScheduler().runTaskLater(CraftBahnPlugin.getInstance(), () -> {
+            if (!cart.getEntity().hasPassenger()) {
+                Message.debug("reEnter " + spawnedEntity.getName() + " (" + passenger.getCartIndex() + ")... Second try.");
+                cart.getEntity().setPassenger(spawnedEntity);
+            }
+        }, 40L);
 
         // Remove Passenger from list
         Passenger.remove(passenger.getUUID());
@@ -268,7 +277,15 @@ public class PortalHandler {
             // Add blindness-effect
             player.addPotionEffect(blindness);
 
+            // Add passeneger to cart
             cart.getEntity().setPassenger(player);
+
+            Bukkit.getScheduler().runTaskLater(CraftBahnPlugin.getInstance(), () -> {
+                if (!cart.getEntity().hasPassenger()) {
+                    Message.debug("reEnter " + player.getName() + "... Second try.");
+                    cart.getEntity().setPassenger(player);
+                }
+            }, 40L);
 
             // Remove Passenger from list
             Passenger.remove(passenger.getUUID());
@@ -321,11 +338,14 @@ public class PortalHandler {
         player.sendPluginMessage(CraftBahnPlugin.getInstance(), "BungeeCord", out.toByteArray());
     }
 
-    public static MinecartGroup getSpawnedTrain(String id) {
-        return spawnedTrains.get(id);
+    public static Collection<String> getSpawnedTrainNames() {
+        return spawnedTrains;
     }
 
-    public static Collection<MinecartGroup> getSpawnedTrains() {
-        return spawnedTrains.values();
+    public static MinecartGroup getSpawnedTrain(String id) {
+        MinecartGroup train = TCHelper.getTrain(id);
+        if (!spawnedTrains.contains(id)) Message.debug("Train '" + id + "' was not spawned by CBPortals");
+        if (train == null) Message.debug("Train '" + id + "' was not found");
+        return train;
     }
 }

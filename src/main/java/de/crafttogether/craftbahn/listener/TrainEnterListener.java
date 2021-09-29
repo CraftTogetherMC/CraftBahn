@@ -62,6 +62,7 @@ public class TrainEnterListener implements Listener {
 
             // Destroy train if it's tagged as "onTrack" and moving
             Bukkit.getScheduler().runTaskLater(CraftBahnPlugin.getInstance(), () -> {
+                if (cart.isUnloaded()) return;
                 boolean onTrack = cart.getGroup().getProperties().getTags().contains("onTrack");
 
                 if (onTrack && cart.isMoving())

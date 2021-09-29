@@ -89,10 +89,10 @@ public class Server extends Thread {
                 Message.debug(senderAddress + " connected.");
 
                 try {
+                    boolean aborted = false;
                     inputStream = connection.getInputStream();
                     reader = new BufferedReader(new InputStreamReader(inputStream));
                     StringBuilder received = new StringBuilder();
-
                     String inputLine;
 
                     while ((inputLine = reader.readLine()) != null) {
@@ -107,22 +107,25 @@ public class Server extends Thread {
                             Message.debug("ENTITY RECEIVED BRUH!!! (" + entityType + ") <33");
                             CommonTagCompound tagCompound = CommonTagCompound.readFromStream(inputStream);
                             Bukkit.getScheduler().runTask(CraftBahnPlugin.getInstance(), () -> PortalHandler.receiveEntity(uuid, entityType, tagCompound));
-                            return;
+
+                            aborted = true;
+                            continue;
                         }
 
                         received.append(inputLine).append("\r\n");
                     }
 
+                    if (!aborted) {
+                        //Message.debug("Received:");
+                        //Message.debug(received.toString());
 
-                    //Message.debug("Received:");
-                    //Message.debug(received.toString());
+                        ConfigurationNode dataPacket = new ConfigurationNode();
+                        dataPacket.loadFromString(received.toString());
+                        String type = dataPacket.get("type", String.class);
 
-                    ConfigurationNode dataPacket = new ConfigurationNode();
-                    dataPacket.loadFromString(received.toString());
-                    String type = dataPacket.get("type", String.class);
-
-                    if ("trainData".equals(type))
-                        Bukkit.getScheduler().runTask(CraftBahnPlugin.getInstance(), () -> PortalHandler.receiveTrain(dataPacket.getNode("body")));
+                        if ("trainData".equals(type))
+                            Bukkit.getScheduler().runTask(CraftBahnPlugin.getInstance(), () -> PortalHandler.receiveTrain(dataPacket.getNode("body")));
+                    }
                 }
 
                 catch (Exception ex) {

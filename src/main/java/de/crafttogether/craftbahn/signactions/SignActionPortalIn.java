@@ -161,7 +161,10 @@ public class SignActionPortalIn extends SignAction {
             pendingTeleports.remove(group);
             group.destroy();
         }
-        else
-            member.onDie(true);
+        else {
+            Entity cartEntity = member.getEntity().getEntity();
+            group.removeSilent(member);
+            cartEntity.remove();
+        }
     }
 }

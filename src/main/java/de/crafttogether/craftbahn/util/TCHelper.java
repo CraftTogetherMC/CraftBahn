@@ -115,12 +115,14 @@ public class TCHelper {
 
     // Send message to all passengers of a train
     public static void sendMessage(MinecartGroup group, String message) {
+        if (group == null) return;
         for (MinecartMember<?> member : group)
             sendMessage(member, message);
     }
 
     // Send message to all passengers of a cart
     public static void sendMessage(MinecartMember<?> member, String message) {
+        if (member == null) return;
         CommonEntity<?> vehicle = CommonEntity.get(member.getEntity().getEntity());
 
         for (Object passenger : vehicle.getPlayerPassengers()) {
@@ -131,18 +133,21 @@ public class TCHelper {
 
     // Send actionbar to all passengers of a train
     public static void sendActionbar(MinecartGroup group, String message) {
+        if (group == null) return;
         for (MinecartMember<?> member : group)
             sendActionbar(member, message);
     }
 
     // Send permission-based actionbar to all passengers of a train
     public static void sendActionbar(MinecartGroup group, String permission, String message) {
+        if (group == null) return;
         for (MinecartMember<?> member : group)
             sendActionbar(member, permission, message);
     }
 
     // Send actionBar to all passengers of a cart
     public static void sendActionbar(MinecartMember<?> member, String message) {
+        if (member == null) return;
         CommonEntity<?> vehicle = CommonEntity.get(member.getEntity().getEntity());
 
         for (Object passenger : vehicle.getPlayerPassengers()) {
@@ -153,6 +158,7 @@ public class TCHelper {
 
     // Send permission-based actionbar to all passengers of a cart
     public static void sendActionbar(MinecartMember<?> member, String permission, String message) {
+        if (member == null) return;
         CommonEntity<?> vehicle = CommonEntity.get(member.getEntity().getEntity());
 
         for (Object passenger : vehicle.getPlayerPassengers()) {
@@ -163,33 +169,39 @@ public class TCHelper {
 
     // Send debug-message to all passengers of a train
     public static void sendDebugMessage(String trainName, String message) {
+        if (trainName == null) return;
         sendDebugMessage(trainName, Component.text(message));
     }
 
     // Send debug-message to all passengers of a train
     public static void sendDebugMessage(String trainName, Component message) {
+        if (trainName == null) return;
         MinecartGroup train = getTrain(trainName);
         if (train != null) sendDebugMessage(train, message);
     }
 
     // Send debug-message to all passengers of a train
     public static void sendDebugMessage(MinecartGroup group, String message) {
+        if (group == null) return;
         sendDebugMessage(group, Component.text(message));
     }
 
     // Send debug-message to all passengers of a cart
     public static void sendDebugMessage(MinecartMember<?> member, String message) {
+        if (member == null) return;
         sendDebugMessage(member, Component.text(message));
     }
 
     // Send debug-message to all passengers of a train
     public static void sendDebugMessage(MinecartGroup group, Component message) {
+        if (group == null) return;
         for (MinecartMember<?> member : group)
             sendDebugMessage(member, message);
     }
 
     // Send debug-message to all passengers of a cart
     public static void sendDebugMessage(MinecartMember<?> member, Component message) {
+        if (member == null) return;
         CommonEntity<?> vehicle = CommonEntity.get(member.getEntity().getEntity());
 
         for (Object passenger : vehicle.getPlayerPassengers()) {
