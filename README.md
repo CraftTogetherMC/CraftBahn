@@ -33,7 +33,7 @@
 **Todo / Probleme:**
 - CBPortals: Beim PlayerSpawnLocationEvent gibt es Probleme beim Entity-Tracking(?) wenn der Spieler schon hier zum passenger einer Entity wird
 - `/fze tp` - (eindeutige) Fehlermeldung, wenn sich das Fahrziel auf einem anderen Server befindet
-
+- Nach Protal Duchqerung und wchseln des cart`s im Zug wird der Zug destroyed. (von testdriv entdeckt beim fahren von Creatriv in FB1) konnte reproduzirt werden.
 - **Ideen:**
 - Speedometer per Befehl ausschaltbar machen (Wahlweise nur für die aktuelle Fahr oder Dauerhaft)
 - Allgemein: Ausgabe im Chat was gespawned wurde (Minecart oder Traincart) wenn man ein Minecart placed
