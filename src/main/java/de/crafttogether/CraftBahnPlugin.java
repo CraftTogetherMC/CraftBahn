@@ -9,7 +9,6 @@ import de.crafttogether.craftbahn.listener.TrainEnterListener;
 import de.crafttogether.craftbahn.net.Client;
 import de.crafttogether.craftbahn.net.Server;
 import de.crafttogether.craftbahn.portals.PortalStorage;
-import de.crafttogether.craftbahn.util.Speedometer;
 import de.crafttogether.craftbahn.util.TCHelper;
 import de.crafttogether.mysql.MySQLAdapter;
 import de.crafttogether.mysql.MySQLConfig;
@@ -33,9 +32,6 @@ public final class CraftBahnPlugin extends JavaPlugin {
 
     // Socket Server (CB-Portals)
     private Server server;
-
-    //Speedometer
-    private Speedometer speedometer;
 
     @Override
     public void onEnable() {
@@ -121,17 +117,11 @@ public final class CraftBahnPlugin extends JavaPlugin {
 
         // Register SignActions (TrainCarts)
         TCHelper.registerActionSigns();
-
-        // Start Speedometer
-        speedometer = new Speedometer();
     }
 
     public void onDisable() {
         // Unregister SignActions (TrainCarts)
         TCHelper.unregisterActionSigns();
-
-        // Stop Speedometer
-        speedometer.stop();
 
         // Close server
         if (server != null)
@@ -158,6 +148,4 @@ public final class CraftBahnPlugin extends JavaPlugin {
 
     public String getServerName() { return serverName; }
     public static CraftBahnPlugin getInstance() { return plugin; }
-
-    public Speedometer getSpeedometer() { return speedometer; }
 }

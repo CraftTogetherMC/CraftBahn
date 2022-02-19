@@ -30,12 +30,10 @@
 - ~~ICS: Items löschen beim Port in die Creative-Welt~~
 - ~~Bestehende Daten aus altem Plugin importieren (php)~~
 
-**Todo / Probleme:**
+**Probleme:**
 - CBPortals: Beim PlayerSpawnLocationEvent gibt es Probleme beim Entity-Tracking(?) wenn der Spieler schon hier zum passenger einer Entity wird
-- `/fze tp` - (eindeutige) Fehlermeldung, wenn sich das Fahrziel auf einem anderen Server befindet
-- Nach Protalduchquerung und wchseln des cart`s im Zug wird der Zug destroyed. (von testdriv entdeckt beim fahren von Creatriv in FB1) konnte reproduzirt werden: Creativ -> FB1,Creativ -> FB2. Trat NICHT bei Fahren von FB1 -> FB2 und umgekehrt auf. Bezieht sich auf Creativ dort auch ohne Portaldurchquerung.
+
 - **Ideen:**
-- Speedometer per Befehl ausschaltbar machen (Wahlweise nur für die aktuelle Fahr oder Dauerhaft)
 - Allgemein: Ausgabe im Chat was gespawned wurde (Minecart oder Traincart) wenn man ein Minecart placed
 - CBPortals: Zug nach teleport für eine kurze konfigurierbare Zeit anhalten. (Für sauberes Chunkloading) // Ist das noch notwendig?
 - CBPortals: "Besserer" Übergang (z.B. durch Blindness-Effekt)

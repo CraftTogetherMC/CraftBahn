@@ -11,7 +11,6 @@ import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.util.CTLocation;
 import de.crafttogether.craftbahn.util.Message;
 import org.bukkit.Location;
-import org.bukkit.Particle;
 import org.bukkit.block.BlockFace;
 
 public class SignActionPortalOut extends SignAction {
@@ -60,14 +59,14 @@ public class SignActionPortalOut extends SignAction {
             .handle(event.getPlayer());
     }
 
-    private void displayError(SignActionEvent event) {
+    private void displayError(SignActionEvent info) {
         // When not successful, display particles at the sign to indicate such
-        BlockFace facingInv = event.getFacing().getOppositeFace();
-        Location effectLocation = event.getRailLocation()
-                .add(0.5, 0.5, 0.5)
-                .add(0.3 * facingInv.getModX(), 0.0, 0.3 * facingInv.getModZ());
+        BlockFace facingInv = info.getFacing().getOppositeFace();
+        Location effectLocation = info.getSign().getLocation()
+            .add(0.5, 0.5, 0.5)
+            .add(0.3 * facingInv.getModX(), 0.0, 0.3 * facingInv.getModZ());
 
-        Util.spawnParticle(effectLocation, Particle.BARRIER);
+        Util.spawnDustParticle(effectLocation, 255.0, 255.0, 0.0);
         WorldUtil.playSound(effectLocation, SoundEffect.EXTINGUISH, 1.0f, 2.0f);
     }
 }

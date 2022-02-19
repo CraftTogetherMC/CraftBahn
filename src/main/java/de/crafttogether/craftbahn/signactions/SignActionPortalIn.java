@@ -19,13 +19,10 @@ import de.crafttogether.craftbahn.util.Message;
 import de.crafttogether.craftbahn.util.TCHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Particle;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
 import java.util.HashMap;
 import java.util.List;
@@ -44,12 +41,16 @@ public class SignActionPortalIn extends SignAction {
         if (!event.isPowered()) return;
 
         // Train arrives sign
-        if (!pendingTeleports.containsKey(event.getGroup()) && event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasGroup())
+        if (!pendingTeleports.containsKey(event.getGroup()) && event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasGroup()) {
+            Message.debug("#trainEnter");
             onTrainEnter(event);
+        }
 
         // Cart arrives sign
-        if (pendingTeleports.containsKey(event.getGroup()) && event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasMember())
+        if (pendingTeleports.containsKey(event.getGroup()) && event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasMember()) {
+            Message.debug("#cartEnter");
             onCartEnter(event);
+        }
     }
 
     @Override
@@ -94,11 +95,11 @@ public class SignActionPortalIn extends SignAction {
     private void displayError(SignActionEvent event) {
         // When not successful, display particles at the sign to indicate such
         BlockFace facingInv = event.getFacing().getOppositeFace();
-        Location effectLocation = event.getRailLocation()
+        Location effectLocation = event.getSign().getLocation()
             .add(0.5, 0.5, 0.5)
             .add(0.3 * facingInv.getModX(), 0.0, 0.3 * facingInv.getModZ());
 
-        Util.spawnParticle(effectLocation, Particle.BARRIER);
+        Util.spawnDustParticle(effectLocation, 255.0, 255.0, 0.0);
         WorldUtil.playSound(effectLocation, SoundEffect.EXTINGUISH, 1.0f, 2.0f);
     }
 
@@ -109,19 +110,8 @@ public class SignActionPortalIn extends SignAction {
 
         if (portal == null || portal.getTargetLocation() == null) {
             TCHelper.sendMessage(event.getGroup(), "§cCouldn't find an §rPortal-Exit §cfor §r'§e" + portalName + "§r'§c!");
-            displayError(event);
             group.destroy();
             return;
-        }
-
-        // Apply blindness-effect
-        PotionEffect blindness = new PotionEffect(PotionEffectType.BLINDNESS, 40, 1);
-
-        for (MinecartMember<?> member : group) {
-            List<Player> passengers = member.getEntity().getPlayerPassengers();
-
-            for (Player passenger : passengers)
-                passenger.addPotionEffect(blindness);
         }
 
         // Clear Inventory if needed
@@ -142,6 +132,7 @@ public class SignActionPortalIn extends SignAction {
         MinecartGroup group = event.getGroup();
         Portal portal = pendingTeleports.get(group);
 
+        Message.debug("Look for passengers in #" + event.getMember().getIndex());
         if (portal == null) {
             Message.debug("Portal is null");
             return;
@@ -149,11 +140,16 @@ public class SignActionPortalIn extends SignAction {
 
         MinecartMember<?> member = event.getMember();
 
-        for (Entity passenger : member.getEntity().getEntity().getPassengers()) {
+        Message.debug("entered cart is a " + member.getEntity().getType().name() + "(" + member.getEntity().getUniqueId() + ")");
+
+        for (Entity passenger : member.getEntity().getPassengers()) {
 
             if (passenger instanceof Player) {
                 Player playerPassenger = (Player) passenger;
                 PortalHandler.sendToServer(playerPassenger, portal.getTargetLocation().getServer());
+
+                Message.debug(playerPassenger, "Try to send you to: " + portal.getTargetLocation().toString());
+                Message.debug("Try to send " + playerPassenger.getName() + " to: " + portal.getTargetLocation().toString());
             }
 
             else if (passenger instanceof LivingEntity) {
