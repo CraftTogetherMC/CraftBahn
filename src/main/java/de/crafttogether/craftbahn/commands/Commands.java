@@ -709,11 +709,20 @@ public class Commands implements TabExecutor {
         ArrayList<String> proposals = new ArrayList<>();
 
         if (cmd.getName().equalsIgnoreCase("fahrziel")) {
-            for (Destination dest : destinationStorage.getDestinations()) {
-                if (!sender.hasPermission("ctdestinations.see.private") && !dest.isPublic())
-                    continue;
+            if (args.length == 1) {
+                for (Destination dest : destinationStorage.getDestinations()) {
+                    if (!sender.hasPermission("ctdestinations.see.private") && !dest.isPublic())
+                        continue;
 
-                proposals.add(dest.getName());
+                    proposals.add(dest.getName());
+                }
+            }
+
+            if (args.length == 2) {
+                Collection<Destination> found = destinationStorage.getDestinations(args[0]);
+
+                for (Destination dest : found)
+                    proposals.add(dest.getServer());
             }
         }
 
