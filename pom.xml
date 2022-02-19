@@ -55,11 +55,6 @@
             <url>https://repo.mikeprimm.com</url>
         </repository>
 
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-
     </repositories>
 
     <dependencies>
@@ -96,12 +91,6 @@
             <artifactId>dynmap-api</artifactId>
             <version>3.2-beta-1</version>
             <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.diproject</groupId>
-            <artifactId>dicore</artifactId>
-            <version>2.1.1</version>
         </dependency>
 
         <dependency>
