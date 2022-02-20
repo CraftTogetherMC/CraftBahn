@@ -7,7 +7,9 @@ import de.crafttogether.craftbahn.util.SpeedData;
 import de.crafttogether.craftbahn.util.TCHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -35,7 +37,7 @@ public class Speedometer implements Runnable {
 
             for (Location particleLocation : markerParticles.values()) {
                 if (particleLocation.getChunk().isLoaded())
-                    p.spawnParticle(Particle.BARRIER, particleLocation, 1);
+                    p.spawnParticle(Particle.BLOCK_MARKER, particleLocation, 1, Material.BARRIER);
             }
         }
     }

@@ -11,6 +11,7 @@ import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.util.CTLocation;
 import de.crafttogether.craftbahn.util.Message;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.BlockFace;
 
@@ -67,7 +68,7 @@ public class SignActionPortalOut extends SignAction {
                 .add(0.5, 0.5, 0.5)
                 .add(0.3 * facingInv.getModX(), 0.0, 0.3 * facingInv.getModZ());
 
-        Util.spawnParticle(effectLocation, Particle.BARRIER);
+        effectLocation.getWorld().spawnParticle(Particle.BLOCK_MARKER, effectLocation, 1, Material.BARRIER);
         WorldUtil.playSound(effectLocation, SoundEffect.EXTINGUISH, 1.0f, 2.0f);
     }
 }
