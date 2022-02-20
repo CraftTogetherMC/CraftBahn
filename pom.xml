@@ -66,7 +66,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.17.1-R0.1-SNAPSHOT</version>
+            <version>1.18.1-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
@@ -80,14 +80,14 @@
         <dependency>
             <groupId>com.bergerkiller.bukkit</groupId>
             <artifactId>BKCommonLib</artifactId>
-            <version>1.17.1-v2-SNAPSHOT</version>
+            <version>1.18.1-v3-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>com.bergerkiller.bukkit</groupId>
             <artifactId>TrainCarts</artifactId>
-            <version>1.17.1-v2-SNAPSHOT</version>
+            <version>1.18.1-v3-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
@@ -99,9 +99,10 @@
         </dependency>
 
         <dependency>
-            <groupId>com.diproject</groupId>
+            <groupId>com.github.Alhxe.Discord-Integration</groupId>
             <artifactId>dicore</artifactId>
-            <version>2.1.1</version>
+            <version>2.2.0</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
