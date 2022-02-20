@@ -17,10 +17,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.BindException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketException;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
@@ -63,7 +60,7 @@ public class Server extends Thread {
 
         try {
             // Create ServerSocket
-            serverSocket = new ServerSocket(port);
+            serverSocket = new ServerSocket(port, 0, InetAddress.getByName(null));
             listen = true;
 
             Message.debug("Server is listening on port " + port);
