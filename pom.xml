@@ -8,7 +8,7 @@
 
     <name>CraftBahn</name>
     <description>Ich mag Züge</description>
-    <url>https://github.com/CraftTogetherDE/CraftBahn</url>
+    <url>https://github.com/CraftTogetherMC/CraftBahn</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -32,12 +32,12 @@
     <repositories>
         <repository>
             <id>ctogether</id>
-            <url>https://repo.craft-together.de/</url>
+            <url>https://maven.craft-together-mc.de/</url>
         </repository>
 
         <repository>
             <id>papermc</id>
-            <url>https://papermc.io/repo/repository/maven-public/</url>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
 
         <repository>
@@ -66,7 +66,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.18.1-R0.1-SNAPSHOT</version>
+            <version>1.19-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
@@ -80,14 +80,14 @@
         <dependency>
             <groupId>com.bergerkiller.bukkit</groupId>
             <artifactId>BKCommonLib</artifactId>
-            <version>1.18.1-v3-SNAPSHOT</version>
+            <version>1.19-v2-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>com.bergerkiller.bukkit</groupId>
             <artifactId>TrainCarts</artifactId>
-            <version>1.18.1-v3-SNAPSHOT</version>
+            <version>1.19-v3-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
