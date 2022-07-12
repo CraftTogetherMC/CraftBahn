@@ -2,7 +2,6 @@ package de.crafttogether.craftbahn.util;
 
 import com.bergerkiller.bukkit.common.entity.CommonEntity;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
-import com.bergerkiller.bukkit.tc.controller.MinecartGroupStore;
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.controller.MinecartMemberStore;
 import com.bergerkiller.bukkit.tc.controller.type.MinecartMemberChest;
@@ -11,16 +10,11 @@ import com.bergerkiller.bukkit.tc.properties.TrainPropertiesStore;
 import com.bergerkiller.bukkit.tc.signactions.SignAction;
 import de.crafttogether.craftbahn.signactions.SignActionPortalIn;
 import de.crafttogether.craftbahn.signactions.SignActionPortalOut;
-import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.text.Component;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.ChatColor;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
-import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -93,7 +87,7 @@ public class TCHelper {
 
     // Clear inventory of all chest-minecarts in a given MinecartGroup
     public static void clearInventory(MinecartGroup group) {
-        for (MinecartMember member : group)
+        for (MinecartMember<?> member : group)
             clearInventory(member);
     }
 
@@ -126,8 +120,8 @@ public class TCHelper {
         CommonEntity<?> vehicle = CommonEntity.get(member.getEntity().getEntity());
 
         for (Object passenger : vehicle.getPlayerPassengers()) {
-            if (passenger instanceof Player player)
-                player.sendMessage(Component.text(message));
+            if (passenger instanceof Player)
+                ((Player) passenger).sendMessage(Component.text(message));
         }
     }
 
@@ -151,8 +145,8 @@ public class TCHelper {
         CommonEntity<?> vehicle = CommonEntity.get(member.getEntity().getEntity());
 
         for (Object passenger : vehicle.getPlayerPassengers()) {
-            if (passenger instanceof Player player)
-                player.sendActionBar(Component.text(message));
+            if (passenger instanceof Player)
+                ((Player) passenger).sendActionBar(Component.text(message));
         }
     }
 
@@ -162,7 +156,10 @@ public class TCHelper {
         CommonEntity<?> vehicle = CommonEntity.get(member.getEntity().getEntity());
 
         for (Object passenger : vehicle.getPlayerPassengers()) {
-            if (passenger instanceof Player player && player.hasPermission(permission))
+            if (!(passenger instanceof Player)) continue;
+
+            Player player = (Player) passenger;
+            if (player.hasPermission(permission))
                 player.sendActionBar(Component.text(message));
         }
     }
@@ -205,8 +202,8 @@ public class TCHelper {
         CommonEntity<?> vehicle = CommonEntity.get(member.getEntity().getEntity());
 
         for (Object passenger : vehicle.getPlayerPassengers()) {
-            if (passenger instanceof Player player)
-                Message.debug(player, message);
+            if (passenger instanceof Player)
+                Message.debug((Player) passenger, message);
         }
     }
 

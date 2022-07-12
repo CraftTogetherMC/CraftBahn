@@ -73,7 +73,6 @@ public class PortalHandler {
 
                 if (passenger instanceof Player)
                     type = "Player";
-
                 else if (passenger instanceof LivingEntity)
                     type = "LivingEntity";
 
