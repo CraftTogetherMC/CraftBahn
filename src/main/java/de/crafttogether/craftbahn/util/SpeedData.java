@@ -1,14 +1,13 @@
 package de.crafttogether.craftbahn.util;
 
-import com.bergerkiller.bukkit.common.utils.CommonUtil;
 import com.bergerkiller.bukkit.tc.TrainCarts;
-import com.bergerkiller.bukkit.tc.cache.RailSignCache;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import com.bergerkiller.bukkit.tc.controller.components.RailState;
 import com.bergerkiller.bukkit.tc.pathfinding.PathConnection;
 import com.bergerkiller.bukkit.tc.pathfinding.PathNode;
 import com.bergerkiller.bukkit.tc.pathfinding.PathProvider;
 import com.bergerkiller.bukkit.tc.pathfinding.PathRailInfo;
+import com.bergerkiller.bukkit.tc.rails.RailLookup;
 import com.bergerkiller.bukkit.tc.utils.TrackMovingPoint;
 import de.crafttogether.CraftBahnPlugin;
 import net.kyori.adventure.text.Component;
@@ -17,13 +16,9 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.util.Vector;
-
-import java.util.Arrays;
-import java.util.Collections;
 
 public class SpeedData {
-    private String trainName;
+    private final String trainName;
     private double distance;
     private String destinationName;
     private Location lastLoc;
@@ -225,21 +220,21 @@ public class SpeedData {
     }
 
     private boolean findStationSign(TrackMovingPoint walker) {
-        for (RailSignCache.TrackedSign sign : walker.getState().railSigns()) {
+        for (RailLookup.TrackedSign sign : walker.getState().railSigns()) {
 
-            TCHelper.sendDebugMessage(this.trainName, "'" + sign.sign.getLine(0) + "' -> '" + sign.sign.getLine(1) + "' -> '" + sign.sign.getLine(2) + "' -> '" + sign.sign.getLine(3) + "'");
+            TCHelper.sendDebugMessage(this.trainName, "'" + sign.sign.line(0) + "' -> '" + sign.sign.line(1) + "' -> '" + sign.sign.line(2) + "' -> '" + sign.sign.line(3) + "'");
 
-            if (!sign.sign.getLine(1).toLowerCase().startsWith("station"))
+            if (!sign.sign.line(1).toString().toLowerCase().startsWith("station"))
                 continue;
 
-            Location loc = sign.sign.getLocation();;
+            Location loc = sign.sign.getLocation();
             ClickEvent tpEvent = ClickEvent.runCommand("/cmi tppos " + loc.getX() + " " + loc.getY() + " " + loc.getZ() + " " + loc.getWorld().getName());
             Component message = Component.text("Station found at: " + loc.getX() + " " + loc.getY() + " " + loc.getZ()).clickEvent(tpEvent).color(NamedTextColor.GOLD);
             TCHelper.sendDebugMessage(trainName, message);
 
             // Spawn markerParticle (debug)
             BlockFace facing = walker.getState().enterFace();
-            Location effectLocation = sign.railBlock.getLocation()
+            Location effectLocation = sign.rail.block().getLocation()
                 .add(0.5, 0.5, 0.5)
                 .add(0.3 * facing.getModX(), 0.0, 0.3 * facing.getModZ());
 
@@ -288,15 +283,11 @@ public class SpeedData {
         Location newLoc = train.head().getBlock().getLocation();
 
         this.distance -= this.multiplier * newLoc.distance(this.lastLoc);
+
         if (this.distance < 0) {
             this.distance = 0;
         }
-        this.lastLoc = newLoc;
 
-        /*TCHelper.sendDebugMessage(train, String.format("Dein Ziel %s ist %.1f Blöcke entfernt.", this.destinationName, this.distance));
-        if (this.distance > 0 && !this.destinationName.equals("")) {
-            TCHelper.sendMessage(train, String.format("Dein Ziel %s ist %.1f Blöcke entfernt.", this.destinationName, this.distance));
-        }
-        */
+        this.lastLoc = newLoc;
     }
 }

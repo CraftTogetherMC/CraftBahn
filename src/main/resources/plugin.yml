@@ -3,8 +3,8 @@ version: ${project.version}
 main: de.crafttogether.CraftBahnPlugin
 api-version: 1.13
 depend: [ MySQLAdapter, dynmap, BKCommonLib, Train_Carts, DICore ]
-authors: [J0schlZ]
-website: https://craft-together.de/
+authors: [J0schlZ, Ceddix, QuiteaBitofAll]
+website: https://craft-together-mc.de/
 description: Ich mag Züge
 commands:
   fahrziel:
