@@ -17,7 +17,6 @@ public final class CraftBahnPlugin extends JavaPlugin {
     private MySQLAdapter mySQLAdapter;
     private DestinationStorage destinationStorage;
 
-
     @Override
     public void onEnable() {
         plugin = this;
@@ -80,7 +79,6 @@ public final class CraftBahnPlugin extends JavaPlugin {
         if(mySQLAdapter != null)
             mySQLAdapter.disconnect();
     }
-
 
     public MySQLAdapter getMySQLAdapter() { return mySQLAdapter; }
     public DestinationStorage getDestinationStorage() { return destinationStorage; }
