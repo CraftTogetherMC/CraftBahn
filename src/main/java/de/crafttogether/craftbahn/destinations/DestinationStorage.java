@@ -67,22 +67,6 @@ public class DestinationStorage {
         // Load all destinations from database into our cache
         Bukkit.getServer().getScheduler().runTask(plugin, () -> loadAll((err, destinations) -> {
             plugin.getLogger().info("Loaded " + destinations.size() + " destinations");
-
-            plugin.getLogger().info("Setup MarkerSets...");
-            MarkerManager.createMarkerSets();
-            plugin.getLogger().info("Setup Markers...");
-
-            int markersCreated = 0;
-            for (Destination dest : destinations) {
-                if (!CraftBahnPlugin.getInstance().getServerName().equalsIgnoreCase(dest.getServer()))
-                    continue;
-
-                if(MarkerManager.addMarker(dest, true))
-                    markersCreated++;
-            }
-
-            plugin.getLogger().info("Created " + markersCreated + " markers.");
-            plugin.getLogger().info("Marker-Setup completed.");
         }));
     }
 

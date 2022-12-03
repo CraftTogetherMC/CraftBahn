@@ -1,32 +1,8 @@
 name: CraftBahn
 version: ${project.version}
 main: de.crafttogether.CraftBahnPlugin
-api-version: 1.13
-depend: [ MySQLAdapter, dynmap, BKCommonLib, Train_Carts, DICore ]
+api-version: 1.19
+depend: [ MySQLAdapter, BKCommonLib, Train_Carts]
 authors: [J0schlZ, Ceddix, QuiteaBitofAll]
 website: https://craft-together-mc.de/
 description: Ich mag Züge
-commands:
-  fahrziel:
-    description: Fahrziel wählen
-    usage: /fahrziel
-  fahrziele:
-    description: Fahrziele auflisten
-    usage: /fahrziele
-  fahrzieledit:
-    description: Fahrziele verwalten
-    usage: /fahrzieledit
-    aliases: [fze]
-  rbf:
-    description: Teleportiere zu zufälligem Bahnhof
-    usage: /rbf
-    aliases: [rt, rtp]
-  setroute:
-    description: Destination silent setzen
-    usage: /setroute
-  setdestination:
-    description: Destination silent setzen
-    usage: /setdestination
-  mobenter:
-    description: Setzt Mobs in den Zug
-    usage: /mobenter
