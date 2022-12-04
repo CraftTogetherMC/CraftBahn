@@ -1,22 +1,16 @@
 package de.crafttogether.craftbahn.commands;
 
-import cloud.commandframework.annotations.Argument;
 import cloud.commandframework.annotations.CommandDescription;
 import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.specifier.Quoted;
 import com.bergerkiller.bukkit.common.cloud.CloudSimpleHandler;
 import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.destinations.Destination;
-import de.crafttogether.craftbahn.destinations.DestinationStorage;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toCollection;
 
 public class Commands {
     private final CloudSimpleHandler cloud = new CloudSimpleHandler();
@@ -32,6 +26,13 @@ public class Commands {
         cloud.enable(plugin);
 
         // Suggestions
+        cloud.suggest("serverName", (context, input) -> {
+            List<String> result =  plugin.getDestinationStorage().getDestinations().stream().distinct()
+                    .map(Destination::getServer)
+                    .collect(Collectors.toList());
+            return result;
+        });
+
         cloud.suggest("destinationName", (context, input) -> {
             List<String> result =  plugin.getDestinationStorage().getDestinations().stream()
                     .map(Destination::getName)
@@ -39,16 +40,16 @@ public class Commands {
             return result;
         });
 
+        cloud.suggest("destinationType", (context, input) -> {
+            List<String> result =  Arrays.stream(Destination.DestinationType.values())
+                    .map(Destination.DestinationType::name)
+                    .collect(Collectors.toList());
+            return result;
+        });
 
         // Register Annotations
         cloud.annotations(this);
         cloud.annotations(commands_destination);
-    }
-
-    @CommandMethod("fahrziel <name>")
-    @CommandDescription("Setzt dem aktuell ausgewähltem Zug ein Fahrziel.")
-    public void fahrziel(final CraftBahnPlugin plugin, final CommandSender sender, final @Argument(value="name", suggestions="destinationName") String name) {
-        sender.sendMessage("There are " + plugin.getDestinationStorage().getDestinations().size() + " Destinations");
     }
 
     @CommandMethod("craftbahn")

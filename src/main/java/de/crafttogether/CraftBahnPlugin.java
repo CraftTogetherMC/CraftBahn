@@ -1,21 +1,28 @@
 package de.crafttogether;
 
+import de.crafttogether.craftbahn.Localization;
+import de.crafttogether.craftbahn.localization.LocalizationManager;
 import de.crafttogether.craftbahn.commands.Commands;
 import de.crafttogether.craftbahn.destinations.DestinationStorage;
 import de.crafttogether.mysql.MySQLAdapter;
 import de.crafttogether.mysql.MySQLConfig;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.Tag;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class CraftBahnPlugin extends JavaPlugin {
-    private static CraftBahnPlugin plugin;
+    public static CraftBahnPlugin plugin;
 
     private String serverName;
 
     private Commands commands;
     private MySQLAdapter mySQLAdapter;
+    private LocalizationManager localizationManager;
     private DestinationStorage destinationStorage;
+    private MiniMessage miniMessageParser;
 
     @Override
     public void onEnable() {
@@ -69,11 +76,21 @@ public final class CraftBahnPlugin extends JavaPlugin {
         // Initialize Storages
         destinationStorage = new DestinationStorage();
 
+        // Initialize LocalizationManager
+        localizationManager = new LocalizationManager();
+
+        // Register Tags/Placeholder for MiniMessage
+        miniMessageParser = MiniMessage.builder()
+            .editTags(t -> t.resolver(TagResolver.resolver("prefix", Tag.selfClosingInserting(Localization.PREFIX.deserialize()))))
+            .editTags(t -> t.resolver(TagResolver.resolver("header", Tag.selfClosingInserting(Localization.HEADER.deserialize()))))
+            .build();
+
         // Register Commands
         commands = new Commands();
         commands.enable(this);
     }
 
+    @Override
     public void onDisable() {
         // Shutdown MySQL-Adapter
         if(mySQLAdapter != null)
@@ -81,8 +98,15 @@ public final class CraftBahnPlugin extends JavaPlugin {
     }
 
     public MySQLAdapter getMySQLAdapter() { return mySQLAdapter; }
+    public LocalizationManager getLocalizationManager() { return localizationManager; }
     public DestinationStorage getDestinationStorage() { return destinationStorage; }
 
+    public MiniMessage getMiniMessageParser() {
+        if (miniMessageParser == null)
+            return MiniMessage.miniMessage();
+        else
+            return miniMessageParser;
+    }
+
     public String getServerName() { return serverName; }
-    public static CraftBahnPlugin getInstance() { return plugin; }
 }

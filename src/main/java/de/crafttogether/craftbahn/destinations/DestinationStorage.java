@@ -14,7 +14,6 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class DestinationStorage {
-    private final CraftBahnPlugin plugin = CraftBahnPlugin.getInstance();
     private final TreeMap<Integer, Destination> destinations = new TreeMap<>();
 
     public DestinationStorage() {
@@ -25,7 +24,7 @@ public class DestinationStorage {
             ResultSet result = MySQL.query("SHOW TABLES LIKE '%sdestinations';", MySQL.getTablePrefix());
 
             if (!result.next()) {
-                plugin.getLogger().info("[MySQL]: Create Table '" + MySQL.getTablePrefix() + "destinations' ...");
+                CraftBahnPlugin.plugin.getLogger().info("[MySQL]: Create Table '" + MySQL.getTablePrefix() + "destinations' ...");
 
                 MySQL.execute("""
                     CREATE TABLE `%sdestinations` (
@@ -58,15 +57,15 @@ public class DestinationStorage {
             }
         }
         catch (SQLException ex) {
-            plugin.getLogger().warning("[MySQL]: " + ex.getMessage());
+            CraftBahnPlugin.plugin.getLogger().warning("[MySQL]: " + ex.getMessage());
         }
         finally {
             MySQL.close();
         }
 
         // Load all destinations from database into our cache
-        Bukkit.getServer().getScheduler().runTask(plugin, () -> loadAll((err, destinations) -> {
-            plugin.getLogger().info("Loaded " + destinations.size() + " destinations");
+        Bukkit.getServer().getScheduler().runTask(CraftBahnPlugin.plugin, () -> loadAll((err, destinations) -> {
+            CraftBahnPlugin.plugin.getLogger().info("Loaded " + destinations.size() + " destinations");
         }));
     }
 
@@ -115,7 +114,7 @@ public class DestinationStorage {
 
         (err, lastInsertedId) -> {
             if (err != null)
-                CraftBahnPlugin.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
+                CraftBahnPlugin.plugin.getLogger().warning("[MySQL:] Error: " + err.getMessage());
 
             // Add to cache
             destination.setId(lastInsertedId);
@@ -154,7 +153,7 @@ public class DestinationStorage {
 
         (err, affectedRows) -> {
             if (err != null)
-                CraftBahnPlugin.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
+                CraftBahnPlugin.plugin.getLogger().warning("[MySQL:] Error: " + err.getMessage());
 
             callback.call(err, affectedRows);
             MySQL.close();
@@ -167,7 +166,7 @@ public class DestinationStorage {
 
         MySQL.queryAsync("SELECT * FROM `%sdestinations` WHERE `id` = %s", (err, result) -> {
             if (err != null) {
-                CraftBahnPlugin.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
+                CraftBahnPlugin.plugin.getLogger().warning("[MySQL:] Error: " + err.getMessage());
             }
 
             else {
@@ -182,7 +181,7 @@ public class DestinationStorage {
                     }
                 } catch (SQLException ex) {
                     err = ex;
-                    CraftBahnPlugin.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
+                    CraftBahnPlugin.plugin.getLogger().warning("[MySQL:] Error: " + err.getMessage());
                 }
                 finally {
                     MySQL.close();
@@ -198,7 +197,7 @@ public class DestinationStorage {
 
         MySQL.updateAsync("DELETE FROM `%sdestinations` WHERE `id` = %s", (err, affectedRows) -> {
             if (err != null) {
-                CraftBahnPlugin.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
+                CraftBahnPlugin.plugin.getLogger().warning("[MySQL:] Error: " + err.getMessage());
                 callback.call(err, null);
             }
             else {
@@ -216,7 +215,7 @@ public class DestinationStorage {
 
         MySQL.queryAsync("SELECT * FROM `%sdestinations`", (err, result) -> {
             if (err != null) {
-                CraftBahnPlugin.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
+                CraftBahnPlugin.plugin.getLogger().warning("[MySQL:] Error: " + err.getMessage());
                 callback.call(err, null);
             }
 
@@ -230,7 +229,7 @@ public class DestinationStorage {
                     }
                 } catch (SQLException ex) {
                     err = ex;
-                    CraftBahnPlugin.getInstance().getLogger().warning("[MySQL:] Error: " + ex.getMessage());
+                    CraftBahnPlugin.plugin.getLogger().warning("[MySQL:] Error: " + ex.getMessage());
                 }
                 finally {
                     MySQL.close();
@@ -293,7 +292,7 @@ public class DestinationStorage {
     }
 
     public void addDestination(String name, UUID owner, Destination.DestinationType type, Location loc, Boolean isPublic, Callback<SQLException, Destination> callback) {
-        String serverName = CraftBahnPlugin.getInstance().getServerName();
+        String serverName = CraftBahnPlugin.plugin.getServerName();
         CTLocation ctLoc = CTLocation.fromBukkitLocation(loc);
 
         Destination dest = new Destination(name, serverName, loc.getWorld().getName(), owner, new ArrayList<>(), type, ctLoc, ctLoc, isPublic);
@@ -317,7 +316,7 @@ public class DestinationStorage {
                 JSONArray jsonArray = new JSONArray(result.getString("participants"));
                 for (Object uuid : jsonArray) participants.add(UUID.fromString((String) uuid));
             } catch (Exception e) {
-                CraftBahnPlugin.getInstance().getLogger().warning("Error: Unable to read participants for '" + name + "'");
+                CraftBahnPlugin.plugin.getLogger().warning("Error: Unable to read participants for '" + name + "'");
             }
 
             Destination.DestinationType destinationType = Destination.DestinationType.valueOf(result.getString("type"));
@@ -332,7 +331,7 @@ public class DestinationStorage {
             dest.setPublic(result.getBoolean("public"));
         }
         catch (Exception err) {
-            CraftBahnPlugin.getInstance().getLogger().warning("[MySQL:] Error: " + err.getMessage());
+            CraftBahnPlugin.plugin.getLogger().warning("[MySQL:] Error: " + err.getMessage());
         }
 
         return dest;

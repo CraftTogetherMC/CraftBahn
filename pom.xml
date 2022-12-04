@@ -74,10 +74,6 @@
                             <pattern>me.lucko.commodore</pattern>
                             <shadedPattern>com.bergerkiller.bukkit.common.dep.me.lucko.commodore</shadedPattern>
                         </relocation>
-                        <relocation>
-                            <pattern>net.kyori</pattern>
-                            <shadedPattern>com.bergerkiller.bukkit.common.dep.net.kyori</shadedPattern>
-                        </relocation>
                     </relocations>
                 </configuration>
             </plugin>
@@ -141,6 +137,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.bergerkiller.bukkit</groupId>
+            <artifactId>TrainCarts</artifactId>
+            <version>1.19.2-v2-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- Cloud Command Framework -->
         <dependency>
             <groupId>org.bergerhealer.cloud.commandframework</groupId>
@@ -161,6 +164,18 @@
             <artifactId>cloud-minecraft-extras</artifactId>
             <version>${project.cloud.version}</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-minimessage</artifactId>
+            <version>4.12.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-serializer-legacy</artifactId>
+            <version>4.12.0</version>
         </dependency>
     </dependencies>
 </project>

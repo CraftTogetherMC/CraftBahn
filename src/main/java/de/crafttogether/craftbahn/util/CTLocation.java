@@ -27,7 +27,7 @@ public class CTLocation {
     }
 
     public static CTLocation fromBukkitLocation(Location loc) {
-        return new CTLocation(CraftBahnPlugin.getInstance().getServerName(), loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ());
+        return new CTLocation(CraftBahnPlugin.plugin.getServerName(), loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ());
     }
 
     public String getServer() {
