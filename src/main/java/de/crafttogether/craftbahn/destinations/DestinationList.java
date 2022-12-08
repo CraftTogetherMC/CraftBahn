@@ -109,7 +109,6 @@ public class DestinationList {
 
                 if ((dest.getType().equals(Destination.DestinationType.PLAYER_STATION) || dest.getType().equals(Destination.DestinationType.PUBLIC_STATION)) && dest.getOwner() != null && this.showOwner) {
                     OfflinePlayer owner = Bukkit.getOfflinePlayer(dest.getOwner());
-
                     String unkown = Localization.COMMAND_DESTINATIONS_LIST_ENTRY_HOVER_OWNERUNKOWN.get();
                     StringBuilder strOwner = new StringBuilder((owner.hasPlayedBefore() ? owner.getName() : unkown) + ", ");
                     for (UUID uuid : dest.getParticipants()) {
@@ -169,7 +168,7 @@ public class DestinationList {
             Component btnBackwards;
             if (pageIndex > 1) {
                 btnBackwards = Localization.COMMAND_DESTINATIONS_BTN_BACKWARDS_ON.deserialize(
-                        PlaceholderResolver.resolver("command", this.command + " " + this.commandFlags + " --page " + (pageIndex - 1)),
+                        PlaceholderResolver.resolver("command", this.command + this.commandFlags + " --page " + (pageIndex - 1)),
                         PlaceholderResolver.resolver("page", String.valueOf(pageIndex - 1)));
             } else
                 btnBackwards = Localization.COMMAND_DESTINATIONS_BTN_BACKWARDS_OFF.deserialize();
@@ -177,7 +176,7 @@ public class DestinationList {
             Component btnForwards;
             if (pageIndex < this.pages.size()) {
                 btnForwards = Localization.COMMAND_DESTINATIONS_BTN_FORWARDS_ON.deserialize(
-                        PlaceholderResolver.resolver("command", this.command + " " + this.commandFlags + " --page " + (pageIndex + 1)),
+                        PlaceholderResolver.resolver("command", this.command + this.commandFlags + " --page " + (pageIndex + 1)),
                         PlaceholderResolver.resolver("page", String.valueOf(pageIndex + 1)));
             } else
                 btnForwards = Localization.COMMAND_DESTINATIONS_BTN_FORWARDS_OFF.deserialize();

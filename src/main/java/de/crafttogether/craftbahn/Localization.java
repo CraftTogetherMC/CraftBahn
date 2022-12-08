@@ -11,6 +11,7 @@ public class Localization extends LocalizationEnum {
     public static final Localization COMMAND_NOPERM = new Localization("command.noperm", "<red>Dazu hast du keine Berechtigung</red>");
     public static final Localization COMMAND_NOTRAIN = new Localization("command.notrain", "<prefix/><red>Bitte setze dich zuerst in einen Zug.</red>");
 
+    public static final Localization DESTINATIONTYPE_ALL = new Localization("destinationtype.all", "Alle");
     public static final Localization DESTINATIONTYPE_STATION = new Localization("destinationtype.station", "Bahnhof");
     public static final Localization DESTINATIONTYPE_MAIN_STATION = new Localization("destinationtype.main_station", "Hauptbahnhof");
     public static final Localization DESTINATIONTYPE_PLAYER_STATION = new Localization("destinationtype.player_station", "Spielerbahnhof");
@@ -73,6 +74,23 @@ public class Localization extends LocalizationEnum {
     public static final Localization COMMAND_DESTINATIONS_BTN_BACKWARDS_ON = new Localization("command.destinations.btn.backwards.on", "<hover:show_text:'<green>Vorherige Seite</green>'><click:run_command:{command}><green>----<<</green> <gold>Zurück</gold></click></hover>");
     public static final Localization COMMAND_DESTINATIONS_BTN_BACKWARDS_OFF = new Localization("command.destinations.btn.backwards.off", "<green>----<<</green> <gray>Zurück</gray>");
     public static final Localization COMMAND_DESTINATIONS_BTN_TELEPORT = new Localization("command.destinations.btn.teleport", "<hover:show_text:'<green>Zum Bahnhof teleportieren</green>'><click:run_command:{command}> <gray>[</gray><white>TP</white><gray>]</gray></click></hover>");
+
+    public static final Localization COMMAND_DESTEDIT_INFO = new Localization("command.destedit.info", """
+            <header/>
+            
+            <prefix/><gold>Fahrziel: </gold><yellow>{name}</yellow>
+            <prefix/><gold>ID: </gold><yellow>{id}</yellow>
+            <prefix/><gold>Typ: </gold><yellow>{type}</yellow>
+            <prefix/><gold>Besitzer: </gold><yellow>{owner}</yellow>
+            <prefix/><gold>Mitwirkende: </gold><yellow>{participants}</yellow>
+            <prefix/><gold>Server: </gold><yellow>{server}</yellow>
+            <prefix/><gold>Welt: </gold><yellow>{world}</yellow>
+            <prefix/><gold>Koordinaten: </gold><yellow>{x} {x} {z}</yellow>
+            
+            <footer/>
+            """);
+    public static final Localization COMMAND_DESTEDIT_NONAME = new Localization("command.destedit.noname", "<prefix/><red>Bitte gebe den Namen des Ziel an.</red>");
+    public static final Localization COMMAND_DESTEDIT_MULTIPLEDEST = new Localization("command.destedit.multipledest", "<prefix/><red>Es existieren mehrere Ziele mit diesem Namen.<newLine><prefix/>Bitte gebe zusätzlich den Servernamen an.</red>");
 
     public static final Localization COMMAND_MOBENTER_SUCCESS = new Localization("command.mobenter.success", "<prefix/><green>Es wurden <yellow>{amount}</yellow> Tiere in deinen Zug gesetzt</green>");
     public static final Localization COMMAND_MOBENTER_FAILED = new Localization("command.mobenter.failed", "<prefix/><red>Es wurden keine Tiere im Umkreis von <yellow>{radius}</yellow> Blöcken gefunden oder der Zug ist leider schon voll.</red>");
