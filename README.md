@@ -2,7 +2,7 @@
 
 ![](https://media.tenor.com/images/b31da936191fcccadb8fc6e0fc777070/tenor.gif)
 
-CraftBahn ist ein Plugin, welches wir für unseren Server craft-together.de entwickelt haben.  
+CraftBahn ist ein Plugin, welches wir für unseren Server [CraftTogetherMC](https://github.com/CraftTogetherMC) entwickelt haben.  
 Es dient als Add-On für das Plugin [TrainCarts](https://github.com/bergerhealer/TrainCarts) und erfüllt primär den Zweck, Fahrziele zu verwalten.
 
 ### Weitere funktionen:
