@@ -12,6 +12,7 @@ import de.crafttogether.craftbahn.localization.PlaceholderResolver;
 import de.crafttogether.craftbahn.util.TCHelper;
 import de.crafttogether.craftbahn.util.Util;
 import net.kyori.adventure.text.Component;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public class DestinationCommands {
     }
 
     @CommandMethod(value="fahrziel <name> [server]", requiredSender=Player.class)
-    @CommandDescription("Setzt dem aktuell ausgewähltem Zug ein Fahrziel.")
+    @CommandDescription("Setzt dem aktuell ausgewähltem Zug ein Fahrziel")
     @CommandPermission("craftbahn.command.destination")
     public void fahrziel(
             final Player sender,
@@ -115,7 +116,7 @@ public class DestinationCommands {
     }
 
     @CommandMethod(value="fahrziele [type]", requiredSender=Player.class)
-    @CommandDescription("Zeigt eine Liste mit möglichen Fahrzielen.")
+    @CommandDescription("Zeigt eine Liste mit möglichen Fahrzielen")
     @CommandPermission("craftbahn.command.destination")
     public void fahrziele(
             final Player sender,
@@ -172,12 +173,130 @@ public class DestinationCommands {
         list.sendPage(sender, (page == null ? 1 : page));
     }
 
-    @CommandMethod(value="fahrzieledit setowner", requiredSender=Player.class)
-    @CommandDescription("Ändert den angegebenen Besitzer eines Fahrziel")
-    @CommandPermission("craftbahn.command.destination.setowner")
-    public void fahrzieledit_setowner(
+    @CommandMethod(value="fahrzieledit info")
+    @CommandDescription("Zeigt Informationen zum angegebenen Fahrziel an")
+    @CommandPermission("craftbahn.command.destination.edit.info")
+    public void fahrzieledit_info(
+            final CommandSender sender
+    ) {
+        sender.sendMessage("Test");
+    }
+
+    @CommandMethod(value="fahrzieledit tp <destination>", requiredSender=Player.class)
+    @CommandDescription("Teleportiert den Spieler zum angegebenen Fahrziel")
+    @CommandPermission("craftbahn.command.destination.edit.teleport")
+    public voidfahrzieledit_teleport(
             final Player sender
     ) {
         sender.sendMessage("Test");
     }
+
+    @CommandMethod(value="fahrzieledit add <destination>")
+    @CommandDescription("Fügt ein neues Fahrziel der Liste hinzu")
+    @CommandPermission("craftbahn.command.destination.edit.add")
+    public void fahrzieledit_add(
+            final CommandSender sender
+    ) {
+        sender.sendMessage("Test");
+    }
+
+    @CommandMethod(value="fahrzieledit remove <destination>")
+    @CommandDescription("Entfernt das angegebene Fahrziel aus der Liste")
+    @CommandPermission("craftbahn.command.destination.edit.remove")
+    public void fahrzieledit_remove(
+            final CommandSender sender
+    ) {
+        sender.sendMessage("Test");
+    }
+
+    @CommandMethod(value="fahrzieledit addmember <destination> <player>")
+    @CommandDescription("Fügt dem angegebene Fahrziel einen sekundären Besitzer hinzu")
+    @CommandPermission("craftbahn.command.destination.edit.addmember")
+    public void fahrzieledit_addmember(
+            final CommandSender sender
+    ) {
+        sender.sendMessage("Test");
+    }
+
+    @CommandMethod(value="fahrzieledit removemember <destination> <player>")
+    @CommandDescription("Entfernt dem angegebene Fahrziel einen sekundären Besitzer")
+    @CommandPermission("craftbahn.command.destination.edit.removemember")
+    public void fahrzieledit_removemember(
+            final CommandSender sender
+    ) {
+        sender.sendMessage("Test");
+    }
+
+    @CommandMethod(value="fahrzieledit setowner <destination> <player>")
+    @CommandDescription("Legt den primären Besitzer des angegebenen Fahrziel fest")
+    @CommandPermission("craftbahn.command.destination.edit.setowner")
+    public void fahrzieledit_setowner(
+            final CommandSender sender
+    ) {
+        sender.sendMessage("Test");
+    }
+
+    @CommandMethod(value="fahrzieledit setprivate <destination>")
+    @CommandDescription("Macht das angegebene Fahrziel privat")
+    @CommandPermission("craftbahn.command.destination.edit.setprivate")
+    public void fahrzieledit_setprivate(
+            final CommandSender sender
+    ) {
+        sender.sendMessage("Test");
+    }
+
+    @CommandMethod(value="fahrzieledit setpublic <destination>")
+    @CommandDescription("Macht das angegebene Fahrziel öffentlich")
+    @CommandPermission("craftbahn.command.destination.edit.setpublic")
+    public void fahrzieledit_setpublic(
+            final CommandSender sender
+    ) {
+        sender.sendMessage("Test");
+    }
+
+    @CommandMethod(value="fahrzieledit setlocation <destination>")
+    @CommandDescription("Legt die Marker-Position (Dynmap) des aktuellen Fahrziel fest")
+    @CommandPermission("craftbahn.command.destination.edit.setlocation")
+    public void fahrzieledit_setlocation(
+            final CommandSender sender
+    ) {
+        sender.sendMessage("Test");
+    }
+
+    @CommandMethod(value="fahrzieledit settype <destination> <type>")
+    @CommandDescription("Legt den Typ des angegebenen Fahrziel fest")
+    @CommandPermission("craftbahn.command.destination.edit.settype")
+    public void fahrzieledit_settype(
+            final CommandSender sender
+    ) {
+        sender.sendMessage("Test");
+    }
+
+    @CommandMethod(value="fahrzieledit setwarp <destination>")
+    @CommandDescription("Legt die Warp-Position des aktuellen Fahrziel fest")
+    @CommandPermission("craftbahn.command.destination.edit.setwarp")
+    public void fahrzieledit_setwarp(
+            final CommandSender sender
+    ) {
+        sender.sendMessage("Test");
+    }
+
+    @CommandMethod(value="fahrzieledit updatemarker")
+    @CommandDescription("Alle Dynmap-Marker werden neu geladen")
+    @CommandPermission("craftbahn.command.destination.edit.updatemarker")
+    public void fahrzieledit_updatemarker(
+            final CommandSender sender
+    ) {
+        sender.sendMessage("Test");
+    }
+
+    @CommandMethod(value="fahrzieledit reload")
+    @CommandDescription("Konfiguration wird neu geladen")
+    @CommandPermission("craftbahn.command.destination.edit.reload")
+    public void fahrzieledit_reload(
+            final CommandSender sender
+    ) {
+        sender.sendMessage("Test");
+    }
+
 }
