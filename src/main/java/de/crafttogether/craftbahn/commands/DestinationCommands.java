@@ -184,7 +184,7 @@ public class DestinationCommands {
 
     @CommandMethod(value="fahrzieledit info <destination> [server]", requiredSender=Player.class)
     @CommandDescription("Zeigt Informationen zum angegebenen Fahrziel an")
-    @CommandPermission("craftbahn.command.destination.edit.info")
+    @CommandPermission("craftbahn.command.destedit.info")
     public void fahrzieledit_info(
             final Player sender,
             final @Argument(value="destination", suggestions="destinationName") String name,
@@ -219,7 +219,7 @@ public class DestinationCommands {
 
     @CommandMethod(value="fahrzieledit tp <destination> [server]", requiredSender=Player.class)
     @CommandDescription("Teleportiert den Spieler zum angegebenen Fahrziel")
-    @CommandPermission("craftbahn.command.destination.edit.teleport")
+    @CommandPermission("craftbahn.command.destedit.teleport")
     public void fahrzieledit_teleport(
             final Player sender,
             final @Argument(value="destination", suggestions="destinationName") String name,
@@ -242,7 +242,7 @@ public class DestinationCommands {
 
     @CommandMethod(value="fahrzieledit add <destination> <type>", requiredSender=Player.class)
     @CommandDescription("Fügt ein neues Fahrziel der Liste hinzu")
-    @CommandPermission("craftbahn.command.destination.edit.add")
+    @CommandPermission("craftbahn.command.destedit.add")
     public void fahrzieledit_add(
             final Player sender,
             final @Argument(value="destination", suggestions="destinationName") String name,
@@ -266,7 +266,7 @@ public class DestinationCommands {
 
     @CommandMethod(value="fahrzieledit remove <destination> [server]", requiredSender=Player.class)
     @CommandDescription("Entfernt das angegebene Fahrziel aus der Liste")
-    @CommandPermission("craftbahn.command.destination.edit.remove")
+    @CommandPermission("craftbahn.command.destedit.remove")
     public void fahrzieledit_remove(
             final Player sender,
             final @Argument(value="destination", suggestions="destinationName") String name,
@@ -286,7 +286,7 @@ public class DestinationCommands {
 
     @CommandMethod(value="fahrzieledit addmember <destination> <player> [server]", requiredSender=Player.class)
     @CommandDescription("Fügt dem angegebene Fahrziel einen sekundären Besitzer hinzu")
-    @CommandPermission("craftbahn.command.destination.edit.addmember")
+    @CommandPermission("craftbahn.command.destedit.addmember")
     public void fahrzieledit_addmember(
             final Player sender,
             final @Argument(value="destination", suggestions="destinationName") String name,
@@ -323,7 +323,7 @@ public class DestinationCommands {
 
     @CommandMethod(value="fahrzieledit removemember <destination> <player> [server]", requiredSender=Player.class)
     @CommandDescription("Entfernt dem angegebene Fahrziel einen sekundären Besitzer")
-    @CommandPermission("craftbahn.command.destination.edit.removemember")
+    @CommandPermission("craftbahn.command.destedit.removemember")
     public void fahrzieledit_removemember(
             final Player sender,
             final @Argument(value="destination", suggestions="destinationName") String name,
@@ -360,7 +360,7 @@ public class DestinationCommands {
 
     @CommandMethod(value="fahrzieledit setowner <destination> <player> [server]", requiredSender=Player.class)
     @CommandDescription("Legt den primären Besitzer des angegebenen Fahrziel fest")
-    @CommandPermission("craftbahn.command.destination.edit.setowner")
+    @CommandPermission("craftbahn.command.destedit.setowner")
     public void fahrzieledit_setowner(
             final Player sender,
             final @Argument(value="destination", suggestions="destinationName") String name,
@@ -372,7 +372,7 @@ public class DestinationCommands {
 
     @CommandMethod(value="fahrzieledit setprivate <destination> [server]", requiredSender=Player.class)
     @CommandDescription("Macht das angegebene Fahrziel privat")
-    @CommandPermission("craftbahn.command.destination.edit.setprivate")
+    @CommandPermission("craftbahn.command.destedit.setprivate")
     public void fahrzieledit_setprivate(
             final Player sender,
             final @Argument(value="destination", suggestions="destinationName") String name,
@@ -383,7 +383,7 @@ public class DestinationCommands {
 
     @CommandMethod(value="fahrzieledit setpublic <destination> [server]", requiredSender=Player.class)
     @CommandDescription("Macht das angegebene Fahrziel öffentlich")
-    @CommandPermission("craftbahn.command.destination.edit.setpublic")
+    @CommandPermission("craftbahn.command.destedit.setpublic")
     public void fahrzieledit_setpublic(
             final Player sender,
             final @Argument(value="destination", suggestions="destinationName") String name,
@@ -394,7 +394,7 @@ public class DestinationCommands {
 
     @CommandMethod(value="fahrzieledit setlocation <destination> [server]", requiredSender=Player.class)
     @CommandDescription("Legt die Marker-Position (Dynmap) des aktuellen Fahrziel fest")
-    @CommandPermission("craftbahn.command.destination.edit.setlocation")
+    @CommandPermission("craftbahn.command.destedit.setlocation")
     public void fahrzieledit_setlocation(
             final Player sender,
             final @Argument(value="destination", suggestions="destinationName") String name,
@@ -405,7 +405,7 @@ public class DestinationCommands {
 
     @CommandMethod(value="fahrzieledit settype <destination> <type> [server]", requiredSender=Player.class)
     @CommandDescription("Legt den Typ des angegebenen Fahrziel fest")
-    @CommandPermission("craftbahn.command.destination.edit.settype")
+    @CommandPermission("craftbahn.command.destedit.settype")
     public void fahrzieledit_settype(
             final Player sender,
             final @Argument(value="destination", suggestions="destinationName") String name,
@@ -417,7 +417,7 @@ public class DestinationCommands {
 
     @CommandMethod(value="fahrzieledit setwarp <destination> [server]", requiredSender=Player.class)
     @CommandDescription("Legt die Warp-Position des aktuellen Fahrziel fest")
-    @CommandPermission("craftbahn.command.destination.edit.setwarp")
+    @CommandPermission("craftbahn.command.destedit.setwarp")
     public void fahrzieledit_setwarp(
             final Player sender,
             final @Argument(value="destination", suggestions="destinationName") String name,
@@ -428,7 +428,7 @@ public class DestinationCommands {
 
     @CommandMethod(value="fahrzieledit updatemarker", requiredSender=Player.class)
     @CommandDescription("Alle Dynmap-Marker werden neu geladen")
-    @CommandPermission("craftbahn.command.destination.edit.updatemarker")
+    @CommandPermission("craftbahn.command.destedit.updatemarker")
     public void fahrzieledit_updatemarker(
             final Player sender
     ) {
@@ -437,7 +437,7 @@ public class DestinationCommands {
 
     @CommandMethod(value="fahrzieledit reload", requiredSender=Player.class)
     @CommandDescription("Konfiguration wird neu geladen")
-    @CommandPermission("craftbahn.command.destination.edit.reload")
+    @CommandPermission("craftbahn.command.destedit.reload")
     public void fahrzieledit_reload(
             final Player sender
     ) {
