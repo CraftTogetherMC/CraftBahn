@@ -269,28 +269,6 @@ public class DestinationStorage {
         return null;
     }
 
-    public List<Destination> filterByServer(List<Destination> destinations, String serverName) {
-        List<Destination> list = new ArrayList<>();
-
-        for (Destination dest : destinations) {
-            if (dest.getServer().equalsIgnoreCase(serverName))
-                list.add(dest);
-        }
-
-        return list;
-    }
-
-    public List<Destination> filterByType(List<Destination> destinations, Destination.DestinationType type) {
-        List<Destination> list = new ArrayList<>();
-
-        for (Destination dest : destinations) {
-            if (dest.getType().equals(type))
-                list.add(dest);
-        }
-
-        return list;
-    }
-
     public void addDestination(String name, UUID owner, Destination.DestinationType type, Location loc, Boolean isPublic, Callback<SQLException, Destination> callback) {
         String serverName = CraftBahnPlugin.plugin.getServerName();
         CTLocation ctLoc = CTLocation.fromBukkitLocation(loc);
