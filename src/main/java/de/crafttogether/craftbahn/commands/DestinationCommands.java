@@ -1,23 +1,20 @@
 package de.crafttogether.craftbahn.commands;
 
-import cloud.commandframework.ArgumentDescription;
-import cloud.commandframework.CommandManager;
-import cloud.commandframework.Description;
-import cloud.commandframework.annotations.*;
-import cloud.commandframework.arguments.standard.IntegerArgument;
-import cloud.commandframework.arguments.standard.StringArgument;
+import cloud.commandframework.annotations.Argument;
+import cloud.commandframework.annotations.CommandDescription;
+import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.Flag;
 import com.bergerkiller.bukkit.common.cloud.CloudSimpleHandler;
+import com.bergerkiller.bukkit.common.utils.LogicUtil;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.Localization;
 import de.crafttogether.craftbahn.destinations.Destination;
 import de.crafttogether.craftbahn.destinations.DestinationList;
+import de.crafttogether.craftbahn.localization.PlaceholderResolver;
 import de.crafttogether.craftbahn.util.TCHelper;
 import de.crafttogether.craftbahn.util.Util;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.tag.Tag;
-import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -57,20 +54,22 @@ public class DestinationCommands {
         // No destination was found
         if (result.size() < 1 || result.get(0) == null) {
             Localization.COMMAND_DESTINATION_NOTEXIST.message(sender,
-                TagResolver.resolver("input", Tag.selfClosingInserting(Component.text(name)))
+                PlaceholderResolver.resolver("input", name)
             );
         }
 
         // Multiple destinations have been found
         else if (result.size() > 1) {
             DestinationList list = new DestinationList(result);
-            list.setFilterName(name);
+            list.setCommand("/fahrziel");
             list.setRowsPerPage(12);
+            list.showContentsPage(false);
+            list.showFooterLine(true);
             list.showOwner(true);
             list.showLocation(true);
-            list.showFooter(true);
 
-            Localization.HEADER.message(sender);
+            if (!LogicUtil.nullOrEmpty(Localization.HEADER.get()))
+                sender.sendMessage(Localization.HEADER.deserialize().append(Component.newline()));
 
             if (page == null) {
                 Localization.COMMAND_DESTINATION_MULTIPLEDEST.message(sender);
@@ -112,7 +111,7 @@ public class DestinationCommands {
             }
 
             Localization.COMMAND_DESTINATION_APPLIED.message(sender,
-                TagResolver.resolver("destination", Tag.selfClosingInserting(Component.text(dest.getName())))
+                PlaceholderResolver.resolver("destination", dest.getName())
             );
         }
     }
@@ -127,6 +126,7 @@ public class DestinationCommands {
             final @Flag(value="page") Integer page
     ) {
         List<Destination> result = null;
+        String commandFlags = "";
 
         // Filter: player
         if (player != null && !player.isEmpty()) {
@@ -134,6 +134,7 @@ public class DestinationCommands {
                 return;
             }
 
+            commandFlags = "--player " + player;
             result = CraftBahnPlugin.plugin.getDestinationStorage().getDestinations().stream()
                     .filter(d -> d.getOwner().equals(player))
                     .filter(d -> d.getParticipants().equals(player))
@@ -142,6 +143,7 @@ public class DestinationCommands {
 
         // Filter: server
         else if (server != null && !server.isEmpty()) {
+            commandFlags = "--server " + server;
             result = CraftBahnPlugin.plugin.getDestinationStorage().getDestinations().stream()
                     .filter(d -> d.getServer().equalsIgnoreCase(server))
                     .collect(Collectors.toList());
@@ -149,6 +151,7 @@ public class DestinationCommands {
 
         // Filter: stationType
         else if (type != null && !type.isEmpty()) {
+            commandFlags = "--stationType " + type;
             result = CraftBahnPlugin.plugin.getDestinationStorage().getDestinations().stream()
                     .filter(d -> d.getType().equals(type))
                     .collect(Collectors.toList());
@@ -158,11 +161,12 @@ public class DestinationCommands {
             result = new ArrayList<>(CraftBahnPlugin.plugin.getDestinationStorage().getDestinations());
 
         DestinationList list = new DestinationList(result);
-        list.showContents(false);
+        list.setCommand("/fahrziele");
+        list.setCommandFlags(commandFlags);
+        list.showContentsPage(false);
+        list.showFooterLine(true);
         list.showOwner(true);
         list.showLocation(true);
-        list.showFooter(true);
-        list.showContents(true);
 
         list.sendPage(sender, (page == null ? 1 : page));
     }
