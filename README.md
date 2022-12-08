@@ -1,32 +1,52 @@
 # CraftBahn
-
+   
 ![](https://media.tenor.com/images/b31da936191fcccadb8fc6e0fc777070/tenor.gif)
-
+   
 CraftBahn ist ein Plugin, welches wir für unseren Server [CraftTogetherMC](https://github.com/CraftTogetherMC) entwickelt haben.  
 Es dient als Add-On für das Plugin [TrainCarts](https://github.com/bergerhealer/TrainCarts) und erfüllt primär den Zweck, Fahrziele zu verwalten.
-
+   
 ### Weitere funktionen:
 - Befehle um Mobs in/aus Züge(n) ein/aussteigen zu lassen.
 - Geschwindigkeitsanzeige in der Actionbar des Spielers, für fahrende Züge.
 - TrainCarts-ActionSigns für serverübergreifende "Teleportation" von Zügen (In Arbeit)
 - Dynmap-Integration -> Für jedes Fahrziel wird ein Marker auf der Karte erstellt.
 - Alle Texte können angepasst werden (localization.yml)
-  
-  
+   
+   
 ![](https://i.imgur.com/G2U1pKx.png)  
 ![](https://i.imgur.com/cUXQjis.png)  
 ![](https://i.imgur.com/g2UdOvJ.png)   
-  
+   
+   
 ### Befehle & Berechtigungen:
-| Befehl                     | Permission                             | Beschreibung     |
-| :---                       | :---                                   | :---             |
-| /fahrziel                  | craftbahn.command.destination          | Zeigt Grundlegende Informationen zur Benutzung des Befehls |
-| /fahrziel <name>           | craftbahn.command.destination          | Setzt dem aktuell ausgewählten Zug das angegebene Ziel |
-| /fahrziele [typ]           | craftbahn.command.destinations         | Zeigt eine Liste mit allen Fahrzielen
-| /fahrziele [typ] [filter]  | craftbahn.command.destinations.filter  | Zeigt eine gefilterte Liste mit allen Fahrzielen **Filter-Flags:** `--server` `--player`  |
-| /mobenter [radius]         | craftbahn.command.mobenter             | Lässt Tiere im Umkreis des ausgewählten Zug, in den Zug einsteigen |
-| /mobeject                  | craftbahn.command.mobeject             | Wirft alle Tiere aus dem ausgewählten Zug heraus |
-
+   
+#### Fahrziel wählen
+| Befehl                      | Permission                            | Beschreibung                                                                             |
+|:----------------------------|:--------------------------------------|:-----------------------------------------------------------------------------------------|
+| `/fahrziel`                 | craftbahn.command.destination         | Zeigt Grundlegende Informationen zur Benutzung des Befehls                               |
+| `/fahrziel <name>`          | craftbahn.command.destination         | Setzt dem aktuell ausgewählten Zug das angegebene Ziel                                   |
+| `/fahrziele [typ]`          | craftbahn.command.destinations        | Zeigt eine Liste mit allen Fahrzielen                                                    |
+| `/fahrziele [typ] [filter]` | craftbahn.command.destinations.filter | Zeigt eine gefilterte Liste mit allen Fahrzielen **Filter-Flags:** `--server` `--player` |
+   
+   
+#### Fahrziele verwalten
+| Befehl                                                       | Permission                              | Beschreibung                                                            |
+|:-------------------------------------------------------------|:----------------------------------------|:------------------------------------------------------------------------|
+| `/fahrzieledit info <destination> [server]`                  | craftbahn.command.destedit.info         | Zeigt detaillierte Informationen zum angegebenen Fahrziel an            |
+| `/fahrzieledit tp <destination> [server]`                    | craftbahn.command.destedit.teleport     | Teleportiert den Spieler zur hinterlegten Position angegebenen Fahrziel |
+| `/fahrzieledit add <destination> <type>  `                   | craftbahn.command.destedit.add          | Fügt ein neues Fahrziel mit dem angegebenen Stationstyp hinzu           |
+| `/fahrzieledit remove <destination>  [server] `              | craftbahn.command.destedit.remove       | Entfernt ein vorhandenes Fahrziel                                       |
+| `/fahrzieledit addmember <destination> <player> [server]`    | craftbahn.command.destedit.addmember    | Fügt dem angegebenen Fahrziel einen sekundären Besitzer hinzu           |
+| `/fahrzieledit removemember <destination> <player> [server]` | craftbahn.command.destedit.removemember | Entfernt einen sekundären Besitzer des angegebenen Fahrziel             |
+   
+   
+#### Sonstige Befehle
+| Befehl                | Permission                 | Beschreibung                                                       |
+|:----------------------|:---------------------------|:-------------------------------------------------------------------|
+| `/mobenter [radius]`  | craftbahn.command.mobenter | Lässt Tiere im Umkreis des ausgewählten Zug, in den Zug einsteigen |
+| `/mobeject`           | craftbahn.command.mobeject | Wirft alle Tiere aus dem ausgewählten Zug heraus                   |
+   
+   
 ### Tabellestruktur:
 
 ``` sql
