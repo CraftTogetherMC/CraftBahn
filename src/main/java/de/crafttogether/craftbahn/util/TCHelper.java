@@ -13,16 +13,16 @@ public class TCHelper {
     // Get train by player
     public static MinecartGroup getTrain(Player p) {
         Entity entity = p.getVehicle();
-        MinecartMember<?> cart = null;
+        MinecartMember<?> member = null;
 
         if (entity == null)
             return null;
 
         if (entity instanceof Minecart)
-            cart = MinecartMemberStore.getFromEntity(entity);
+            member = MinecartMemberStore.getFromEntity(entity);
 
-        if (cart != null)
-            return cart.getGroup();
+        if (member != null)
+            return member.getGroup();
 
         return null;
     }

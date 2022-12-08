@@ -8,6 +8,9 @@ public class Localization extends LocalizationEnum {
     public static final Localization HEADER = new Localization("command.header", "<yellow>--------------</yellow> <red><bold>CraftBahn</bold></red> <yellow>--------------<yellow/>");
     public static final Localization FOOTER = new Localization("command.footer", "<yellow>----------------------------------------</yellow>");
 
+    public static final Localization COMMAND_NOPERM = new Localization("command.noperm", "<red>Dazu hast du keine Berechtigung</red>");
+    public static final Localization COMMAND_NOTRAIN = new Localization("command.notrain", "<prefix/><red>Bitte setze dich zuerst in einen Zug.</red>");
+
     public static final Localization DESTINATIONTYPE_STATION = new Localization("destinationtype.station", "Bahnhof");
     public static final Localization DESTINATIONTYPE_MAIN_STATION = new Localization("destinationtype.main_station", "Hauptbahnhof");
     public static final Localization DESTINATIONTYPE_PLAYER_STATION = new Localization("destinationtype.player_station", "Spielerbahnhof");
@@ -15,7 +18,6 @@ public class Localization extends LocalizationEnum {
 
     public static final Localization COMMAND_DESTINATION_NOTEXIST = new Localization("command.destination.notexist", "<prefix/><red>Es wurde kein Ziel mit dem Namen <gold>{input}</gold> gefunden.</red>");
     public static final Localization COMMAND_DESTINATION_NOPERMISSION = new Localization("command.destination.nopermission", "<prefix/><red>Auf dieses Ziel hast du keinen Zugriff.</red>");
-    public static final Localization COMMAND_DESTINATION_NOTRAIN = new Localization("command.destination.notrain", "<prefix/><red>Bitte setze dich zuerst in einen Zug.</red>");
     public static final Localization COMMAND_DESTINATION_MULTIPLEDEST = new Localization("command.destination.multipledest", "<prefix/><red>Es wurden mehrere mögliche Ziele gefunden.</red>");
     public static final Localization COMMAND_DESTINATION_APPLIED = new Localization("command.destination.applied", "<prefix/><yellow>Dieser Zug versucht nun das Ziel <gold>{destination}</gold> zu erreichen.</yellow>");
     public static final Localization COMMAND_DESTINATION_INFO = new Localization("command.destination.info",
@@ -72,7 +74,9 @@ public class Localization extends LocalizationEnum {
     public static final Localization COMMAND_DESTINATIONS_BTN_BACKWARDS_OFF = new Localization("command.destinations.btn.backwards.off", "<green>----<<</green> <gray>Zurück</gray>");
     public static final Localization COMMAND_DESTINATIONS_BTN_TELEPORT = new Localization("command.destinations.btn.teleport", "<hover:show_text:'<green>Zum Bahnhof teleportieren</green>'><click:run_command:{command}> <gray>[</gray><white>TP</white><gray>]</gray></click></hover>");
 
-    public static final Localization COMMAND_NOPERM = new Localization("command.noperm", "<red>Dazu hast du keine Berechtigung</red>");
+    public static final Localization COMMAND_MOBENTER_SUCCESS = new Localization("command.mobenter.success", "<prefix/><green>Es wurden <yellow>{amount}</yellow> Tiere in deinen Zug gesetzt</green>");
+    public static final Localization COMMAND_MOBENTER_FAILED = new Localization("command.mobenter.failed", "<prefix/><red>Es wurden keine im Umkreis von <yellow>{radius}</yellow> Blöcken Tiere gefunden oder der Zug ist leider schon voll.</red>");
+    public static final Localization COMMAND_MOBEJECT_SUCCESS = new Localization("command.mobeject.success", "<prefix/><green>Es wurden alle vorhandenen Tiere aus dem Zug geworden.</green>");
 
     private Localization(String name, String defValue) {
         super(name, defValue);

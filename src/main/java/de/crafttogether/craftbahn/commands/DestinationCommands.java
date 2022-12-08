@@ -89,7 +89,7 @@ public class DestinationCommands {
             // Find train
             MinecartGroup train = TCHelper.getTrain(sender);
             if (train == null) {
-                Localization.COMMAND_DESTINATION_NOTRAIN.message(sender);
+                Localization.COMMAND_NOTRAIN.message(sender);
                 return;
             }
 
