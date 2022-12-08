@@ -1,46 +1,33 @@
-**CraftBahn** _(CTDestinations rewritten)_
+# CraftBahn
 
 ![](https://media.tenor.com/images/b31da936191fcccadb8fc6e0fc777070/tenor.gif)
 
-**TODO:**
-- Debugging (Ein Job für Ceddix)
-- CBPortals: Warnmeldung wenn portal-out bereits existiert
-- CBPortals: Erstelle portal-in nicht wenn ziel auf gleichem server ist
-- CBPortals: Reload-Befehl
-- Befehl: /mobeject
-- Züge mit kurzer Verzögerung löschen wenn Spieler ausgestiegen ist. (Benötigt Tag-Signs an allen Bahnhöfen!)
-- Alias-System um Spielerbahnhöfe anders in der Liste anzuzeigen
-- /tprelative-Befehl Beispiel: `/tpr 300 north`
-- Möglichkeit Beschreibung bei Fahrzielen
-- Eigenes Icon für StationType: PUBLIC_STATION (Chest_Minecard)
-- `/fze settype` / `/fze updatemarker` prüfen
-- ~~`/fze <action> <destination> [server]`~ -> Destination jeweils anhand des verbundenen Server auswählen (wenn kein anderer angegeben)`~~
-- ~~`/fahrziel` <destination> -> Alle gefundenen Fahrziele mit dem angegebenen Namen sortiert nach server auflisten~~
-- ~~/fahrzieledit setwarp -cmd für das setzen der Teleport-Position hinzufügen (setlocation == MarkerPosition)~~
-- ~~/farhzieledit add/remove-owner -cmd für die Verwaltung weiterer Besitzer (participants) hinzufügen.~~
-- ~~TrainListener wieder einfügen (Für EnterMessages und weitere CraftBahn features)~~
-- ~~Inhaltsverzeichnis für `/fahrziele` mit klickbaren Links~~
-- ~~Bei /fahrziel Route setzen wenn Ziel sich auf anderem Server befindet~~ 
-- ~~/fahrziele (Liste) übersichtlicher gestalten.. (Mit Pagination)~~
-- ~~Befehl hinzufügen um Info's über ein bestimmtes Fahrziel anzuzeigen `/fze info <name> [server]`~~
-- ~~Route / Destination über TrainCartsAPI setzen anstatt jeweiliges command auszuführen. (Um Rückgabe zu vermeiden)~~
-- ~~MarkerSystem überarbeiten~~
-- ~~ICS integrieren~~
-- ~~ViewDistance bei der Zugfahrt für mitfahrende Spieler senken https://github.com/Spottedleaf/Tuinity/commit/1ed460a26b4266b9573d7f28202ca4022784c5d9~~
-- ~~ICS: Items löschen beim Port in die Creative-Welt~~
-- ~~Bestehende Daten aus altem Plugin importieren (php)~~
+CraftBahn ist ein Plugin, welches wir für unseren Server craft-together.de entwickelt haben.  
+Es dient als Add-On für das Plugin [TrainCarts](https://github.com/bergerhealer/TrainCarts) und erfüllt primär den Zweck, Fahrziele zu verwalten.
 
-**Probleme:**
-- CBPortals: Beim PlayerSpawnLocationEvent gibt es Probleme beim Entity-Tracking(?) wenn der Spieler schon hier zum passenger einer Entity wird
+### Weitere funktionen:
+- Befehle um Mobs in/aus Züge(n) ein/aussteigen zu lassen.
+- Geschwindigkeitsanzeige in der Actionbar des Spielers, für fahrende Züge.
+- TrainCarts-ActionSigns für serverübergreifende "Teleportation" von Zügen (In Arbeit)
+- Dynmap-Integration -> Für jedes Fahrziel wird ein Marker auf der Karte erstellt.
+- Alle Texte können angepasst werden (localization.yml)
+  
+  
+![](https://i.imgur.com/G2U1pKx.png)  
+![](https://i.imgur.com/cUXQjis.png)  
+![](https://i.imgur.com/g2UdOvJ.png)   
+  
+### Befehle & Berechtigungen:
+| Befehl                     | Permission                             | Beschreibung     |
+| :---                       | :---                                   | :---             |
+| /fahrziel                  | craftbahn.command.destination          | Zeigt Grundlegende Informationen zur Benutzung des Befehls |
+| /fahrziel <name>           | craftbahn.command.destination          | Setzt dem aktuell ausgewählten Zug das angegebene Ziel |
+| /fahrziele [typ]           | craftbahn.command.destinations         | Zeigt eine Liste mit allen Fahrzielen
+| /fahrziele [typ] [filter]  | craftbahn.command.destinations.filter  | Zeigt eine gefilterte Liste mit allen Fahrzielen **Filter-Flags:** `--server` `--player`  |
+| /mobenter [radius]         | craftbahn.command.mobenter             | Lässt Tiere im Umkreis des ausgewählten Zug, in den Zug einsteigen |
+| /mobeject                  | craftbahn.command.mobeject             | Wirft alle Tiere aus dem ausgewählten Zug heraus |
 
-- **Ideen:**
-- Allgemein: Ausgabe im Chat was gespawned wurde (Minecart oder Traincart) wenn man ein Minecart placed
-- CBPortals: Zug nach teleport für eine kurze konfigurierbare Zeit anhalten. (Für sauberes Chunkloading) // Ist das noch notwendig?
-- CBPortals: "Besserer" Übergang (z.B. durch Blindness-Effekt)
-- PluginMessage: Andere Server im Netzwerk bei Änderungen benachrichtigen (Destinations & Portals)
-
-**Tabelle:**
-![](https://craft-together.de/~irgendsoeintyp/chrome_42JbdTaOft.png)
+### Tabellestruktur:
 
 ``` sql
 CREATE TABLE `cb_destinations` (
