@@ -4,6 +4,7 @@ import cloud.commandframework.CommandManager;
 import cloud.commandframework.annotations.CommandDescription;
 import cloud.commandframework.annotations.CommandMethod;
 import com.bergerkiller.bukkit.common.cloud.CloudSimpleHandler;
+import com.bergerkiller.bukkit.tc.commands.annotations.CommandRequiresPermission;
 import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.destinations.Destination;
 import org.bukkit.Bukkit;
@@ -48,7 +49,7 @@ public class Commands {
 
         cloud.suggest("destinationType", (context, input) -> {
             List<String> result =  Arrays.stream(Destination.DestinationType.values())
-                    .map(Destination.DestinationType::name)
+                    .map(Destination.DestinationType::toString)
                     .collect(Collectors.toList());
             return result;
         });

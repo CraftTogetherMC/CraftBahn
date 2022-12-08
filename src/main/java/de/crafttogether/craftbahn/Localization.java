@@ -8,6 +8,11 @@ public class Localization extends LocalizationEnum {
     public static final Localization HEADER = new Localization("command.header", "<yellow>--------------</yellow> <red><bold>CraftBahn</bold></red> <yellow>--------------<yellow/>");
     public static final Localization FOOTER = new Localization("command.footer", "<yellow>----------------------------------------</yellow>");
 
+    public static final Localization DESTINATIONTYPE_STATION = new Localization("destinationtype.station", "Bahnhof");
+    public static final Localization DESTINATIONTYPE_MAIN_STATION = new Localization("destinationtype.main_station", "Hauptbahnhof");
+    public static final Localization DESTINATIONTYPE_PLAYER_STATION = new Localization("destinationtype.player_station", "Spielerbahnhof");
+    public static final Localization DESTINATIONTYPE_PUBLIC_STATION = new Localization("destinationtype.public_station", "Öffentlich");
+
     public static final Localization COMMAND_DESTINATION_NOTEXIST = new Localization("command.destination.notexist", "<prefix/><red>Es wurde kein Ziel mit dem Namen <gold>{input}</gold> gefunden.</red>");
     public static final Localization COMMAND_DESTINATION_NOPERMISSION = new Localization("command.destination.nopermission", "<prefix/><red>Auf dieses Ziel hast du keinen Zugriff.</red>");
     public static final Localization COMMAND_DESTINATION_NOTRAIN = new Localization("command.destination.notrain", "<prefix/><red>Bitte setze dich zuerst in einen Zug.</red>");
@@ -16,21 +21,19 @@ public class Localization extends LocalizationEnum {
     public static final Localization COMMAND_DESTINATION_INFO = new Localization("command.destination.info",
             """
                 <header/>
-                
-                <hover:show_text:'<green>/bahnhof</green>'>
-                <prefix/><gold>Willkommen bei der CraftBahn!</gold>
+
+                <hover:show_text:'<green>Informationen zum Schienennetz</green>'><prefix/><gold>Willkommen bei der CraftBahn!</gold>
                 <prefix/><yellow>Unser Schienennetz erstreckt sich</yellow>
                 <prefix/><yellow>In alle Himmelsrichtungen.</yellow>
-
+                <prefix/>
                 <prefix/><gold><bold>Anleitung:</bold></gold>
-                <prefix/><click:run_command:/bahnhof><red>/bahnhof</red></click>
-                </hover>
-
+                <prefix/><click:run_command:/bahnhof><red>/bahnhof</red></click></hover>
+                <prefix/>
                 <prefix/><gold><bold>Fahrziele wählen:</bold></gold>
-                <prefix/><click:run_command:/fahrziel><red>/fahrziel</red></click>
+                <prefix/><hover:show_text:'<green>Verfügbare Fahrziele auflisten</green>'><click:run_command:/fahrziele><red>/fahrziele</red></click></hover>
                 <prefix/><yellow>oder</yellow>
                 <prefix/><click:suggest_command:/fahrziel NAME><red>/fahrziel</red></click> <gray>\\<name></gray>
-
+                <prefix/>
                 <prefix/><yellow>Gute Fahrt!</yellow>
                 
                 <footer/>""");
@@ -38,25 +41,21 @@ public class Localization extends LocalizationEnum {
     public static final Localization COMMAND_DESTINATIONS_HEAD = new Localization("command.destinations.head",
             """
                 <header/>
-                
-                <hover:show_text:'<green>/bahnhof</green>'>
-                <click:run_command:/bahnhof>
-                <prefix/><yellow>Guten Tag, Reisender!</yellow>
+
+                <hover:show_text:'<green>Informationen zum Schienennetz</green>'><click:run_command:/bahnhof><prefix/><yellow>Guten Tag, Reisender!</yellow>
                 <prefix/><yellow>Verstehst du nur </yellow>
-                <prefix/><red>/bahnhof</red><yellow>?</yellow>
-                </click>
-                </hover>
-                
-                <green>» </green><yellow>Hauptbahnhöfe</yellow>
-                <hover:show_text:'<green>/fahrziele Hauptbahnhöfe</green>'><click:run_command:/fahrziele Hauptbahnhöfe><red>/fahrziel</red></click></hover>
-                <green>» </green><yellow>Bahnhöfe</yellow>
-                <hover:show_text:'<green>/fahrziele Bahnhöfe</green>'><click:run_command:/fahrziele Bahnhöfe><red>/fahrziel</red></click></hover>
-                <green>» </green><yellow>Spielerbahnhöfe</yellow>
-                <hover:show_text:'<green>/fahrziele Spielerbahnhöfe</green>'><click:run_command:/fahrziele Spielerbahnhöfe><red>/fahrziel</red></click></hover>
-                <green>» </green><yellow>Öffentliche Ziele</yellow>
-                <hover:show_text:'<green>/fahrziele Öffentlich</green>'><click:run_command:/fahrziele Öffentlich><red>/fahrziel</red></click></hover>""");
+                <prefix/><red>/bahnhof</red><yellow>?</yellow></click></hover>
+                <prefix/>
+                <prefix/><gold><bold>Mögliche Fahrziele:</bold></gold>
+                <prefix/>
+                <prefix/><hover:show_text:'<green>/fahrziele Hauptbahnhof</green>'><click:run_command:/fahrziele Hauptbahnhof><green>» </green><yellow>Hauptbahnhöfe</yellow></click></hover>
+                <prefix/><hover:show_text:'<green>/fahrziele Bahnhof</green>'><click:run_command:/fahrziele Bahnhof><green>» </green><yellow>Bahnhöfe</yellow></click></hover>
+                <prefix/><hover:show_text:'<green>/fahrziele Spielerbahnhof</green>'><click:run_command:/fahrziele Spielerbahnhof><green>» </green><yellow>Spielerbahnhöfe</yellow></click></hover>
+                <prefix/><hover:show_text:'<green>/fahrziele Öffentlich</green>'><click:run_command:/fahrziele Öffentlich><green>» </green><yellow>Öffentliche Ziele</yellow></click></hover>
+                """);
     public static final Localization COMMAND_DESTINATIONS_LIST_INVALIDPAGE = new Localization("command.destinations.list.invalidpage", "<prefix/><red>Ungültige Seitennummer.</red>");
     public static final Localization COMMAND_DESTINATIONS_LIST_UNKOWNPAGE = new Localization("command.destinations.list.unkownpage", "<prefix/><red>Es gibt nur {pages} Seite(n).</red>");
+    public static final Localization COMMAND_DESTINATIONS_LIST_EMPTY = new Localization("command.destinations.list.empty", "<prefix/><red>Es wurden keine Fahrziele zu dieser Auswahl gefunden.</red>");
     public static final Localization COMMAND_DESTINATIONS_LIST_INDICATOR = new Localization("command.destinations.list.indicator", " <green>{actual} <green>/<green> <green>{total}</green> ");
     public static final Localization COMMAND_DESTINATIONS_LIST_CAPTION = new Localization("command.destinations.list.caption", "<prefix/><gray> # </gray><gold><bold>{server}</bold></gold>");
     public static final Localization COMMAND_DESTINATIONS_LIST_ENTRY_PLAYER = new Localization("command.destinations.list.entry.player", "<yellow>{destination}</yellow>");
@@ -64,7 +63,7 @@ public class Localization extends LocalizationEnum {
     public static final Localization COMMAND_DESTINATIONS_LIST_ENTRY_HOVER_CAPTION = new Localization("command.destinations.list.entry.hover.caption", "<green>{command}</green>");
     public static final Localization COMMAND_DESTINATIONS_LIST_ENTRY_HOVER_TYPE = new Localization("command.destinations.list.entry.hover.type", "<gold>Stations-Typ: </gold><yellow>{type}</yellow>");
     public static final Localization COMMAND_DESTINATIONS_LIST_ENTRY_HOVER_OWNER = new Localization("command.destinations.list.entry.hover.owner", "<gold>Besitzer: </gold><yellow>{owner}</yellow>");
-    public static final Localization COMMAND_DESTINATIONS_LIST_ENTRY_HOVER_OWNER_UNKOWN = new Localization("command.destinations.list.entry.hover.owner.unkown", "Unbekannt");
+    public static final Localization COMMAND_DESTINATIONS_LIST_ENTRY_HOVER_OWNERUNKOWN = new Localization("command.destinations.list.entry.hover.ownerunkown", "Unbekannt");
     public static final Localization COMMAND_DESTINATIONS_LIST_ENTRY_HOVER_LOCATION = new Localization("command.destinations.list.entry.hover.location", "<gold>Koordinaten: </gold><yellow>{location}</yellow>");
     public static final Localization COMMAND_DESTINATIONS_LIST_ENTRY_HOVER_WORLD = new Localization("command.destinations.list.entry.hover.world", "<gold>Welt: </gold><yellow>{world}</yellow>");
     public static final Localization COMMAND_DESTINATIONS_BTN_FORWARDS_ON = new Localization("command.destinations.btn.forwards.on", "<hover:show_text:'<green>Nächste Seite</green>'><click:run_command:{command}><gold>Weiter</gold> <green>>>----</green></click></hover>");

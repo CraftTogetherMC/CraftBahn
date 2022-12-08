@@ -105,12 +105,12 @@ public class DestinationList {
 
                 if (this.showType)
                     hoverText = hoverText.append(Component.newline()).append(Localization.COMMAND_DESTINATIONS_LIST_ENTRY_HOVER_TYPE.deserialize(
-                            PlaceholderResolver.resolver("type", dest.getType().name())));
+                            PlaceholderResolver.resolver("type", dest.getType().toString())));
 
                 if ((dest.getType().equals(Destination.DestinationType.PLAYER_STATION) || dest.getType().equals(Destination.DestinationType.PUBLIC_STATION)) && dest.getOwner() != null && this.showOwner) {
                     OfflinePlayer owner = Bukkit.getOfflinePlayer(dest.getOwner());
 
-                    String unkown = Localization.COMMAND_DESTINATIONS_LIST_ENTRY_HOVER_OWNER_UNKOWN.get();
+                    String unkown = Localization.COMMAND_DESTINATIONS_LIST_ENTRY_HOVER_OWNERUNKOWN.get();
                     StringBuilder strOwner = new StringBuilder((owner.hasPlayedBefore() ? owner.getName() : unkown) + ", ");
                     for (UUID uuid : dest.getParticipants()) {
                         OfflinePlayer participant = Bukkit.getOfflinePlayer(uuid);
@@ -118,8 +118,8 @@ public class DestinationList {
                         strOwner.append(participant.getName()).append(", ");
                     }
 
-                    hoverText = hoverText.append(Component.newline()).append(Localization.COMMAND_DESTINATIONS_LIST_ENTRY_HOVER_WORLD.deserialize(
-                            PlaceholderResolver.resolver("world", dest.getWorld())));
+                    hoverText = hoverText.append(Component.newline()).append(Localization.COMMAND_DESTINATIONS_LIST_ENTRY_HOVER_OWNER.deserialize(
+                            PlaceholderResolver.resolver("owner", strOwner.substring(0, strOwner.length()-2))));
                 }
 
                 if (dest.getLocation() != null && this.showLocation) {
@@ -130,7 +130,7 @@ public class DestinationList {
                 }
 
                 btnDestination = btnDestination
-                        .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziel " + dest.getName() + (duplicates.size() > 1 ? (" --server " + dest.getServer()) : "")))
+                        .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziel " + dest.getName() + (duplicates.size() > 1 ? dest.getServer() : "")))
                         .hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText));
 
                 // Append teleport-button
@@ -162,7 +162,6 @@ public class DestinationList {
 
         Component page = this.pages.get(pageIndex - 1);
         Component output = Component.newline().append(page);
-
 
         if (pages.size() > 1) {
             output = output.append(Component.newline());

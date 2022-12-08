@@ -1,9 +1,6 @@
 package de.crafttogether.craftbahn.commands;
 
-import cloud.commandframework.annotations.Argument;
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.Flag;
+import cloud.commandframework.annotations.*;
 import com.bergerkiller.bukkit.common.cloud.CloudSimpleHandler;
 import com.bergerkiller.bukkit.common.utils.LogicUtil;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
@@ -19,7 +16,6 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class DestinationCommands {
     private final CraftBahnPlugin plugin = CraftBahnPlugin.plugin;
@@ -31,18 +27,20 @@ public class DestinationCommands {
 
     @CommandMethod(value="fahrziel", requiredSender=Player.class)
     @CommandDescription("Informationen zum /fahrziel Befehl")
+    @CommandPermission("craftbahn.command.destination")
     public void fahrziel_info(
             final Player sender
     ) {
         Localization.COMMAND_DESTINATION_INFO.message(sender);
     }
 
-    @CommandMethod(value="fahrziel <name>", requiredSender=Player.class)
+    @CommandMethod(value="fahrziel <name> [server]", requiredSender=Player.class)
     @CommandDescription("Setzt dem aktuell ausgewähltem Zug ein Fahrziel.")
+    @CommandPermission("craftbahn.command.destination")
     public void fahrziel(
             final Player sender,
             final @Argument(value="name", suggestions="destinationName") String name,
-            final @Flag(value="server", suggestions="serverName") String server,
+            final @Argument(value="server", suggestions="serverName") String server,
             final @Flag(value="page") Integer page
     ) {
         ArrayList<Destination> result = new ArrayList<>();
@@ -116,17 +114,26 @@ public class DestinationCommands {
         }
     }
 
-    @CommandMethod(value="fahrziele", requiredSender=Player.class)
+    @CommandMethod(value="fahrziele [type]", requiredSender=Player.class)
     @CommandDescription("Zeigt eine Liste mit möglichen Fahrzielen.")
+    @CommandPermission("craftbahn.command.destination")
     public void fahrziele(
             final Player sender,
-            final @Flag(value="player", suggestions="onlinePlayers") String player,
-            final @Flag(value="server", suggestions="serverName") String server,
-            final @Flag(value="type", suggestions="destinationType") String type,
+            final @Argument(value="type", suggestions="destinationType") String type,
+            final @Flag(value="player", suggestions="onlinePlayers", permission = "craftbahn.command.destination.filter") String player,
+            final @Flag(value="server", suggestions="serverName", permission = "craftbahn.command.destination.filter") String server,
             final @Flag(value="page") Integer page
     ) {
-        List<Destination> result = null;
+        List<Destination> result = new ArrayList<>(CraftBahnPlugin.plugin.getDestinationStorage().getDestinations());
         String commandFlags = "";
+
+        // Filter: stationType
+        if (type != null && !type.isEmpty()) {
+            commandFlags = type;
+            result = result.stream()
+                    .filter(d -> d.getType().toString().equalsIgnoreCase(type))
+                    .toList();
+        }
 
         // Filter: player
         if (player != null && !player.isEmpty()) {
@@ -134,36 +141,30 @@ public class DestinationCommands {
                 return;
             }
 
-            commandFlags = "--player " + player;
-            result = CraftBahnPlugin.plugin.getDestinationStorage().getDestinations().stream()
+            commandFlags += "--player " + player;
+            result = result.stream()
                     .filter(d -> d.getOwner().equals(player))
                     .filter(d -> d.getParticipants().equals(player))
-                    .collect(Collectors.toList());
+                    .toList();
         }
 
         // Filter: server
-        else if (server != null && !server.isEmpty()) {
-            commandFlags = "--server " + server;
-            result = CraftBahnPlugin.plugin.getDestinationStorage().getDestinations().stream()
+        if (server != null && !server.isEmpty()) {
+            commandFlags += "--server " + server;
+            result = result.stream()
                     .filter(d -> d.getServer().equalsIgnoreCase(server))
-                    .collect(Collectors.toList());
+                    .toList();
         }
 
-        // Filter: stationType
-        else if (type != null && !type.isEmpty()) {
-            commandFlags = "--stationType " + type;
-            result = CraftBahnPlugin.plugin.getDestinationStorage().getDestinations().stream()
-                    .filter(d -> d.getType().equals(type))
-                    .collect(Collectors.toList());
+        if (result.size() < 1) {
+            Localization.COMMAND_DESTINATIONS_LIST_EMPTY.message(sender);
+            return;
         }
-
-        else
-            result = new ArrayList<>(CraftBahnPlugin.plugin.getDestinationStorage().getDestinations());
 
         DestinationList list = new DestinationList(result);
         list.setCommand("/fahrziele");
         list.setCommandFlags(commandFlags);
-        list.showContentsPage(false);
+        list.showContentsPage(commandFlags.isEmpty() ? true : false);
         list.showFooterLine(true);
         list.showOwner(true);
         list.showLocation(true);
@@ -173,6 +174,7 @@ public class DestinationCommands {
 
     @CommandMethod(value="fahrzieledit setowner", requiredSender=Player.class)
     @CommandDescription("Ändert den angegebenen Besitzer eines Fahrziel")
+    @CommandPermission("craftbahn.command.destination.setowner")
     public void fahrzieledit_setowner(
             final Player sender
     ) {

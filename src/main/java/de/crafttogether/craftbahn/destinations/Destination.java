@@ -1,8 +1,10 @@
 package de.crafttogether.craftbahn.destinations;
 
+import de.crafttogether.craftbahn.Localization;
 import de.crafttogether.craftbahn.util.CTLocation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,29 +24,27 @@ public class Destination {
         STATION {
             @Override
             public String toString() {
-                return "Bahnhof";
+                return Localization.DESTINATIONTYPE_STATION.get();
             }
         },
 
         MAIN_STATION {
             @Override
             public String toString() {
-                return "Hauptbahnhof";
-            }
-        },
-
-        PUBLIC_STATION {
-            @Override
-            public String toString() {
-                return "Öffentlich";
+                return Localization.DESTINATIONTYPE_MAIN_STATION.get();
             }
         },
 
         PLAYER_STATION {
             @Override
             public String toString() {
-                return "Spielerbahnhof";
+                return Localization.DESTINATIONTYPE_PLAYER_STATION.get();
             }
+        },
+
+        PUBLIC_STATION {
+            @Override
+            public String toString() { return Localization.DESTINATIONTYPE_PUBLIC_STATION.get(); }
         }
     }
 
@@ -153,13 +153,10 @@ public class Destination {
     }
 
     public static DestinationType findType(String label) {
-        return switch (label.toLowerCase()) {
-            case "bahnhof" -> DestinationType.STATION;
-            case "hauptbahnhof" -> DestinationType.MAIN_STATION;
-            case "öffentlich" -> DestinationType.PUBLIC_STATION;
-            case "spielerbahnhof" -> DestinationType.PLAYER_STATION;
-            default -> null;
-        };
+        List<DestinationType> result = Arrays.stream(DestinationType.values())
+                .filter(destinationType -> destinationType.toString().equals(label))
+                .toList();
+        return result.get(0);
     }
 
     public String toString() {
