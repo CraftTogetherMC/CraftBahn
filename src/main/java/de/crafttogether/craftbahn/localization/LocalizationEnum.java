@@ -41,7 +41,7 @@ public abstract class LocalizationEnum implements ILocalizationEnum {
      * @param arguments for the node
      */
     @Override
-    public void message(CommandSender sender, TagResolver... arguments) {
+    public void message(CommandSender sender, PlaceholderResolver... arguments) {
         ILocalizationEnum.super.message(sender, arguments);
     }
 
@@ -52,7 +52,7 @@ public abstract class LocalizationEnum implements ILocalizationEnum {
      * @return deserialized Component
      */
     @Override
-    public Component deserialize(TagResolver... arguments) {
+    public Component deserialize(PlaceholderResolver... arguments) {
         return ILocalizationEnum.super.deserialize(arguments);
     }
 

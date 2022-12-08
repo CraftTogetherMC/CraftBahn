@@ -21,13 +21,8 @@ public interface ILocalizationEnum extends ILocalizationDefault {
      * @param sender to send to
      * @param arguments for the node
      */
-    default void message(CommandSender sender, TagResolver... arguments) {
-        String text = get();
-
-        if (!LogicUtil.nullOrEmpty(text)) {
-            Component parsed = CraftBahnPlugin.plugin.getMiniMessageParser().deserialize(text, arguments);
-            sender.sendMessage(parsed);
-        }
+    default void message(CommandSender sender, PlaceholderResolver... arguments) {
+        sender.sendMessage(deserialize(arguments));
     }
 
     /**
@@ -35,13 +30,16 @@ public interface ILocalizationEnum extends ILocalizationDefault {
      *
      * @param arguments for the node
      */
-    default Component deserialize(TagResolver... arguments) {
+    default Component deserialize(PlaceholderResolver... arguments) {
         String text = get();
 
         if (LogicUtil.nullOrEmpty(text))
             return null;
 
-        return CraftBahnPlugin.plugin.getMiniMessageParser().deserialize(text, arguments);
+        for (PlaceholderResolver resolver : arguments)
+            text = resolver.parse(text);
+
+        return CraftBahnPlugin.plugin.getMiniMessageParser().deserialize(text);
     }
 
     /**
