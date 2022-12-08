@@ -132,7 +132,7 @@ public class DestinationCommands {
         String commandFlags = "";
         Boolean showContentsPage = true;
 
-        // Filter: stationType
+        // Filter: destinationType
         if (type != null && !type.isEmpty() && !type.equalsIgnoreCase(Localization.DESTINATIONTYPE_ALL.get())) {
             commandFlags = " " + type;
             showContentsPage = false;
@@ -191,9 +191,263 @@ public class DestinationCommands {
             final @Argument(value="server", suggestions="serverName") String server,
             final @Flag(value="page") Integer page
     ) {
+        Destination destination = findDestination(sender, name, server);
+
+        OfflinePlayer owner = Bukkit.getOfflinePlayer(destination.getOwner());
+        String unkown = Localization.COMMAND_DESTINATIONS_LIST_ENTRY_HOVER_OWNERUNKOWN.get();
+        String ownerName = (owner.hasPlayedBefore() ? owner.getName() : unkown);
+
+        StringBuilder participants = new StringBuilder();
+        for (UUID uuid : destination.getParticipants()) {
+            OfflinePlayer participant = Bukkit.getOfflinePlayer(uuid);
+            if (!participant.hasPlayedBefore()) continue;
+            participants.append(participant.getName()).append(", ");
+        }
+
+        Localization.COMMAND_DESTEDIT_INFO.message(sender,
+                PlaceholderResolver.resolver("name", destination.getName()),
+                PlaceholderResolver.resolver("id", destination.getId().toString()),
+                PlaceholderResolver.resolver("type", destination.getType().toString()),
+                PlaceholderResolver.resolver("owner", ownerName),
+                PlaceholderResolver.resolver("participants", participants.isEmpty() ? "" : participants.substring(0, participants.length()-2)),
+                PlaceholderResolver.resolver("server", destination.getServer()),
+                PlaceholderResolver.resolver("world", destination.getWorld()),
+                PlaceholderResolver.resolver("x", String.valueOf(destination.getLocation().getX())),
+                PlaceholderResolver.resolver("y", String.valueOf(destination.getLocation().getY())),
+                PlaceholderResolver.resolver("z", String.valueOf(destination.getLocation().getZ())));
+    }
+
+    @CommandMethod(value="fahrzieledit tp <destination> [server]", requiredSender=Player.class)
+    @CommandDescription("Teleportiert den Spieler zum angegebenen Fahrziel")
+    @CommandPermission("craftbahn.command.destination.edit.teleport")
+    public void fahrzieledit_teleport(
+            final Player sender,
+            final @Argument(value="destination", suggestions="destinationName") String name,
+            final @Argument(value="server", suggestions="serverName") String server
+    ) {
+        Destination destination = findDestination(sender, name, server);
+
+        if (!destination.getServer().equalsIgnoreCase(plugin.getServerName())) {
+            Localization.COMMAND_DESTEDIT_TELEPORT_OTHERSERVER.message(sender,
+                    PlaceholderResolver.resolver("server", destination.getServer()));
+            return;
+        }
+
+        // Teleport player
+        sender.teleport(destination.getTeleportLocation().getBukkitLocation());
+
+        Localization.COMMAND_DESTEDIT_TELEPORT.message(sender,
+                PlaceholderResolver.resolver("destination", destination.getName()));
+    }
+
+    @CommandMethod(value="fahrzieledit add <destination> <type>", requiredSender=Player.class)
+    @CommandDescription("Fügt ein neues Fahrziel der Liste hinzu")
+    @CommandPermission("craftbahn.command.destination.edit.add")
+    public void fahrzieledit_add(
+            final Player sender,
+            final @Argument(value="destination", suggestions="destinationName") String name,
+            final @Argument(value="type", suggestions="destinationType") String type
+    ) {
+        Destination.DestinationType destinationType = Destination.findType(type);
+        if (destinationType == null) {
+            Localization.COMMAND_DESTEDIT_ADD_INVALIDTYPE.message(sender);
+            return;
+        }
+
+        plugin.getDestinationStorage().addDestination(name, sender.getUniqueId(), destinationType, sender.getLocation(), true, (err, dest) -> {
+            if (err != null)
+                Localization.COMMAND_DESTEDIT_SAVEFAILED.message(sender,
+                        PlaceholderResolver.resolver("error", err.getMessage()));
+            else
+                Localization.COMMAND_DESTEDIT_ADD_SUCCESS.message(sender,
+                        PlaceholderResolver.resolver("destination", dest.getName()));
+        });
+    }
+
+    @CommandMethod(value="fahrzieledit remove <destination> [server]", requiredSender=Player.class)
+    @CommandDescription("Entfernt das angegebene Fahrziel aus der Liste")
+    @CommandPermission("craftbahn.command.destination.edit.remove")
+    public void fahrzieledit_remove(
+            final Player sender,
+            final @Argument(value="destination", suggestions="destinationName") String name,
+            final @Argument(value="server", suggestions="serverName") String server
+    ) {
+        Destination destination = findDestination(sender, name, server);
+
+        plugin.getDestinationStorage().delete(destination.getId(), (err, affectedRows) -> {
+            if (err != null)
+                Localization.COMMAND_DESTEDIT_SAVEFAILED.message(sender,
+                        PlaceholderResolver.resolver("error", err.getMessage()));
+            else
+                Localization.COMMAND_DESTEDIT_REMOVE.message(sender,
+                        PlaceholderResolver.resolver("destination", destination.getName()));
+        });
+    }
+
+    @CommandMethod(value="fahrzieledit addmember <destination> <player> [server]", requiredSender=Player.class)
+    @CommandDescription("Fügt dem angegebene Fahrziel einen sekundären Besitzer hinzu")
+    @CommandPermission("craftbahn.command.destination.edit.addmember")
+    public void fahrzieledit_addmember(
+            final Player sender,
+            final @Argument(value="destination", suggestions="destinationName") String name,
+            final @Argument(value="player", suggestions="onlinePlayers") String player,
+            final @Argument(value="server", suggestions="serverName") String server
+    ) {
+        OfflinePlayer participant = Bukkit.getOfflinePlayer(player);
+        if (!participant.hasPlayedBefore()) {
+            Localization.COMMAND_DESTEDIT_UNKOWNPLAYER.message(sender,
+                    PlaceholderResolver.resolver("input", player));
+            return;
+        }
+
+        Destination destination = findDestination(sender, name, server);
+
+        if (destination.getParticipants().contains(participant.getUniqueId())) {
+            Localization.COMMAND_DESTEDIT_ADDMEMBER_FAILED.message(sender,
+                    PlaceholderResolver.resolver("input", player));
+            return;
+        }
+
+        destination.addParticipant(participant.getUniqueId());
+
+        plugin.getDestinationStorage().update(destination, (err, affectedRows) -> {
+            if (err != null)
+                Localization.COMMAND_DESTEDIT_SAVEFAILED.message(sender,
+                        PlaceholderResolver.resolver("error", err.getMessage()));
+            else
+                Localization.COMMAND_DESTEDIT_ADDMEMBER_SUCCESS.message(sender,
+                        PlaceholderResolver.resolver("destination", destination.getName()),
+                        PlaceholderResolver.resolver("player", participant.getName()));
+        });
+    }
+
+    @CommandMethod(value="fahrzieledit removemember <destination> <player> [server]", requiredSender=Player.class)
+    @CommandDescription("Entfernt dem angegebene Fahrziel einen sekundären Besitzer")
+    @CommandPermission("craftbahn.command.destination.edit.removemember")
+    public void fahrzieledit_removemember(
+            final Player sender,
+            final @Argument(value="destination", suggestions="destinationName") String name,
+            final @Argument(value="player", suggestions="onlinePlayers") String player,
+            final @Argument(value="server", suggestions="serverName") String server
+    ) {
+        OfflinePlayer participant = Bukkit.getOfflinePlayer(player);
+        if (!participant.hasPlayedBefore()) {
+            Localization.COMMAND_DESTEDIT_UNKOWNPLAYER.message(sender,
+                    PlaceholderResolver.resolver("input", player));
+            return;
+        }
+
+        Destination destination = findDestination(sender, name, server);
+
+        if (!destination.getParticipants().contains(participant.getUniqueId())) {
+            Localization.COMMAND_DESTEDIT_REMOVEMEMBER_FAILED.message(sender,
+                    PlaceholderResolver.resolver("input", player));
+            return;
+        }
+
+        destination.removeParticipant(participant.getUniqueId());
+
+        plugin.getDestinationStorage().update(destination, (err, affectedRows) -> {
+            if (err != null)
+                Localization.COMMAND_DESTEDIT_SAVEFAILED.message(sender,
+                        PlaceholderResolver.resolver("error", err.getMessage()));
+            else
+                Localization.COMMAND_DESTEDIT_REMOVEMEMBER_SUCCESS.message(sender,
+                        PlaceholderResolver.resolver("destination", destination.getName()),
+                        PlaceholderResolver.resolver("player", participant.getName()));
+        });
+    }
+
+    @CommandMethod(value="fahrzieledit setowner <destination> <player> [server]", requiredSender=Player.class)
+    @CommandDescription("Legt den primären Besitzer des angegebenen Fahrziel fest")
+    @CommandPermission("craftbahn.command.destination.edit.setowner")
+    public void fahrzieledit_setowner(
+            final Player sender,
+            final @Argument(value="destination", suggestions="destinationName") String name,
+            final @Argument(value="player", suggestions="onlinePlayers") String player,
+            final @Argument(value="server", suggestions="serverName") String server
+    ) {
+        Destination destination = findDestination(sender, name, server);
+    }
+
+    @CommandMethod(value="fahrzieledit setprivate <destination> [server]", requiredSender=Player.class)
+    @CommandDescription("Macht das angegebene Fahrziel privat")
+    @CommandPermission("craftbahn.command.destination.edit.setprivate")
+    public void fahrzieledit_setprivate(
+            final Player sender,
+            final @Argument(value="destination", suggestions="destinationName") String name,
+            final @Argument(value="server", suggestions="serverName") String server
+    ) {
+        Destination destination = findDestination(sender, name, server);
+    }
+
+    @CommandMethod(value="fahrzieledit setpublic <destination> [server]", requiredSender=Player.class)
+    @CommandDescription("Macht das angegebene Fahrziel öffentlich")
+    @CommandPermission("craftbahn.command.destination.edit.setpublic")
+    public void fahrzieledit_setpublic(
+            final Player sender,
+            final @Argument(value="destination", suggestions="destinationName") String name,
+            final @Argument(value="server", suggestions="serverName") String server
+    ) {
+        Destination destination = findDestination(sender, name, server);
+    }
+
+    @CommandMethod(value="fahrzieledit setlocation <destination> [server]", requiredSender=Player.class)
+    @CommandDescription("Legt die Marker-Position (Dynmap) des aktuellen Fahrziel fest")
+    @CommandPermission("craftbahn.command.destination.edit.setlocation")
+    public void fahrzieledit_setlocation(
+            final Player sender,
+            final @Argument(value="destination", suggestions="destinationName") String name,
+            final @Argument(value="server", suggestions="serverName") String server
+    ) {
+        Destination destination = findDestination(sender, name, server);
+    }
+
+    @CommandMethod(value="fahrzieledit settype <destination> <type> [server]", requiredSender=Player.class)
+    @CommandDescription("Legt den Typ des angegebenen Fahrziel fest")
+    @CommandPermission("craftbahn.command.destination.edit.settype")
+    public void fahrzieledit_settype(
+            final Player sender,
+            final @Argument(value="destination", suggestions="destinationName") String name,
+            final @Argument(value="type", suggestions="destinationType") String type,
+            final @Argument(value="server", suggestions="serverName") String server
+    ) {
+        Destination destination = findDestination(sender, name, server);
+    }
+
+    @CommandMethod(value="fahrzieledit setwarp <destination> [server]", requiredSender=Player.class)
+    @CommandDescription("Legt die Warp-Position des aktuellen Fahrziel fest")
+    @CommandPermission("craftbahn.command.destination.edit.setwarp")
+    public void fahrzieledit_setwarp(
+            final Player sender,
+            final @Argument(value="destination", suggestions="destinationName") String name,
+            final @Argument(value="server", suggestions="serverName") String server
+    ) {
+        Destination destination = findDestination(sender, name, server);
+    }
+
+    @CommandMethod(value="fahrzieledit updatemarker", requiredSender=Player.class)
+    @CommandDescription("Alle Dynmap-Marker werden neu geladen")
+    @CommandPermission("craftbahn.command.destination.edit.updatemarker")
+    public void fahrzieledit_updatemarker(
+            final Player sender
+    ) {
+        sender.sendMessage("Test");
+    }
+
+    @CommandMethod(value="fahrzieledit reload", requiredSender=Player.class)
+    @CommandDescription("Konfiguration wird neu geladen")
+    @CommandPermission("craftbahn.command.destination.edit.reload")
+    public void fahrzieledit_reload(
+            final Player sender
+    ) {
+        sender.sendMessage("Test");
+    }
+
+    public Destination findDestination(CommandSender sender, String name, String server) {
         if (LogicUtil.nullOrEmpty(name)) {
             Localization.COMMAND_DESTEDIT_NONAME.message(sender);
-            return;
+            return null;
         }
 
         ArrayList<Destination> result = new ArrayList<>();
@@ -210,169 +464,13 @@ public class DestinationCommands {
         }
 
         // Multiple destinations have been found
-        else if (result.size() > 1) {
+        else if (result.size() > 1)
             Localization.COMMAND_DESTEDIT_MULTIPLEDEST.message(sender);
-        }
 
         // A single destination was found
-        else {
-            Destination destination = result.get(0);
+        else
+            return result.get(0);
 
-            OfflinePlayer owner = Bukkit.getOfflinePlayer(destination.getOwner());
-            String unkown = Localization.COMMAND_DESTINATIONS_LIST_ENTRY_HOVER_OWNERUNKOWN.get();
-            String ownerName = (owner.hasPlayedBefore() ? owner.getName() : unkown);
-
-            StringBuilder participants = new StringBuilder();
-            for (UUID uuid : destination.getParticipants()) {
-                OfflinePlayer participant = Bukkit.getOfflinePlayer(uuid);
-                if (!participant.hasPlayedBefore()) continue;
-                participants.append(participant.getName()).append(", ");
-            }
-
-            Localization.COMMAND_DESTEDIT_INFO.message(sender,
-                    PlaceholderResolver.resolver("name", destination.getName()),
-                    PlaceholderResolver.resolver("id", destination.getId().toString()),
-                    PlaceholderResolver.resolver("type", destination.getType().toString()),
-                    PlaceholderResolver.resolver("owner", ownerName),
-                    PlaceholderResolver.resolver("participants", participants.isEmpty() ? "" : participants.substring(0, participants.length()-2)),
-                    PlaceholderResolver.resolver("server", destination.getServer()),
-                    PlaceholderResolver.resolver("world", destination.getWorld()),
-                    PlaceholderResolver.resolver("x", String.valueOf(destination.getLocation().getX())),
-                    PlaceholderResolver.resolver("y", String.valueOf(destination.getLocation().getY())),
-                    PlaceholderResolver.resolver("z", String.valueOf(destination.getLocation().getZ())));
-        }
+        return null;
     }
-
-    @CommandMethod(value="fahrzieledit tp <destination>", requiredSender=Player.class)
-    @CommandDescription("Teleportiert den Spieler zum angegebenen Fahrziel")
-    @CommandPermission("craftbahn.command.destination.edit.teleport")
-    public void fahrzieledit_teleport(
-            final Player sender,
-            final @Argument(value="destination", suggestions="destinationName") String destination
-    ) {
-        sender.sendMessage("Test");
-    }
-
-    @CommandMethod(value="fahrzieledit add <destination>")
-    @CommandDescription("Fügt ein neues Fahrziel der Liste hinzu")
-    @CommandPermission("craftbahn.command.destination.edit.add")
-    public void fahrzieledit_add(
-            final CommandSender sender,
-            final @Argument(value="destination", suggestions="destinationName") String destination
-    ) {
-        sender.sendMessage("Test");
-    }
-
-    @CommandMethod(value="fahrzieledit remove <destination>")
-    @CommandDescription("Entfernt das angegebene Fahrziel aus der Liste")
-    @CommandPermission("craftbahn.command.destination.edit.remove")
-    public void fahrzieledit_remove(
-            final CommandSender sender,
-            final @Argument(value="destination", suggestions="destinationName") String destination
-    ) {
-        sender.sendMessage("Test");
-    }
-
-    @CommandMethod(value="fahrzieledit addmember <destination> <player>")
-    @CommandDescription("Fügt dem angegebene Fahrziel einen sekundären Besitzer hinzu")
-    @CommandPermission("craftbahn.command.destination.edit.addmember")
-    public void fahrzieledit_addmember(
-            final CommandSender sender,
-            final @Argument(value="destination", suggestions="destinationName") String destination,
-            final @Argument(value="player", suggestions="onlinePlayers") String player
-    ) {
-        sender.sendMessage("Test");
-    }
-
-    @CommandMethod(value="fahrzieledit removemember <destination> <player>")
-    @CommandDescription("Entfernt dem angegebene Fahrziel einen sekundären Besitzer")
-    @CommandPermission("craftbahn.command.destination.edit.removemember")
-    public void fahrzieledit_removemember(
-            final CommandSender sender,
-            final @Argument(value="destination", suggestions="destinationName") String destination,
-            final @Argument(value="player", suggestions="onlinePlayers") String player
-    ) {
-        sender.sendMessage("Test");
-    }
-
-    @CommandMethod(value="fahrzieledit setowner <destination> <player>")
-    @CommandDescription("Legt den primären Besitzer des angegebenen Fahrziel fest")
-    @CommandPermission("craftbahn.command.destination.edit.setowner")
-    public void fahrzieledit_setowner(
-            final CommandSender sender,
-            final @Argument(value="destination", suggestions="destinationName") String destination,
-            final @Argument(value="player", suggestions="onlinePlayers") String player
-    ) {
-        sender.sendMessage("Test");
-    }
-
-    @CommandMethod(value="fahrzieledit setprivate <destination>")
-    @CommandDescription("Macht das angegebene Fahrziel privat")
-    @CommandPermission("craftbahn.command.destination.edit.setprivate")
-    public void fahrzieledit_setprivate(
-            final CommandSender sender,
-            final @Argument(value="destination", suggestions="destinationName") String destination
-    ) {
-        sender.sendMessage("Test");
-    }
-
-    @CommandMethod(value="fahrzieledit setpublic <destination>")
-    @CommandDescription("Macht das angegebene Fahrziel öffentlich")
-    @CommandPermission("craftbahn.command.destination.edit.setpublic")
-    public void fahrzieledit_setpublic(
-            final CommandSender sender,
-            final @Argument(value="destination", suggestions="destinationName") String destination
-    ) {
-        sender.sendMessage("Test");
-    }
-
-    @CommandMethod(value="fahrzieledit setlocation <destination>")
-    @CommandDescription("Legt die Marker-Position (Dynmap) des aktuellen Fahrziel fest")
-    @CommandPermission("craftbahn.command.destination.edit.setlocation")
-    public void fahrzieledit_setlocation(
-            final CommandSender sender,
-            final @Argument(value="destination", suggestions="destinationName") String destination
-    ) {
-        sender.sendMessage("Test");
-    }
-
-    @CommandMethod(value="fahrzieledit settype <destination> <type>")
-    @CommandDescription("Legt den Typ des angegebenen Fahrziel fest")
-    @CommandPermission("craftbahn.command.destination.edit.settype")
-    public void fahrzieledit_settype(
-            final CommandSender sender,
-            final @Argument(value="destination", suggestions="destinationName") String destination,
-            final @Argument(value="type", suggestions="destinationType") String type
-    ) {
-        sender.sendMessage("Test");
-    }
-
-    @CommandMethod(value="fahrzieledit setwarp <destination>")
-    @CommandDescription("Legt die Warp-Position des aktuellen Fahrziel fest")
-    @CommandPermission("craftbahn.command.destination.edit.setwarp")
-    public void fahrzieledit_setwarp(
-            final CommandSender sender,
-            final @Argument(value="destination", suggestions="destinationName") String destination
-    ) {
-        sender.sendMessage("Test");
-    }
-
-    @CommandMethod(value="fahrzieledit updatemarker")
-    @CommandDescription("Alle Dynmap-Marker werden neu geladen")
-    @CommandPermission("craftbahn.command.destination.edit.updatemarker")
-    public void fahrzieledit_updatemarker(
-            final CommandSender sender
-    ) {
-        sender.sendMessage("Test");
-    }
-
-    @CommandMethod(value="fahrzieledit reload")
-    @CommandDescription("Konfiguration wird neu geladen")
-    @CommandPermission("craftbahn.command.destination.edit.reload")
-    public void fahrzieledit_reload(
-            final CommandSender sender
-    ) {
-        sender.sendMessage("Test");
-    }
-
 }

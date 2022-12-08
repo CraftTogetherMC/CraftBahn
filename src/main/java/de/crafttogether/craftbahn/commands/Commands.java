@@ -64,6 +64,7 @@ public class Commands {
             List<String> result =  Arrays.stream(Destination.DestinationType.values())
                     .map(Destination.DestinationType::toString)
                     .collect(Collectors.toList());
+            result.add(Localization.DESTINATIONTYPE_ALL.get());
             return result;
         });
 
