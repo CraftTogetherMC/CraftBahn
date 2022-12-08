@@ -25,6 +25,8 @@ public class LocalizationManager {
 
         // header
         this.localizationconfig.setHeader("Below are the localization nodes set for plugin '" + CraftBahnPlugin.plugin.getName() + "'.");
+        this.localizationconfig.addHeader("For colors and text-formatting use the MiniMessage format.");
+        this.localizationconfig.addHeader("https://docs.adventure.kyori.net/minimessage/format.html");
 
         // load
         this.loadLocales(Localization.class);

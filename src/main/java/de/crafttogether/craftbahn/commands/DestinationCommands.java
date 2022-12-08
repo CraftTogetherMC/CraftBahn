@@ -9,6 +9,7 @@ import de.crafttogether.craftbahn.Localization;
 import de.crafttogether.craftbahn.destinations.Destination;
 import de.crafttogether.craftbahn.destinations.DestinationList;
 import de.crafttogether.craftbahn.localization.PlaceholderResolver;
+import de.crafttogether.craftbahn.util.CTLocation;
 import de.crafttogether.craftbahn.util.TCHelper;
 import de.crafttogether.craftbahn.util.Util;
 import net.kyori.adventure.text.Component;
@@ -367,18 +368,25 @@ public class DestinationCommands {
             final @Argument(value="player", suggestions="onlinePlayers") String player,
             final @Argument(value="server", suggestions="serverName") String server
     ) {
-        Destination destination = findDestination(sender, name, server);
-    }
+        OfflinePlayer owner = Bukkit.getOfflinePlayer(player);
+        if (!owner.hasPlayedBefore()) {
+            Localization.COMMAND_DESTEDIT_UNKOWNPLAYER.message(sender,
+                    PlaceholderResolver.resolver("input", player));
+            return;
+        }
 
-    @CommandMethod(value="fahrzieledit setprivate <destination> [server]", requiredSender=Player.class)
-    @CommandDescription("Macht das angegebene Fahrziel privat")
-    @CommandPermission("craftbahn.command.destedit.setprivate")
-    public void fahrzieledit_setprivate(
-            final Player sender,
-            final @Argument(value="destination", suggestions="destinationName") String name,
-            final @Argument(value="server", suggestions="serverName") String server
-    ) {
         Destination destination = findDestination(sender, name, server);
+        destination.setOwner(owner.getUniqueId());
+
+        plugin.getDestinationStorage().update(destination, (err, affectedRows) -> {
+            if (err != null)
+                Localization.COMMAND_DESTEDIT_SAVEFAILED.message(sender,
+                        PlaceholderResolver.resolver("error", err.getMessage()));
+            else
+                Localization.COMMAND_DESTEDIT_SETOWNER_SUCCESS.message(sender,
+                        PlaceholderResolver.resolver("destination", destination.getName()),
+                        PlaceholderResolver.resolver("owner", owner.getName()));
+        });
     }
 
     @CommandMethod(value="fahrzieledit setpublic <destination> [server]", requiredSender=Player.class)
@@ -390,6 +398,39 @@ public class DestinationCommands {
             final @Argument(value="server", suggestions="serverName") String server
     ) {
         Destination destination = findDestination(sender, name, server);
+        destination.setPublic(true);
+
+        plugin.getDestinationStorage().update(destination, (err, affectedRows) -> {
+            if (err != null)
+                Localization.COMMAND_DESTEDIT_SAVEFAILED.message(sender,
+                        PlaceholderResolver.resolver("error", err.getMessage()));
+            else {
+                Localization.COMMAND_DESTEDIT_SETPUBLIC_SUCCESS.message(sender,
+                        PlaceholderResolver.resolver("destination", destination.getName()));
+            }
+        });
+    }
+
+    @CommandMethod(value="fahrzieledit setprivate <destination> [server]", requiredSender=Player.class)
+    @CommandDescription("Macht das angegebene Fahrziel privat")
+    @CommandPermission("craftbahn.command.destedit.setprivate")
+    public void fahrzieledit_setprivate(
+            final Player sender,
+            final @Argument(value="destination", suggestions="destinationName") String name,
+            final @Argument(value="server", suggestions="serverName") String server
+    ) {
+        Destination destination = findDestination(sender, name, server);
+        destination.setPublic(false);
+
+        plugin.getDestinationStorage().update(destination, (err, affectedRows) -> {
+            if (err != null)
+                Localization.COMMAND_DESTEDIT_SAVEFAILED.message(sender,
+                        PlaceholderResolver.resolver("error", err.getMessage()));
+            else {
+                Localization.COMMAND_DESTEDIT_SETPRIVATE_SUCCESS.message(sender,
+                        PlaceholderResolver.resolver("destination", destination.getName()));
+            }
+        });
     }
 
     @CommandMethod(value="fahrzieledit setlocation <destination> [server]", requiredSender=Player.class)
@@ -401,6 +442,17 @@ public class DestinationCommands {
             final @Argument(value="server", suggestions="serverName") String server
     ) {
         Destination destination = findDestination(sender, name, server);
+        destination.setLocation(CTLocation.fromBukkitLocation(sender.getLocation()));
+
+        plugin.getDestinationStorage().update(destination, (err, affectedRows) -> {
+            if (err != null)
+                Localization.COMMAND_DESTEDIT_SAVEFAILED.message(sender,
+                        PlaceholderResolver.resolver("error", err.getMessage()));
+            else {
+                Localization.COMMAND_DESTEDIT_SETLOCATION_SUCCESS.message(sender,
+                        PlaceholderResolver.resolver("destination", destination.getName()));
+            }
+        });
     }
 
     @CommandMethod(value="fahrzieledit settype <destination> <type> [server]", requiredSender=Player.class)
@@ -412,7 +464,25 @@ public class DestinationCommands {
             final @Argument(value="type", suggestions="destinationType") String type,
             final @Argument(value="server", suggestions="serverName") String server
     ) {
+        Destination.DestinationType destinationType = Destination.findType(type);
+        if (destinationType == null) {
+            Localization.COMMAND_DESTEDIT_ADD_INVALIDTYPE.message(sender);
+            return;
+        }
+
         Destination destination = findDestination(sender, name, server);
+        destination.setType(destinationType);
+
+        plugin.getDestinationStorage().update(destination, (err, affectedRows) -> {
+            if (err != null)
+                Localization.COMMAND_DESTEDIT_SAVEFAILED.message(sender,
+                        PlaceholderResolver.resolver("error", err.getMessage()));
+            else {
+                Localization.COMMAND_DESTEDIT_SETTYPE_SUCCESS.message(sender,
+                        PlaceholderResolver.resolver("destination", destination.getName()),
+                        PlaceholderResolver.resolver("type", destinationType.toString()));
+            }
+        });
     }
 
     @CommandMethod(value="fahrzieledit setwarp <destination> [server]", requiredSender=Player.class)
@@ -424,6 +494,17 @@ public class DestinationCommands {
             final @Argument(value="server", suggestions="serverName") String server
     ) {
         Destination destination = findDestination(sender, name, server);
+        destination.setTeleportLocation(CTLocation.fromBukkitLocation(sender.getLocation()));
+
+        plugin.getDestinationStorage().update(destination, (err, affectedRows) -> {
+            if (err != null)
+                Localization.COMMAND_DESTEDIT_SAVEFAILED.message(sender,
+                        PlaceholderResolver.resolver("error", err.getMessage()));
+            else {
+                Localization.COMMAND_DESTEDIT_SETWARP_SUCCESS.message(sender,
+                        PlaceholderResolver.resolver("destination", destination.getName()));
+            }
+        });
     }
 
     @CommandMethod(value="fahrzieledit updatemarker", requiredSender=Player.class)
@@ -432,7 +513,7 @@ public class DestinationCommands {
     public void fahrzieledit_updatemarker(
             final Player sender
     ) {
-        sender.sendMessage("Test");
+        sender.sendMessage("Coming soon");
     }
 
     @CommandMethod(value="fahrzieledit reload", requiredSender=Player.class)
@@ -441,7 +522,7 @@ public class DestinationCommands {
     public void fahrzieledit_reload(
             final Player sender
     ) {
-        sender.sendMessage("Test");
+        sender.sendMessage("Coming soon");
     }
 
     public Destination findDestination(CommandSender sender, String name, String server) {
