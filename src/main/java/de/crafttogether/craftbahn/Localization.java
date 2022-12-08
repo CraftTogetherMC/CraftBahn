@@ -75,7 +75,7 @@ public class Localization extends LocalizationEnum {
     public static final Localization COMMAND_DESTINATIONS_BTN_TELEPORT = new Localization("command.destinations.btn.teleport", "<hover:show_text:'<green>Zum Bahnhof teleportieren</green>'><click:run_command:{command}> <gray>[</gray><white>TP</white><gray>]</gray></click></hover>");
 
     public static final Localization COMMAND_MOBENTER_SUCCESS = new Localization("command.mobenter.success", "<prefix/><green>Es wurden <yellow>{amount}</yellow> Tiere in deinen Zug gesetzt</green>");
-    public static final Localization COMMAND_MOBENTER_FAILED = new Localization("command.mobenter.failed", "<prefix/><red>Es wurden keine im Umkreis von <yellow>{radius}</yellow> Blöcken Tiere gefunden oder der Zug ist leider schon voll.</red>");
+    public static final Localization COMMAND_MOBENTER_FAILED = new Localization("command.mobenter.failed", "<prefix/><red>Es wurden keine Tiere im Umkreis von <yellow>{radius}</yellow> Blöcken gefunden oder der Zug ist leider schon voll.</red>");
     public static final Localization COMMAND_MOBEJECT_SUCCESS = new Localization("command.mobeject.success", "<prefix/><green>Es wurden alle vorhandenen Tiere aus dem Zug geworden.</green>");
 
     private Localization(String name, String defValue) {
