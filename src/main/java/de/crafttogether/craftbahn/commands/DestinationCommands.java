@@ -10,6 +10,7 @@ import de.crafttogether.craftbahn.destinations.Destination;
 import de.crafttogether.craftbahn.destinations.DestinationList;
 import de.crafttogether.craftbahn.localization.PlaceholderResolver;
 import de.crafttogether.craftbahn.util.CTLocation;
+import de.crafttogether.craftbahn.util.DynmapMarker;
 import de.crafttogether.craftbahn.util.TCHelper;
 import de.crafttogether.craftbahn.util.Util;
 import net.kyori.adventure.text.Component;
@@ -513,7 +514,9 @@ public class DestinationCommands {
     public void fahrzieledit_updatemarker(
             final Player sender
     ) {
-        sender.sendMessage("Coming soon");
+        int markersCreated = DynmapMarker.setupMarkers(CraftBahnPlugin.plugin.getDestinationStorage().getDestinations());
+        Localization.COMMAND_DESTEDIT_UPDATEMARKER_SUCCESS.message(sender,
+                PlaceholderResolver.resolver("amount", String.valueOf(markersCreated)));
     }
 
     @CommandMethod(value="fahrzieledit reload", requiredSender=Player.class)

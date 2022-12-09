@@ -108,6 +108,7 @@ public class Localization extends LocalizationEnum {
     public static final Localization COMMAND_DESTEDIT_SETLOCATION_SUCCESS = new Localization("command.destedit.setlocation.success", "<prefix/><green>Du hast die Position des Fahrziel</green> <yellow>{destination}</yellow> <green>aktualisiert.<green>");
     public static final Localization COMMAND_DESTEDIT_SETWARP_SUCCESS = new Localization("command.destedit.setwarp.success", "<prefix/><green>Du hast die Warp-Position des Fahrziel</green> <yellow>{destination}</yellow> <green>aktualisiert.<green>");
     public static final Localization COMMAND_DESTEDIT_SETTYPE_SUCCESS = new Localization("command.destedit.settype.success", "<prefix/><green>Du hast den Stationstyp des Fahrziel</green> <yellow>{destination}</yellow> <green>zu<green> <yellow>{type}</yellow> <green>geändert</green>");
+    public static final Localization COMMAND_DESTEDIT_UPDATEMARKER_SUCCESS = new Localization("command.destedit.updatemarker.success", "<prefix/><green>Dynmap-Marker aktualisiert. Es wurden</green> <yellow>{amount}</yellow> <green>Marker erstellt.</green>");
 
     public static final Localization COMMAND_MOBENTER_SUCCESS = new Localization("command.mobenter.success", "<prefix/><green>Es wurden <yellow>{amount}</yellow> Tiere in deinen Zug gesetzt</green>");
     public static final Localization COMMAND_MOBENTER_FAILED = new Localization("command.mobenter.failed", "<prefix/><red>Es wurden keine Tiere im Umkreis von <yellow>{radius}</yellow> Blöcken gefunden oder der Zug ist leider schon voll.</red>");

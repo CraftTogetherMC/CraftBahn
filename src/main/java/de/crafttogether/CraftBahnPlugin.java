@@ -4,6 +4,7 @@ import de.crafttogether.craftbahn.Localization;
 import de.crafttogether.craftbahn.localization.LocalizationManager;
 import de.crafttogether.craftbahn.commands.Commands;
 import de.crafttogether.craftbahn.destinations.DestinationStorage;
+import de.crafttogether.craftbahn.util.DynmapMarker;
 import de.crafttogether.mysql.MySQLAdapter;
 import de.crafttogether.mysql.MySQLConfig;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -12,11 +13,13 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.dynmap.DynmapAPI;
 
 public final class CraftBahnPlugin extends JavaPlugin {
     public static CraftBahnPlugin plugin;
 
     private String serverName;
+    private DynmapAPI dynmap;
 
     private Commands commands;
     private MySQLAdapter mySQLAdapter;
@@ -47,11 +50,18 @@ public final class CraftBahnPlugin extends JavaPlugin {
             return;
         }
 
+        if (!getServer().getPluginManager().isPluginEnabled("dynmap")) {
+            plugin.getLogger().warning("Couldn't find Dynmap");
+            Bukkit.getServer().getPluginManager().disablePlugin(plugin);
+            return;
+        }
+
         // Create default config
         saveDefaultConfig();
 
         // Initialize
         FileConfiguration config = getConfig();
+        dynmap = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("Dynmap");
         serverName = config.getString("Settings.ServerName");
 
         // Setup MySQLConfig
@@ -99,6 +109,7 @@ public final class CraftBahnPlugin extends JavaPlugin {
     }
 
     public MySQLAdapter getMySQLAdapter() { return mySQLAdapter; }
+    public DynmapAPI getDynmap() { return dynmap; }
     public LocalizationManager getLocalizationManager() { return localizationManager; }
     public DestinationStorage getDestinationStorage() { return destinationStorage; }
 

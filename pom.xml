@@ -46,6 +46,7 @@
                     <target>${java.version}</target>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -78,6 +79,7 @@
                 </configuration>
             </plugin>
         </plugins>
+
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -103,6 +105,11 @@
         </repository>
 
         <repository>
+            <id>dynmap-repo</id>
+            <url>https://repo.mikeprimm.com</url>
+        </repository>
+
+        <repository>
             <id>MG-Dev Jenkins CI Maven Repository</id>
             <url>https://ci.mg-dev.eu/plugin/repository/everything</url>
         </repository>
@@ -120,6 +127,13 @@
             <groupId>de.crafttogether</groupId>
             <artifactId>MySQLAdapter</artifactId>
             <version>1.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>us.dynmap</groupId>
+            <artifactId>dynmap-api</artifactId>
+            <version>3.4</version>
             <scope>provided</scope>
         </dependency>
 

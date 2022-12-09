@@ -66,6 +66,9 @@ public class DestinationStorage {
         // Load all destinations from database into our cache
         Bukkit.getServer().getScheduler().runTask(CraftBahnPlugin.plugin, () -> loadAll((err, destinations) -> {
             CraftBahnPlugin.plugin.getLogger().info("Loaded " + destinations.size() + " destinations");
+
+            // Add Dynmmap-Markers
+            DynmapMarker.setupMarkers(CraftBahnPlugin.plugin.getDestinationStorage().getDestinations());
         }));
     }
 
