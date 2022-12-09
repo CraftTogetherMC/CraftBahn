@@ -1,8 +1,8 @@
 Settings:
-  Port: 5000
   ServerName: 'lobby'
-  Debug: true
 Portals:
+  Host: '127.0.0.1'
+  Port: 5000
   LaunchSpeed: 0.4
   LaunchDelayTicks: 20.0 # Ticks
   LaunchDistanceBlocks: 10.0 # Blocks

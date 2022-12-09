@@ -22,6 +22,12 @@ public class Localization extends LocalizationEnum {
     public static final Localization ENTERMESSAGE_DEST = new Localization("entermessage.dest", "<prefix/><yellow>Dieser Zug versucht das Ziel:</yellow><newLine><prefix/><gold><bold>{destination}</bold></gold> <yellow>zu erreichen.</yellow>");
     public static final Localization ENTERMESSAGE_NODEST = new Localization("entermessage.nodest", "<hover:show_text:'<green>Verfügbare Fahrziele auflisten</green>'><click:run_command:/fahrziele><prefix/><red><bold>Hinweis:</bold></red><newLine><prefix/><red>Dieser Zug hat noch kein Fahrziel</red></click></hover>");
 
+    public static final Localization PORTAL_CREATESIGN_FAILED_NAME = new Localization("portal.createsign.failed.name", "<prefix/><red>Bitte schreibe einen Namen für das Portal in die dritte Zeile des Schildes.</red>");
+    public static final Localization PORTAL_CREATESIGN_FAILED_EXISTS = new Localization("portal.createsign.failed.exists", "<prefix/><red>Es besteht bereits ein Portal-Paar für den Kanal </red> <yellow>{name}</yellow><red>.</red>");
+    public static final Localization PORTAL_CREATESIGN_FAILED_SAMESERVER = new Localization("portal.createsign.failed.sameserver", "<prefix/><red>Es besteht bereits ein bidirektionales Portal für diesen Kanal auf diesem Server.</red>");
+    public static final Localization PORTAL_CREATESIGN_FIRST = new Localization("portal.createsign.first", "<prefix/><gold>Hinweis:</gold> <red>Es wurde noch kein zweites Portal für den Kanal </red> <yellow>{name}</yellow> <red>erstellt.</red>");
+    public static final Localization PORTAL_CREATESIGN_SECOND = new Localization("portal.createsign.second", "<prefix/><gold>Hinweis:</gold> <yellow>Das andere Portal befindet sich in <gold>{world}</gold> <yellow>bei</yellow> <gold>{x} {y} {z}</gold>");
+
     public static final Localization DESTINATIONTYPE_ALL = new Localization("destinationtype.all", "Alle");
     public static final Localization DESTINATIONTYPE_STATION = new Localization("destinationtype.station", "Bahnhof");
     public static final Localization DESTINATIONTYPE_MAIN_STATION = new Localization("destinationtype.main_station", "Hauptbahnhof");
@@ -30,6 +36,7 @@ public class Localization extends LocalizationEnum {
 
     public static final Localization COMMAND_NOPERM = new Localization("command.noperm", "<red>Dazu hast du keine Berechtigung</red>");
     public static final Localization COMMAND_NOTRAIN = new Localization("command.notrain", "<prefix/><red>Bitte setze dich zuerst in einen Zug.</red>");
+    public static final Localization COMMAND_ERROR = new Localization("command.error", "<prefix/><red>Ein Fehler ist aufgetreten. Bitte kontaktiere einen Administrator.</red><newLine><red>{error}</red>");
 
     public static final Localization COMMAND_DESTINATION_NOTEXIST = new Localization("command.destination.notexist", "<prefix/><red>Es wurde kein Ziel mit dem Namen <gold>{input}</gold> gefunden.</red>");
     public static final Localization COMMAND_DESTINATION_NOPERMISSION = new Localization("command.destination.nopermission", "<prefix/><red>Auf dieses Ziel hast du keinen Zugriff.</red>");

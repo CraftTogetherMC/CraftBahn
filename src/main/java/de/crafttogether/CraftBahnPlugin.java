@@ -3,8 +3,12 @@ package de.crafttogether;
 import de.crafttogether.craftbahn.Localization;
 import de.crafttogether.craftbahn.commands.Commands;
 import de.crafttogether.craftbahn.destinations.DestinationStorage;
+import de.crafttogether.craftbahn.listener.PlayerSpawnListener;
+import de.crafttogether.craftbahn.listener.SignBreakListener;
 import de.crafttogether.craftbahn.listener.TrainEnterListener;
 import de.crafttogether.craftbahn.localization.LocalizationManager;
+import de.crafttogether.craftbahn.portals.PortalStorage;
+import de.crafttogether.craftbahn.util.TCHelper;
 import de.crafttogether.mysql.MySQLAdapter;
 import de.crafttogether.mysql.MySQLConfig;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -25,6 +29,7 @@ public final class CraftBahnPlugin extends JavaPlugin {
     private MySQLAdapter mySQLAdapter;
     private LocalizationManager localizationManager;
     private DestinationStorage destinationStorage;
+    private PortalStorage portalStorage;
     private MiniMessage miniMessageParser;
 
     @Override
@@ -66,6 +71,8 @@ public final class CraftBahnPlugin extends JavaPlugin {
 
         // Register Listener
         getServer().getPluginManager().registerEvents(new TrainEnterListener(), this);
+        getServer().getPluginManager().registerEvents(new SignBreakListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerSpawnListener(), this);
 
         // Setup MySQLConfig
         MySQLConfig myCfg = new MySQLConfig();
@@ -88,6 +95,7 @@ public final class CraftBahnPlugin extends JavaPlugin {
 
         // Initialize Storages
         destinationStorage = new DestinationStorage();
+        portalStorage = new PortalStorage();
 
         // Initialize LocalizationManager
         localizationManager = new LocalizationManager();
@@ -102,6 +110,9 @@ public final class CraftBahnPlugin extends JavaPlugin {
         // Register Commands
         commands = new Commands();
         commands.enable(this);
+
+        // Register ActionSigns for TrainCarts
+        TCHelper.registerActionSigns();
     }
 
     @Override
@@ -109,12 +120,17 @@ public final class CraftBahnPlugin extends JavaPlugin {
         // Shutdown MySQL-Adapter
         if(mySQLAdapter != null)
             mySQLAdapter.disconnect();
+
+        TCHelper.unregisterActionSigns();
     }
 
     public MySQLAdapter getMySQLAdapter() { return mySQLAdapter; }
     public DynmapAPI getDynmap() { return dynmap; }
     public LocalizationManager getLocalizationManager() { return localizationManager; }
     public DestinationStorage getDestinationStorage() { return destinationStorage; }
+    public PortalStorage getPortalStorage() {
+        return portalStorage;
+    }
 
     public MiniMessage getMiniMessageParser() {
         if (miniMessageParser == null)
