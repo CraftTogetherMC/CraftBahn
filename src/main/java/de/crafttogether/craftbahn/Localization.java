@@ -4,18 +4,32 @@ import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.localization.LocalizationEnum;
 
 public class Localization extends LocalizationEnum {
-    public static final Localization PREFIX = new Localization("command.prefix", "<gold>CraftBahn </gold><dark_gray>» </dark_gray>");
-    public static final Localization HEADER = new Localization("command.header", "<yellow>--------------</yellow> <red><bold>CraftBahn</bold></red> <yellow>--------------<yellow/>");
-    public static final Localization FOOTER = new Localization("command.footer", "<yellow>----------------------------------------</yellow>");
+    public static final Localization PREFIX = new Localization("prefix", "<gold>CraftBahn </gold><dark_gray>» </dark_gray>");
+    public static final Localization HEADER = new Localization("header", "<yellow>--------------</yellow> <red><bold>CraftBahn</bold></red> <yellow>--------------<yellow/>");
+    public static final Localization FOOTER = new Localization("footer", "<yellow>----------------------------------------</yellow>");
 
-    public static final Localization COMMAND_NOPERM = new Localization("command.noperm", "<red>Dazu hast du keine Berechtigung</red>");
-    public static final Localization COMMAND_NOTRAIN = new Localization("command.notrain", "<prefix/><red>Bitte setze dich zuerst in einen Zug.</red>");
+    public static final Localization ENTERMESSAGE = new Localization("entermessage.head", """
+            <header/>
+            
+            <hover:show_text:'<green>Informationen zum Schienennetz</green>'><click:run_command:/bahnhof><prefix/><yellow>Guten Tag, Reisender!</yellow>
+            <prefix/><yellow>Verstehst du nur </yellow>
+            <prefix/><red>/bahnhof</red><yellow>?</yellow></click></hover>
+            <prefix/>
+            {destinationInfo}
+            
+            <footer/>
+            """);
+    public static final Localization ENTERMESSAGE_DEST = new Localization("entermessage.dest", "<prefix/><yellow>Dieser Zug versucht das Ziel:</yellow><newLine><prefix/><gold><bold>{destination}</bold></gold> <yellow>zu erreichen.</yellow>");
+    public static final Localization ENTERMESSAGE_NODEST = new Localization("entermessage.nodest", "<hover:show_text:'<green>Verfügbare Fahrziele auflisten</green>'><click:run_command:/fahrziele><prefix/><red><bold>Hinweis:</bold></red><newLine><prefix/><red>Dieser Zug hat noch kein Fahrziel</red></click></hover>");
 
     public static final Localization DESTINATIONTYPE_ALL = new Localization("destinationtype.all", "Alle");
     public static final Localization DESTINATIONTYPE_STATION = new Localization("destinationtype.station", "Bahnhof");
     public static final Localization DESTINATIONTYPE_MAIN_STATION = new Localization("destinationtype.main_station", "Hauptbahnhof");
     public static final Localization DESTINATIONTYPE_PLAYER_STATION = new Localization("destinationtype.player_station", "Spielerbahnhof");
     public static final Localization DESTINATIONTYPE_PUBLIC_STATION = new Localization("destinationtype.public_station", "Öffentlich");
+
+    public static final Localization COMMAND_NOPERM = new Localization("command.noperm", "<red>Dazu hast du keine Berechtigung</red>");
+    public static final Localization COMMAND_NOTRAIN = new Localization("command.notrain", "<prefix/><red>Bitte setze dich zuerst in einen Zug.</red>");
 
     public static final Localization COMMAND_DESTINATION_NOTEXIST = new Localization("command.destination.notexist", "<prefix/><red>Es wurde kein Ziel mit dem Namen <gold>{input}</gold> gefunden.</red>");
     public static final Localization COMMAND_DESTINATION_NOPERMISSION = new Localization("command.destination.nopermission", "<prefix/><red>Auf dieses Ziel hast du keinen Zugriff.</red>");

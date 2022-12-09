@@ -9,6 +9,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 
+import java.util.Collection;
+
 public class TCHelper {
     // Get train by player
     public static MinecartGroup getTrain(Player p) {
@@ -30,5 +32,12 @@ public class TCHelper {
     public static MinecartGroup getTrain(String trainName) {
         TrainProperties trainProperties = TrainPropertiesStore.get(trainName);
         return (trainProperties == null) ? null : trainProperties.getHolder();
+    }
+
+    public static boolean hasTagIgnoreCase(String tag, Collection<String> tags) {
+        for (String found : tags)
+            if (found.equalsIgnoreCase(tag)) return true;
+
+        return false;
     }
 }

@@ -1,10 +1,10 @@
 package de.crafttogether;
 
 import de.crafttogether.craftbahn.Localization;
-import de.crafttogether.craftbahn.localization.LocalizationManager;
 import de.crafttogether.craftbahn.commands.Commands;
 import de.crafttogether.craftbahn.destinations.DestinationStorage;
-import de.crafttogether.craftbahn.util.DynmapMarker;
+import de.crafttogether.craftbahn.listener.TrainEnterListener;
+import de.crafttogether.craftbahn.localization.LocalizationManager;
 import de.crafttogether.mysql.MySQLAdapter;
 import de.crafttogether.mysql.MySQLConfig;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -63,6 +63,9 @@ public final class CraftBahnPlugin extends JavaPlugin {
         FileConfiguration config = getConfig();
         dynmap = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("Dynmap");
         serverName = config.getString("Settings.ServerName");
+
+        // Register Listener
+        getServer().getPluginManager().registerEvents(new TrainEnterListener(), this);
 
         // Setup MySQLConfig
         MySQLConfig myCfg = new MySQLConfig();
