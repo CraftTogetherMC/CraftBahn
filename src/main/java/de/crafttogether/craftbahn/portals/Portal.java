@@ -2,8 +2,6 @@ package de.crafttogether.craftbahn.portals;
 
 import com.bergerkiller.bukkit.common.utils.BlockUtil;
 import com.bergerkiller.bukkit.tc.SignActionHeader;
-import com.bergerkiller.bukkit.tc.signactions.SignActionMode;
-import de.crafttogether.craftbahn.Localization;
 import de.crafttogether.craftbahn.util.CTLocation;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -18,12 +16,13 @@ public class Portal {
     private CTLocation targetLocation = null;
 
     public enum PortalType {
-        ENTRANCE, EXIT, BIDIRECTIONAL
+        IN, OUT, BIDIRECTIONAL
     }
 
     public Portal(String name, PortalType type, Integer id, String targetHost, Integer targetPort, CTLocation targetLocation) {
         this.id = id;
         this.name = name;
+        this.type = type;
         this.targetHost = targetHost;
         this.targetPort = targetPort;
         this.targetLocation = targetLocation;
@@ -47,17 +46,21 @@ public class Portal {
     public void setTargetPort(Integer targetPort) { this.targetPort = targetPort; }
     public void setTargetLocation(CTLocation targetLocation) { this.targetLocation = targetLocation; }
 
+    public static boolean isValid(Sign sign) {
+        SignActionHeader actionSign = SignActionHeader.parseFromSign(sign);
+        return actionSign.isValid() && actionSign.isTrain() && (
+                ("portal").equalsIgnoreCase(sign.getLine(1)) ||
+                ("portal-in").equalsIgnoreCase(sign.getLine(1)) ||
+                ("portal-out").equalsIgnoreCase(sign.getLine(1))
+        );
+    }
+
     public Sign getSign() {
         Location location = this.getTargetLocation().getBukkitLocation();
         Block block = location.getWorld().getBlockAt(location);
         Sign sign = BlockUtil.getSign(block);
-        if (sign == null) return null;
-
-        // Sign validieren
-        SignActionHeader actionSign = SignActionHeader.parseFromSign(BlockUtil.getSign(block));
-        if (!actionSign.isTrain()) return null;
-
-        return sign;
+        if (isValid(sign)) return sign;
+        return null;
     }
 
     public String toString() {

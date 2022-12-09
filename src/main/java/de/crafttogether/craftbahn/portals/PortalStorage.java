@@ -86,7 +86,6 @@ public class PortalStorage {
                 .toList();
 
         for (Portal portal : localPortals) {
-            plugin.getLogger().info(portal.getName());
             if (portal.getSign() != null) continue;
 
             delete(portal.getId(), (err, rows) -> {

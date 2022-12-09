@@ -20,12 +20,12 @@ import org.bukkit.block.BlockFace;
 import java.sql.SQLException;
 import java.util.List;
 
-public class SignActionPortal extends SignAction {
+public class SignActionPortalOut extends SignAction {
     private CraftBahnPlugin plugin = CraftBahnPlugin.plugin;
 
     @Override
     public boolean match(SignActionEvent event) {
-        return event.getLine(1).equalsIgnoreCase("portal");
+        return event.getLine(1).equalsIgnoreCase("portal-out");
     }
 
     @Override
@@ -56,10 +56,10 @@ public class SignActionPortal extends SignAction {
             return false;
         }
 
-        // Get existing portals from database
+        // Get existing portal-out -signs from database
         List<Portal> portals = null;
         try {
-            portals = plugin.getPortalStorage().get(portalName, Portal.PortalType.BIDIRECTIONAL);
+            portals = plugin.getPortalStorage().get(portalName, Portal.PortalType.OUT);
         } catch (SQLException e) {
             Localization.COMMAND_ERROR.message(event.getPlayer(),
                     PlaceholderResolver.resolver("error", e.getMessage()));
@@ -68,44 +68,12 @@ public class SignActionPortal extends SignAction {
             return false;
         }
 
-        // Create sign
-        if (portals.size() == 0 || portals.size() == 1) {
-
-            // First sign created
-            if (portals.size() == 0) {
-                Localization.PORTAL_CREATE_BIDIRECTIONAL_INFO_FIRST.message(event.getPlayer(),
-                        PlaceholderResolver.resolver("name", portalName));
-            }
-
-            // Sign updated
-            else if (portals.get(0).getTargetLocation().getBukkitLocation().equals(event.getLocation())) {
-                return true;
-            }
-
-            // Second sign created
-            else {
-                Portal portal = portals.get(0);
-
-                // One sign on this server already exists
-                if (portal.getTargetLocation().getServer().equals(plugin.getServerName())) {
-                    Localization.PORTAL_CREATE_BIDIRECTIONAL_SAMESERVER.message(event.getPlayer());
-                    return false;
-                }
-
-                Localization.PORTAL_CREATE_BIDIRECTIONAL_INFO_SECOND.message(event.getPlayer(),
-                        PlaceholderResolver.resolver("name", portal.getName()),
-                        PlaceholderResolver.resolver("server", portal.getTargetLocation().getServer()),
-                        PlaceholderResolver.resolver("world", portal.getTargetLocation().getWorld()),
-                        PlaceholderResolver.resolver("x", String.valueOf(portal.getTargetLocation().getX())),
-                        PlaceholderResolver.resolver("y", String.valueOf(portal.getTargetLocation().getY())),
-                        PlaceholderResolver.resolver("z", String.valueOf(portal.getTargetLocation().getZ())));
-            }
-
-            // Save to database
+        // Save to database
+        if (portals.size() == 0) {
             try {
-                Portal portal = plugin.getPortalStorage().create(
+                plugin.getPortalStorage().create(
                         portalName,
-                        Portal.PortalType.BIDIRECTIONAL,
+                        Portal.PortalType.OUT,
                         plugin.getConfig().getString("Portals.Host"),
                         plugin.getConfig().getInt("Portals.Port"),
                         CTLocation.fromBukkitLocation(event.getLocation()));
@@ -117,19 +85,26 @@ public class SignActionPortal extends SignAction {
                 return false;
             }
 
-            Localization.PORTAL_CREATE_BIDIRECTIONAL_SUCCESS.message(event.getPlayer(),
+            Localization.PORTAL_CREATE_OUT_SUCCESS.message(event.getPlayer(),
                     PlaceholderResolver.resolver("name", portalName));
         }
 
         // There are already two signs
         else {
-            Localization.PORTAL_CREATE_BIDIRECTIONAL_EXISTS.message(event.getPlayer(),
-                    PlaceholderResolver.resolver("name", portalName));
+            Portal portal = portals.get(0);
+
+            Localization.PORTAL_CREATE_OUT_EXIST.message(event.getPlayer(),
+                    PlaceholderResolver.resolver("name", portal.getName()),
+                    PlaceholderResolver.resolver("server", portal.getTargetLocation().getServer()),
+                    PlaceholderResolver.resolver("world", portal.getTargetLocation().getWorld()),
+                    PlaceholderResolver.resolver("x", String.valueOf(portal.getTargetLocation().getX())),
+                    PlaceholderResolver.resolver("y", String.valueOf(portal.getTargetLocation().getY())),
+                    PlaceholderResolver.resolver("z", String.valueOf(portal.getTargetLocation().getZ())));
             return false;
         }
 
         SignBuildOptions.create()
-                .setName("ServerPortal").setDescription("allow trains to travel between servers" + ((event.getLine(3).equalsIgnoreCase("clear")) ? ".\n§eChest-Minecarts will be cleared" : ""))
+                .setName("ServerPortal-Exit").setDescription("allow trains to travel between servers" + ((event.getLine(3).equalsIgnoreCase("clear")) ? ".\n§eChest-Minecarts will be cleared" : ""))
                 .handle(event.getPlayer());
 
         return true;
