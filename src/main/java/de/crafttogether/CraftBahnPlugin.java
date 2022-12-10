@@ -126,6 +126,9 @@ public final class CraftBahnPlugin extends JavaPlugin {
 
     public MySQLAdapter getMySQLAdapter() { return mySQLAdapter; }
     public DynmapAPI getDynmap() { return dynmap; }
+    public Commands getCommandManager() {
+        return commands;
+    }
     public LocalizationManager getLocalizationManager() { return localizationManager; }
     public DestinationStorage getDestinationStorage() { return destinationStorage; }
     public PortalStorage getPortalStorage() {

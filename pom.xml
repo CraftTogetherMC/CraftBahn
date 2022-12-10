@@ -15,7 +15,9 @@
 
     <properties>
         <java.version>18</java.version>
+        <project.paper.version>1.19.2-R0.1-SNAPSHOT</project.paper.version>
         <project.bkcommonlib.version>1.19.2-v2</project.bkcommonlib.version>
+        <project.traincarts.version>1.19.2-v2-SNAPSHOT</project.traincarts.version>
         <project.cloud.version>1.8.0-SNAPSHOT</project.cloud.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.number>NO-CI</project.build.number>
@@ -119,7 +121,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.19.2-R0.1-SNAPSHOT</version>
+            <version>${project.paper.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -154,7 +156,7 @@
         <dependency>
             <groupId>com.bergerkiller.bukkit</groupId>
             <artifactId>TrainCarts</artifactId>
-            <version>1.19.2-v2-SNAPSHOT</version>
+            <version>${project.traincarts.version}</version>
             <scope>provided</scope>
         </dependency>
 

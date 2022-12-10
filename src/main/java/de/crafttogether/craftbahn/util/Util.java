@@ -24,7 +24,7 @@ public class Util {
 
         // Broadcast to online players with permission
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (!CraftBahnPlugin.plugin.getConfig().getBoolean("debug") || !player.hasPermission("craftbahn.debug")) continue;
+            if (!CraftBahnPlugin.plugin.getConfig().getBoolean("Settings.Debug") || !player.hasPermission("craftbahn.debug")) continue;
             player.sendMessage(message);
         }
 

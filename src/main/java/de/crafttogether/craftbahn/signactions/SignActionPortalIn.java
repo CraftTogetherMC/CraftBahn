@@ -12,8 +12,8 @@ import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.Localization;
 import de.crafttogether.craftbahn.localization.PlaceholderResolver;
 import de.crafttogether.craftbahn.portals.Portal;
+import de.crafttogether.craftbahn.portals.PortalHandler;
 import de.crafttogether.craftbahn.util.CTLocation;
-import de.crafttogether.craftbahn.util.Util;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 
@@ -30,18 +30,14 @@ public class SignActionPortalIn extends SignAction {
 
     @Override
     public void execute(SignActionEvent event) {
-        if (!event.isPowered()) return;
+        if (!event.isPowered() || !event.isTrainSign())
+            return;
 
-        // Train arrives sign
-        if (event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasGroup()) {
-            Util.debug("#trainEnter");
+        if (event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasGroup())
+            PortalHandler.handleTrain(event);
 
-        }
-
-        // Cart arrives sign
-        if (event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasMember()) {
-            Util.debug("#cartEnter");
-        }
+        if (event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasMember())
+            PortalHandler.handleCart(event);
     }
 
     @Override
@@ -57,7 +53,7 @@ public class SignActionPortalIn extends SignAction {
         }
 
         // Get existing portal-out -signs from database
-        List<Portal> portals = null;
+        List<Portal> portals;
         try {
             portals = plugin.getPortalStorage().get(portalName, Portal.PortalType.OUT);
         } catch (SQLException e) {

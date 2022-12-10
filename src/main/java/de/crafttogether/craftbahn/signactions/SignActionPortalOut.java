@@ -6,14 +6,12 @@ import com.bergerkiller.bukkit.common.utils.WorldUtil;
 import com.bergerkiller.bukkit.tc.events.SignActionEvent;
 import com.bergerkiller.bukkit.tc.events.SignChangeActionEvent;
 import com.bergerkiller.bukkit.tc.signactions.SignAction;
-import com.bergerkiller.bukkit.tc.signactions.SignActionType;
 import com.bergerkiller.bukkit.tc.utils.SignBuildOptions;
 import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.Localization;
 import de.crafttogether.craftbahn.localization.PlaceholderResolver;
 import de.crafttogether.craftbahn.portals.Portal;
 import de.crafttogether.craftbahn.util.CTLocation;
-import de.crafttogether.craftbahn.util.Util;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 
@@ -29,20 +27,7 @@ public class SignActionPortalOut extends SignAction {
     }
 
     @Override
-    public void execute(SignActionEvent event) {
-        if (!event.isPowered()) return;
-
-        // Train arrives sign
-        if (event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasGroup()) {
-            Util.debug("#trainEnter");
-
-        }
-
-        // Cart arrives sign
-        if (event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasMember()) {
-            Util.debug("#cartEnter");
-        }
-    }
+    public void execute(SignActionEvent event) { }
 
     @Override
     public boolean build(SignChangeActionEvent event) {
@@ -57,7 +42,7 @@ public class SignActionPortalOut extends SignAction {
         }
 
         // Get existing portal-out -signs from database
-        List<Portal> portals = null;
+        List<Portal> portals;
         try {
             portals = plugin.getPortalStorage().get(portalName, Portal.PortalType.OUT);
         } catch (SQLException e) {
