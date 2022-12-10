@@ -1,29 +1,23 @@
 package de.crafttogether.craftbahn.net;
 
-import com.bergerkiller.bukkit.common.utils.CommonUtil;
+import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.util.Util;
-import org.bukkit.event.Event;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.BindException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketException;
+import java.net.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class TCPServer extends Thread {
+    String host;
     private int port;
     private boolean listen;
     private ServerSocket serverSocket;
-    private ArrayList<Socket> clients;
+    private ArrayList<TCPClient> clients;
 
-    public void listen(int port) {
+    public TCPServer(String host, int port) {
+        this.host = host;
         this.port = port;
-        this.start();
+        start();
     }
 
     @Override
@@ -32,20 +26,17 @@ public class TCPServer extends Thread {
 
         try {
             // Create ServerSocket
-            serverSocket = new ServerSocket(port);
+            serverSocket = new ServerSocket(port, 5, InetAddress.getByName(host));
             listen = true;
 
-            Util.debug("Server is listening on port " + port, false);
+            Util.debug("[TCPServer]: Server is listening on port " + port, false);
 
             // Handle incoming connections
             while (listen && !isInterrupted()) {
                 Socket connection = null;
-                InputStream inputStream = null;
-                BufferedReader reader = null;
 
                 try {
                     connection = serverSocket.accept();
-                    clients.add(connection);
                 } catch (SocketException e) {
                     if (!e.getMessage().equalsIgnoreCase("socket closed"))
                         e.printStackTrace();
@@ -54,45 +45,24 @@ public class TCPServer extends Thread {
                 if (connection == null)
                     continue;
 
-                String ip = connection.getInetAddress().getHostAddress();
-                Util.debug(ip + " connected.", false);
+                TCPClient client = new TCPClient(connection);
+                boolean acceptRemote = CraftBahnPlugin.plugin.getConfig().getBoolean("Portals.Server.AcceptRemoteConnections");
 
-                try {
-                    inputStream = connection.getInputStream();
-                    reader = new BufferedReader(new InputStreamReader(inputStream));
-                    StringBuilder received = new StringBuilder();
+                Util.debug(client.getAddress() + " connected.", false);
 
-                    String input;
-                    while ((input = reader.readLine()) != null)
-                        received.append(input).append("\r\n");
-
-                    //Util.debug("Received:", false);
-                    //Util.debug(received.toString(), false);
-
-                    Event event = new PacketReceivedEvent(connection, received.toString());
-                    CommonUtil.callEvent(event);
+                // Should we accept remote connections?
+                if (!acceptRemote && !client.getAddress().equals("127.0.0.1")) {
+                    Util.debug("[TCPServer]: " + client.getAddress() + " was kicked. (No remote connections allowed)", false);
+                    client.send("Remote connections are not allowed");
+                    client.disconnect();
                 }
 
-                catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-
-                finally {
-                    Util.debug("Closing connection. (" + Arrays.toString(connection.getInetAddress().getAddress()) + ")", false);
-
-                    if (reader != null)
-                        reader.close();
-
-                    if (inputStream != null)
-                        inputStream.close();
-
-                    clients.remove(connection);
-                    connection.close();
-                }
+                clients.add(client);
             }
 
         } catch (BindException e) {
-            Util.debug("Can't bind to " + port + ".. Port already in use!", false);
+            CraftBahnPlugin.plugin.getLogger().warning("[Portalserver]: Can't bind to " + port + ".. Port already in use!");
+            Util.debug("[TCPServer]: Can't bind to " + port + ".. Port already in use!", false);
 
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -100,7 +70,7 @@ public class TCPServer extends Thread {
 
         finally {
             close();
-            Util.debug("Server stopped.", false);
+            Util.debug("[TCPServer]: Server stopped.", false);
         }
     }
 
@@ -109,22 +79,11 @@ public class TCPServer extends Thread {
     }
 
     public void close() {
-        if (!isInterrupted())
-            interrupt();
-
-        if (!listen)
-            return;
-
+        if (!listen) return;
         listen = false;
 
-        for (Socket connection : clients) {
-            if (connection.isClosed()) continue;
-            try {
-                clients.remove(connection);
-                connection.close();
-            }
-            catch (IOException ex) { ex.printStackTrace(); }
-        }
+        for (TCPClient client : clients)
+            client.disconnect();
 
         if (serverSocket != null) {
             try { serverSocket.close(); }

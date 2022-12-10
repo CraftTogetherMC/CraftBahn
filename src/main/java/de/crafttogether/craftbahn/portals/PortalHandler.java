@@ -42,11 +42,11 @@ public class PortalHandler {
     private final TCPServer tcpServer;
     private final Map<MinecartGroup, Portal> pendingTeleports = new HashMap<>();
 
-    public PortalHandler(int port) {
+    public PortalHandler(String host, int port) {
         // Create Server Socket
-        this.tcpServer = new TCPServer();
-        this.tcpServer.listen(port);
+        this.tcpServer = new TCPServer(host, port);
 
+        // Register TrainCarts-ActionSigns
         registerActionSigns();
     }
 

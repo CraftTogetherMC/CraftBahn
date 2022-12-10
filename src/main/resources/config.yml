@@ -2,8 +2,12 @@ Settings:
   ServerName: 'lobby'
   Debug: true
 Portals:
-  Host: '127.0.0.1'
-  Port: 5000
+  Server:
+    Port: 5000
+    BindAdress: '127.0.0.1'
+    AcceptRemoteConnections: true
+    PublicAddress: '127.0.0.1'
+    SecretKey: 'iliketrains'
   LaunchSpeed: 0.4
   LaunchDelayTicks: 20.0 # Ticks
   LaunchDistanceBlocks: 10.0 # Blocks

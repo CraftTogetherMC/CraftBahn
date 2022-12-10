@@ -69,7 +69,6 @@ public final class CraftBahnPlugin extends JavaPlugin {
 
         // Initialize
         FileConfiguration config = getConfig();
-        dynmap = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("Dynmap");
         serverName = config.getString("Settings.ServerName");
 
         // Register Listener
@@ -118,7 +117,7 @@ public final class CraftBahnPlugin extends JavaPlugin {
         commands.enable(this);
 
         // Initialize PortalHandler
-        portalHandler = new PortalHandler(config.getInt("Portals.Port"));
+        portalHandler = new PortalHandler(config.getString("Portals.Server.Host"), config.getInt("Portals.Server.Port"));
         portalHandler.registerActionSigns();
     }
 
