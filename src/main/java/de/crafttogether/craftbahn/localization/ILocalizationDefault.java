@@ -1,7 +1,7 @@
 package de.crafttogether.craftbahn.localization;
 
-/**
- * Copyright (C) 2013-2022 bergerkiller
+/*
+  Copyright (C) 2013-2022 bergerkiller
  */
 
 import java.util.Locale;

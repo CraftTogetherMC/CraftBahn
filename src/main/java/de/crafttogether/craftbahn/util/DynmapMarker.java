@@ -15,7 +15,7 @@ import java.util.Collection;
 import java.util.UUID;
 
 public class DynmapMarker {
-    private static CraftBahnPlugin plugin = CraftBahnPlugin.plugin;
+    private static final CraftBahnPlugin plugin = CraftBahnPlugin.plugin;
 
     public static int setupMarkers(Collection<Destination> destinations) {
         plugin.getLogger().info("Setup Markers...");
@@ -75,7 +75,7 @@ public class DynmapMarker {
             return false;
         }
 
-        MarkerIcon icon, railIcon, minecartIcon = null;
+        MarkerIcon icon, railIcon, minecartIcon;
         String label, owner, color = null;
         boolean showOwner = true;
 

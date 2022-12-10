@@ -1,8 +1,8 @@
 package de.crafttogether.craftbahn.localization;
 
 public class PlaceholderResolver {
-    private String name;
-    private String value;
+    private final String name;
+    private final String value;
 
     private PlaceholderResolver(String key, String value) {
         this.name = key;

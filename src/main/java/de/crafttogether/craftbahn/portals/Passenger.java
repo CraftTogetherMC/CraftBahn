@@ -1,5 +1,7 @@
 package de.crafttogether.craftbahn.portals;
 
+import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
+
 import java.util.*;
 
 public class Passenger {
@@ -13,6 +15,11 @@ public class Passenger {
         this.uuid = uuid;
         this.trainId = trainId;
         this.cartIndex = cartIndex;
+    }
+
+    // Find the corresponding train
+    public MinecartGroup getTrain() {
+        return null;
     }
 
     public UUID getUUID() { return this.uuid; }

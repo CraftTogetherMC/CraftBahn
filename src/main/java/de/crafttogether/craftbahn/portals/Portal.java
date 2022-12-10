@@ -11,9 +11,9 @@ public class Portal {
     private Integer id;
     private String name;
     private PortalType type;
-    private String targetHost = null;
-    private Integer targetPort = null;
-    private CTLocation targetLocation = null;
+    private String targetHost;
+    private Integer targetPort;
+    private CTLocation targetLocation;
 
     public enum PortalType {
         IN, OUT, BIDIRECTIONAL

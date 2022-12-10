@@ -1,7 +1,7 @@
 package de.crafttogether.craftbahn.localization;
 
-/**
- * Copyright (C) 2013-2022 bergerkiller
+/*
+  Copyright (C) 2013-2022 bergerkiller
  */
 
 import com.bergerkiller.bukkit.common.config.FileConfiguration;
@@ -12,7 +12,7 @@ import de.crafttogether.craftbahn.Localization;
 import java.util.Locale;
 
 public class LocalizationManager {
-    private FileConfiguration localizationconfig;
+    private final FileConfiguration localizationconfig;
 
     public LocalizationManager() {
         // Load localization configuration
@@ -61,9 +61,9 @@ public class LocalizationManager {
 
     /**
      * Loads a single Localization value<br>
-     * Adds this node to the localization configuration if it wsn't added
+     * Adds this node to the localization configuration if it wasn't added
      *
-     * @param path to the value (case insensitive, can not be null)
+     * @param path to the value (case-insensitive, can not be null)
      * @param defaultValue for the value
      */
     public void loadLocale(String path, String defaultValue) {
@@ -76,7 +76,7 @@ public class LocalizationManager {
     /**
      * Gets a localization value
      *
-     * @param path to the localization value (case insensitive, can not be null)
+     * @param path to the localization value (case-insensitive, can not be null)
      * @return Localization value
      */
     public String getLocale(String path) {
@@ -85,9 +85,8 @@ public class LocalizationManager {
         if (this.localizationconfig.isNode(path)) {
             // Redirect to the proper sub-node
             // Check recursively if the arguments are contained
-            String newPath = path + ".default";
             // Update path to lead to the new path
-            path = newPath;
+            path = path + ".default";
         }
 
         return this.localizationconfig.get(path, String.class, "");

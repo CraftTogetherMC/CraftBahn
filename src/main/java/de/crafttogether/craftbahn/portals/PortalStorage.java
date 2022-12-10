@@ -1,20 +1,12 @@
 package de.crafttogether.craftbahn.portals;
 
-import com.bergerkiller.bukkit.common.utils.BlockUtil;
 import de.crafttogether.Callback;
 import de.crafttogether.CraftBahnPlugin;
-import de.crafttogether.craftbahn.Localization;
-import de.crafttogether.craftbahn.destinations.Destination;
-import de.crafttogether.craftbahn.localization.PlaceholderResolver;
 import de.crafttogether.craftbahn.util.CTLocation;
-import de.crafttogether.craftbahn.util.Util;
 import de.crafttogether.mysql.MySQLAdapter;
 import de.crafttogether.mysql.MySQLConnection;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.Sign;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -76,7 +68,7 @@ public class PortalStorage {
             plugin.getLogger().info("Loaded " + portals.size() + " Portals");
 
             // Remove not existing signs from database
-            Bukkit.getServer().getScheduler().runTask(plugin, () -> checkSigns());
+            Bukkit.getServer().getScheduler().runTask(plugin, this::checkSigns);
         }));
     }
 
@@ -88,9 +80,7 @@ public class PortalStorage {
         for (Portal portal : localPortals) {
             if (portal.getSign() != null) continue;
 
-            delete(portal.getId(), (err, rows) -> {
-                plugin.getLogger().info("Deleted portal '" + portal.getName() + "' because action-sign doesn't exist anymore.");
-            });
+            delete(portal.getId(), (err, rows) -> plugin.getLogger().info("Deleted portal '" + portal.getName() + "' because action-sign doesn't exist anymore."));
         }
     }
 

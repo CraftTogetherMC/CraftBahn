@@ -7,8 +7,8 @@ import de.crafttogether.craftbahn.listener.PlayerSpawnListener;
 import de.crafttogether.craftbahn.listener.SignBreakListener;
 import de.crafttogether.craftbahn.listener.TrainEnterListener;
 import de.crafttogether.craftbahn.localization.LocalizationManager;
+import de.crafttogether.craftbahn.portals.PortalHandler;
 import de.crafttogether.craftbahn.portals.PortalStorage;
-import de.crafttogether.craftbahn.util.TCHelper;
 import de.crafttogether.mysql.MySQLAdapter;
 import de.crafttogether.mysql.MySQLConfig;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -18,6 +18,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dynmap.DynmapAPI;
+
+import java.util.Objects;
 
 public final class CraftBahnPlugin extends JavaPlugin {
     public static CraftBahnPlugin plugin;
@@ -30,6 +32,7 @@ public final class CraftBahnPlugin extends JavaPlugin {
     private LocalizationManager localizationManager;
     private DestinationStorage destinationStorage;
     private PortalStorage portalStorage;
+    private PortalHandler portalHandler;
     private MiniMessage miniMessageParser;
 
     @Override
@@ -74,6 +77,9 @@ public final class CraftBahnPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new SignBreakListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerSpawnListener(), this);
 
+        // Register PluginChannel
+        this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+
         // Setup MySQLConfig
         MySQLConfig myCfg = new MySQLConfig();
         myCfg.setHost(config.getString("MySQL.Host"));
@@ -111,8 +117,9 @@ public final class CraftBahnPlugin extends JavaPlugin {
         commands = new Commands();
         commands.enable(this);
 
-        // Register ActionSigns for TrainCarts
-        TCHelper.registerActionSigns();
+        // Initialize PortalHandler
+        portalHandler = new PortalHandler(config.getInt("Portals.Port"));
+        portalHandler.registerActionSigns();
     }
 
     @Override
@@ -121,7 +128,8 @@ public final class CraftBahnPlugin extends JavaPlugin {
         if(mySQLAdapter != null)
             mySQLAdapter.disconnect();
 
-        TCHelper.unregisterActionSigns();
+        // Close TCPServer/TCPClients & Unregister ActionSigns
+        portalHandler.shutdown();
     }
 
     public MySQLAdapter getMySQLAdapter() { return mySQLAdapter; }
@@ -134,12 +142,12 @@ public final class CraftBahnPlugin extends JavaPlugin {
     public PortalStorage getPortalStorage() {
         return portalStorage;
     }
+    public PortalHandler getPortalHandler() {
+        return portalHandler;
+    }
 
     public MiniMessage getMiniMessageParser() {
-        if (miniMessageParser == null)
-            return MiniMessage.miniMessage();
-        else
-            return miniMessageParser;
+        return Objects.requireNonNullElseGet(miniMessageParser, MiniMessage::miniMessage);
     }
 
     public String getServerName() { return serverName; }

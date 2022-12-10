@@ -12,7 +12,6 @@ import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.Localization;
 import de.crafttogether.craftbahn.localization.PlaceholderResolver;
 import de.crafttogether.craftbahn.portals.Portal;
-import de.crafttogether.craftbahn.portals.PortalHandler;
 import de.crafttogether.craftbahn.util.CTLocation;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
@@ -21,7 +20,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class SignActionPortal extends SignAction {
-    private CraftBahnPlugin plugin = CraftBahnPlugin.plugin;
+    private final CraftBahnPlugin plugin = CraftBahnPlugin.plugin;
 
     @Override
     public boolean match(SignActionEvent event) {
@@ -34,10 +33,10 @@ public class SignActionPortal extends SignAction {
             return;
 
         if (event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasGroup())
-            PortalHandler.handleTrain(event);
+            plugin.getPortalHandler().handleTrain(event);
 
         if (event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasMember())
-            PortalHandler.handleCart(event);
+            plugin.getPortalHandler().handleCart(event);
     }
 
     @Override
@@ -99,7 +98,7 @@ public class SignActionPortal extends SignAction {
 
             // Save to database
             try {
-                Portal portal = plugin.getPortalStorage().create(
+                plugin.getPortalStorage().create(
                         portalName,
                         Portal.PortalType.BIDIRECTIONAL,
                         plugin.getConfig().getString("Portals.Host"),

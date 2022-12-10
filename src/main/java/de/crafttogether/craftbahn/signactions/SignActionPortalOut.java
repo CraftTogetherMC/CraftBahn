@@ -19,7 +19,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class SignActionPortalOut extends SignAction {
-    private CraftBahnPlugin plugin = CraftBahnPlugin.plugin;
+    private final CraftBahnPlugin plugin = CraftBahnPlugin.plugin;
 
     @Override
     public boolean match(SignActionEvent event) {

@@ -1,11 +1,10 @@
 package de.crafttogether.craftbahn.localization;
 
-/**
- * Copyright (C) 2013-2022 bergerkiller
+/*
+  Copyright (C) 2013-2022 bergerkiller
  */
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.command.CommandSender;
 
 /**

@@ -9,14 +9,13 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.util.Arrays;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 public class Util {
     public static OfflinePlayer getOfflinePlayer(String name) {
         return Arrays.stream(Bukkit.getServer().getOfflinePlayers())
                 .distinct()
-                .filter(offlinePlayer -> offlinePlayer.getName().equalsIgnoreCase(name))
-                .collect(Collectors.toList()).get(0);
+                .filter(offlinePlayer -> Objects.requireNonNull(offlinePlayer.getName()).equalsIgnoreCase(name)).toList().get(0);
     }
 
     public static void debug(Component message, boolean broadcast) {
@@ -24,7 +23,7 @@ public class Util {
 
         // Broadcast to online players with permission
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (!CraftBahnPlugin.plugin.getConfig().getBoolean("Settings.Debug") || !player.hasPermission("craftbahn.debug")) continue;
+            if (CraftBahnPlugin.plugin.getConfig().getBoolean("Settings.Debug")) continue;
             player.sendMessage(message);
         }
 
