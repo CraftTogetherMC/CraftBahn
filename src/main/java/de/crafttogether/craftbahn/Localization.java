@@ -120,7 +120,7 @@ public class Localization extends LocalizationEnum {
     public static final Localization COMMAND_DESTEDIT_MULTIPLEDEST = new Localization("command.destedit.multipledest", "<prefix/><red>Es existieren mehrere Ziele mit diesem Namen.<newLine><prefix/>Bitte gebe zusätzlich den Servernamen an.</red>");
     public static final Localization COMMAND_DESTEDIT_UNKOWNPLAYER = new Localization("command.destedit.unkownplayer", "<prefix/><red>Ein Spieler mit dem Namen</red> <yellow>{input}</yellow> <red>ist hier nicht bekannt</red>");
     public static final Localization COMMAND_DESTEDIT_SAVEFAILED = new Localization("command.destedit.savefailed", "<prefix/><red>Es trat ein Fehler beim speichern des Fahrziel auf. Bitte kontaktiere einen Administrator.</red><newLine><red>{error}</red>");
-    public static final Localization COMMAND_DESTEDIT_TELEPORT = new Localization("command.destedit.teleport", "<prefix/><gold>Du wurdest zum Fahrziel</gold> <yellow>{destination]</yellow> <gold>teleportiert</gold>");
+    public static final Localization COMMAND_DESTEDIT_TELEPORT = new Localization("command.destedit.teleport", "<prefix/><gold>Du wurdest zum Fahrziel</gold> <yellow>{destination}</yellow> <gold>teleportiert</gold>");
     public static final Localization COMMAND_DESTEDIT_TELEPORT_OTHERSERVER = new Localization("command.destedit.teleport.otherserver", "<prefix/><red>Das Ziel befindet sich auf dem Server: <yellow>{server}</yellow>");
     public static final Localization COMMAND_DESTEDIT_ADD_INVALIDTYPE = new Localization("command.destedit.teleport.add.invalidtype", "<prefix/><red>Ungültiger Stationstyp.</red>");
     public static final Localization COMMAND_DESTEDIT_ADD_SUCCESS = new Localization("command.destedit.teleport.add.success", "<prefix/><green>Fahrziel</green> <yellow>{destination}</yellow> <green>ID:</green> <yellow>{id}</yellow>");
@@ -140,6 +140,8 @@ public class Localization extends LocalizationEnum {
     public static final Localization COMMAND_MOBENTER_SUCCESS = new Localization("command.mobenter.success", "<prefix/><green>Es wurden <yellow>{amount}</yellow> Tiere in deinen Zug gesetzt</green>");
     public static final Localization COMMAND_MOBENTER_FAILED = new Localization("command.mobenter.failed", "<prefix/><red>Es wurden keine Tiere im Umkreis von <yellow>{radius}</yellow> Blöcken gefunden oder der Zug ist leider schon voll.</red>");
     public static final Localization COMMAND_MOBEJECT_SUCCESS = new Localization("command.mobeject.success", "<prefix/><green>Es wurden alle vorhandenen Tiere aus dem Zug geworden.</green>");
+
+    public static final Localization DEPENDENCY_DYNMAP_MISSING = new Localization("dependency_dynmap_missing", "<red>Dynmap ist nicht geladen");
 
     private Localization(String name, String defValue) {
         super(name, defValue);

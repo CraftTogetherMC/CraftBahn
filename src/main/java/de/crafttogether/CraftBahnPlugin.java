@@ -58,9 +58,9 @@ public final class CraftBahnPlugin extends JavaPlugin {
             return;
         }
 
-        if (!getServer().getPluginManager().isPluginEnabled("dynmap")) {
-            plugin.getLogger().warning("Couldn't find Dynmap");
-            Bukkit.getServer().getPluginManager().disablePlugin(plugin);
+        if (getServer().getPluginManager().isPluginEnabled("dynmap")) {
+            plugin.getLogger().warning("Dynmap found!");
+            dynmap = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("dynmap");
             return;
         }
 
@@ -128,7 +128,8 @@ public final class CraftBahnPlugin extends JavaPlugin {
             mySQLAdapter.disconnect();
 
         // Close TCPServer/TCPClients & Unregister ActionSigns
-        portalHandler.shutdown();
+        if (portalHandler != null)
+            portalHandler.shutdown();
     }
 
     public MySQLAdapter getMySQLAdapter() { return mySQLAdapter; }

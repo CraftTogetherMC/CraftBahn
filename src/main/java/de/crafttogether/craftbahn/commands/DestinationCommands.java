@@ -514,6 +514,11 @@ public class DestinationCommands {
     public void fahrzieledit_updatemarker(
             final Player sender
     ) {
+        if (plugin.getDynmap() == null) {
+            Localization.DEPENDENCY_DYNMAP_MISSING.message(sender);
+            return;
+        }
+
         int markersCreated = DynmapMarker.setupMarkers(CraftBahnPlugin.plugin.getDestinationStorage().getDestinations());
         Localization.COMMAND_DESTEDIT_UPDATEMARKER_SUCCESS.message(sender,
                 PlaceholderResolver.resolver("amount", String.valueOf(markersCreated)));

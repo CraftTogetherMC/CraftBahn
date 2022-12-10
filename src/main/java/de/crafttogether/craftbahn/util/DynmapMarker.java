@@ -18,6 +18,9 @@ public class DynmapMarker {
     private static final CraftBahnPlugin plugin = CraftBahnPlugin.plugin;
 
     public static int setupMarkers(Collection<Destination> destinations) {
+        if (plugin.getDynmap() == null)
+            return 0;
+
         plugin.getLogger().info("Setup Markers...");
 
         int markersCreated = 0;
@@ -32,6 +35,9 @@ public class DynmapMarker {
     }
 
     public static void deleteMarker(Destination dest) {
+        if (plugin.getDynmap() == null)
+            return;
+
         if (!dest.getServer().equalsIgnoreCase(plugin.getServerName()))
             return;
 
@@ -45,6 +51,9 @@ public class DynmapMarker {
     }
 
     public static boolean addMarker(Destination destination) {
+        if (plugin.getDynmap() == null)
+            return false;
+
         if (!destination.getServer().equalsIgnoreCase(plugin.getServerName()))
             return false;
 
