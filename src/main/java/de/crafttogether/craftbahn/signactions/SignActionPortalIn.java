@@ -12,12 +12,14 @@ import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.Localization;
 import de.crafttogether.craftbahn.localization.PlaceholderResolver;
 import de.crafttogether.craftbahn.portals.Portal;
+import de.crafttogether.craftbahn.portals.PortalHandler;
 import de.crafttogether.craftbahn.util.CTLocation;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SignActionPortalIn extends SignAction {
     private final CraftBahnPlugin plugin = CraftBahnPlugin.plugin;
@@ -32,11 +34,13 @@ public class SignActionPortalIn extends SignAction {
         if (!event.isPowered() || !event.isTrainSign())
             return;
 
-        if (event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasGroup())
-            plugin.getPortalHandler().handleTrain(event);
+        PortalHandler portalHandler = plugin.getPortalHandler();
 
-        if (event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasMember())
-            plugin.getPortalHandler().handleCart(event);
+        if (!portalHandler.getPendingTeleports().containsKey(event.getGroup()) && event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasGroup())
+            portalHandler.handleTrain(event);
+
+        if (portalHandler.getPendingTeleports().containsKey(event.getGroup()) && event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasMember())
+            portalHandler.handleCart(event);
     }
 
     @Override
@@ -54,7 +58,9 @@ public class SignActionPortalIn extends SignAction {
         // Get existing portal-out -signs from database
         List<Portal> portals;
         try {
-            portals = plugin.getPortalStorage().get(portalName, Portal.PortalType.OUT);
+            portals = plugin.getPortalStorage().get(portalName).stream()
+                    .filter(portal -> portal.getType().equals(Portal.PortalType.OUT))
+                    .collect(Collectors.toList());
         } catch (SQLException e) {
             Localization.COMMAND_ERROR.message(event.getPlayer(),
                     PlaceholderResolver.resolver("error", e.getMessage()));
@@ -72,8 +78,8 @@ public class SignActionPortalIn extends SignAction {
             plugin.getPortalStorage().create(
                     portalName,
                     Portal.PortalType.IN,
-                    plugin.getConfig().getString("Portals.Host"),
-                    plugin.getConfig().getInt("Portals.Port"),
+                    null,
+                    0,
                     CTLocation.fromBukkitLocation(event.getLocation()));
         } catch (SQLException e) {
             Localization.COMMAND_ERROR.message(event.getPlayer(),

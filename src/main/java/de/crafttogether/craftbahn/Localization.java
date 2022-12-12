@@ -32,7 +32,7 @@ public class Localization extends LocalizationEnum {
     public static final Localization PORTAL_CREATE_BIDIRECTIONAL_SAMESERVER = new Localization("portal.create.bidirectional.sameserver", "<prefix/><red>Es besteht bereits ein bidirektionales Portal für diesen Kanal auf diesem Server.</red>");
     public static final Localization PORTAL_CREATE_BIDIRECTIONAL_SUCCESS = new Localization("portal.create.bidirectional.success", "<prefix/><red>Portal wurde erstellt (</red><yellow>{name}</yellow><red>)</red>");
     public static final Localization PORTAL_CREATE_BIDIRECTIONAL_INFO_FIRST = new Localization("portal.create.bidirectional.info.first", "<prefix/><gold>Hinweis:</gold> <red>Es wurde noch kein zweites Portal für den Kanal </red> <yellow>{name}</yellow> <red>erstellt.</red>");
-    public static final Localization PORTAL_CREATE_BIDIRECTIONAL_INFO_SECOND = new Localization("portal.create.bidirectional.info.second", "<prefix/><gold>Hinweis:</gold> <yellow>Das andere Portal befindet sich in <gold>{world}</gold><newLine><yellow>Koordinaten:</yellow> <gold>{x}, {y}, {z}</gold>");
+    public static final Localization PORTAL_CREATE_BIDIRECTIONAL_INFO_SECOND = new Localization("portal.create.bidirectional.info.second", "<prefix/><gold>Hinweis:</gold> <yellow>Das andere Portal befindet sich in</yellow> <gold>{world}</gold> <yellow>auf</yellow><gold>{server}</gold><newLine><yellow>Koordinaten:</yellow> <gold>{x}, {y}, {z}</gold>");
 
     public static final Localization DESTINATIONTYPE_ALL = new Localization("destinationtype.all", "Alle");
     public static final Localization DESTINATIONTYPE_STATION = new Localization("destinationtype.station", "Bahnhof");

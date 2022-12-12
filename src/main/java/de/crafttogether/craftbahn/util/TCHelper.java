@@ -1,17 +1,25 @@
 package de.crafttogether.craftbahn.util;
 
+import com.bergerkiller.bukkit.common.utils.FaceUtil;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.controller.MinecartMemberStore;
+import com.bergerkiller.bukkit.tc.controller.components.RailPiece;
+import com.bergerkiller.bukkit.tc.controller.components.RailState;
+import com.bergerkiller.bukkit.tc.controller.spawnable.SpawnableGroup;
 import com.bergerkiller.bukkit.tc.controller.type.MinecartMemberChest;
+import com.bergerkiller.bukkit.tc.events.SignActionEvent;
 import com.bergerkiller.bukkit.tc.properties.TrainProperties;
 import com.bergerkiller.bukkit.tc.properties.TrainPropertiesStore;
 import de.crafttogether.craftbahn.Localization;
 import de.crafttogether.craftbahn.localization.PlaceholderResolver;
 import net.kyori.adventure.text.Component;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -104,5 +112,150 @@ public class TCHelper {
     public static void sendMessage(MinecartGroup group, Component message) {
         for (Player passenger : getPlayerPassengers(group))
             passenger.sendMessage(message);
+    }
+
+    public static SpawnableGroup.SpawnLocationList getSpawnLocations(SpawnableGroup spawnable, RailPiece rail, Sign sign) {
+        SignActionEvent info = new SignActionEvent(sign.getBlock());
+
+        /*
+          Copyright (C) 2013-2022 bergerkiller
+        */
+
+        if (spawnable.getMembers().isEmpty()) {
+            return null;
+        }
+
+        // Find the movement direction vector on the rails
+        // This, and the inverted vector, are the two directions in which can be spawned
+        Vector railDirection;
+        {
+            RailState state = RailState.getSpawnState(rail);
+            railDirection = state.motionVector();
+        }
+
+        // Figure out a preferred direction to spawn into, and whether to allow centering or not
+        // This is defined by:
+        // - Watched directions ([train:right]), which disables centering
+        // - Which block face of the sign is powered, which disables centering
+        // - Facing of the sign if no direction is set, which enables centering
+        boolean isBothDirections;
+        boolean useCentering;
+        Vector spawnDirection;
+        {
+            boolean spawnA = info.isWatchedDirection(railDirection.clone().multiply(-1.0));
+            boolean spawnB = info.isWatchedDirection(railDirection);
+            if (isBothDirections = (spawnA && spawnB)) {
+                // Decide using redstone power if both directions are watched
+                BlockFace face = com.bergerkiller.bukkit.tc.Util.vecToFace(railDirection, false);
+                spawnA = info.isPowered(face);
+                spawnB = info.isPowered(face.getOppositeFace());
+            }
+
+            if (spawnA && !spawnB) {
+                // Definitively into spawn direction A
+                spawnDirection = railDirection;
+                useCentering = false;
+            } else if (!spawnA && spawnB) {
+                // Definitively into spawn direction B
+                spawnDirection = railDirection.clone().multiply(-1.0);
+                useCentering = false;
+            } else {
+                // No particular direction is decided
+                // Center the train and spawn relative right of the sign
+                if (FaceUtil.isVertical(com.bergerkiller.bukkit.tc.Util.vecToFace(railDirection, false))) {
+                    // Vertical rails, launch downwards
+                    if (railDirection.getY() < 0.0) {
+                        spawnDirection = railDirection;
+                    } else {
+                        spawnDirection = railDirection.clone().multiply(-1.0);
+                    }
+                } else {
+                    // Horizontal rails, launch most relative right of the sign facing
+                    Vector facingDir = FaceUtil.faceToVector(FaceUtil.rotate(info.getFacing(), -2));
+                    if (railDirection.dot(facingDir) >= 0.0) {
+                        spawnDirection = railDirection;
+                    } else {
+                        spawnDirection = railDirection.clone().multiply(-1.0);
+                    }
+                }
+                useCentering = true;
+            }
+        }
+
+        // If a center mode is defined in the declared spawned train, then adjust the
+        // centering rule accordingly.
+        if (spawnable.getCenterMode() == SpawnableGroup.CenterMode.MIDDLE) {
+            useCentering = true;
+        } else if (spawnable.getCenterMode() == SpawnableGroup.CenterMode.LEFT || spawnable.getCenterMode() == SpawnableGroup.CenterMode.RIGHT) {
+            useCentering = false;
+        }
+
+        // If CenterMode is LEFT, then we use the REVERSE spawn mode instead of DEFAULT
+        // This places the head close to the sign, rather than the tail
+        SpawnableGroup.SpawnMode directionalSpawnMode = SpawnableGroup.SpawnMode.DEFAULT;
+        if (spawnable.getCenterMode() == SpawnableGroup.CenterMode.LEFT) {
+            directionalSpawnMode = SpawnableGroup.SpawnMode.REVERSE;
+        }
+
+        // Attempt spawning the train in priority of operations
+        SpawnableGroup.SpawnLocationList spawnLocations = null;
+        if (useCentering) {
+            // First try spawning it centered, facing in the suggested spawn direction
+            spawnLocations = spawnable.findSpawnLocations(info.getRailPiece(), spawnDirection, SpawnableGroup.SpawnMode.CENTER);
+
+            // If this hits a dead-end, in particular with single-cart spawns, try the opposite direction
+            if (spawnLocations != null && !spawnLocations.can_move) {
+                Vector opposite = spawnDirection.clone().multiply(-1.0);
+                SpawnableGroup.SpawnLocationList spawnOpposite = spawnable.findSpawnLocations(
+                        info.getRailPiece(), opposite, SpawnableGroup.SpawnMode.CENTER);
+
+                if (spawnOpposite != null && spawnOpposite.can_move) {
+                    spawnDirection = opposite;
+                    spawnLocations = spawnOpposite;
+                }
+            }
+        }
+
+        // First try the suggested direction
+        if (spawnLocations == null) {
+            spawnLocations = spawnable.findSpawnLocations(info.getRailPiece(), spawnDirection, directionalSpawnMode);
+        }
+
+        // Try opposite direction if not possible
+        // If movement into this direction is not possible, and both directions
+        // can be spawned (watched directions), also try other direction.
+        // If that direction can be moved into, then use that one instead.
+        if (spawnLocations == null || (!spawnLocations.can_move && isBothDirections)) {
+            Vector opposite = spawnDirection.clone().multiply(-1.0);
+            SpawnableGroup.SpawnLocationList spawnOpposite = spawnable.findSpawnLocations(
+                    info.getRailPiece(), opposite, directionalSpawnMode);
+
+            if (spawnOpposite != null && (spawnLocations == null || spawnOpposite.can_move)) {
+                spawnDirection = opposite;
+                spawnLocations = spawnOpposite;
+            }
+        }
+
+        // If still not possible, try centered if we had not tried yet, just in case
+        if (spawnLocations == null && !useCentering) {
+            spawnLocations = spawnable.findSpawnLocations(info.getRailPiece(), spawnDirection, SpawnableGroup.SpawnMode.CENTER);
+        }
+
+        // If still no spawn locations could be found, fail
+        if (spawnLocations == null) {
+            Util.debug("no spawnLocations");
+            return null; // Failed
+        }
+
+        // Load the chunks first
+        spawnLocations.loadChunks();
+
+        // Check that the area isn't occupied by another train
+        if (spawnLocations.isOccupied()) {
+            Util.debug("occupied");
+            //return null; // Occupied
+        }
+
+        return spawnLocations;
     }
 }

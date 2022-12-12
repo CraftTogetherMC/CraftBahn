@@ -18,23 +18,22 @@ public class Util {
                 .filter(offlinePlayer -> Objects.requireNonNull(offlinePlayer.getName()).equalsIgnoreCase(name)).toList().get(0);
     }
 
-    public static void debug(Component message, boolean broadcast) {
-        message = LegacyComponentSerializer.legacyAmpersand().deserialize("<gray><bold>[Debug]: </bold></gray><reset>").append(message);
+    public static void debug(String message, boolean broadcast) {
+        Component messageComponent = LegacyComponentSerializer.legacyAmpersand().deserialize("&7&l[Debug]: &r" + message);
 
         // Broadcast to online players with permission
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (CraftBahnPlugin.plugin.getConfig().getBoolean("Settings.Debug")) continue;
-            player.sendMessage(message);
+            player.sendMessage(messageComponent);
         }
 
-        CraftBahnPlugin.plugin.getLogger().info(PlainTextComponentSerializer.plainText().serialize(message));
-    }
-
-    public static void debug(String message, boolean broadcast) {
-        debug(Component.text(message), broadcast);
+        CraftBahnPlugin.plugin.getLogger().info(PlainTextComponentSerializer.plainText().serialize(messageComponent));
     }
     public static void debug(String message) {
         debug(Component.text(message), false);
+    }
+    public static void debug(Component message, boolean broadcast) {
+        debug(LegacyComponentSerializer.legacyAmpersand().serialize(message), broadcast);
     }
     public static void debug(Component message) {
         debug(message, false);

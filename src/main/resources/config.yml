@@ -1,20 +1,20 @@
 Settings:
-  ServerName: 'lobby'
+  ServerName: lobby
   Debug: true
 Portals:
   Server:
     Port: 5000
-    BindAdress: '127.0.0.1'
+    BindAdress: 127.0.0.1
     AcceptRemoteConnections: true
-    PublicAddress: '127.0.0.1'
-    SecretKey: 'iliketrains'
+    PublicAddress: 127.0.0.1
+    SecretKey: iliketrains
   LaunchSpeed: 0.4
-  LaunchDelayTicks: 20.0 # Ticks
-  LaunchDistanceBlocks: 10.0 # Blocks
+  LaunchDelayTicks: 20
+  LaunchDistanceBlocks: 10
 MySQL:
-  Host: '127.0.0.1'
+  Host: 127.0.0.1
   Port: 3306
-  Database: 'database'
-  Username: 'username'
-  Password: 'password'
-  TablePrefix: 'cb_'
+  Database: database
+  Username: username
+  Password: password
+  TablePrefix: cb_

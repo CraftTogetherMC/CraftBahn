@@ -8,8 +8,8 @@ import java.net.*;
 import java.util.ArrayList;
 
 public class TCPServer extends Thread {
-    String host;
-    private int port;
+    private final String host;
+    private final int port;
     private boolean listen;
     private ServerSocket serverSocket;
     private ArrayList<TCPClient> clients;
@@ -38,19 +38,19 @@ public class TCPServer extends Thread {
                 try {
                     connection = serverSocket.accept();
                 } catch (SocketException e) {
-                    if (!e.getMessage().equalsIgnoreCase("socket closed"))
-                        e.printStackTrace();
+                    Util.debug(e.getMessage());
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
 
                 if (connection == null)
                     continue;
 
                 TCPClient client = new TCPClient(connection);
-                boolean acceptRemote = CraftBahnPlugin.plugin.getConfig().getBoolean("Portals.Server.AcceptRemoteConnections");
-
-                Util.debug(client.getAddress() + " connected.", false);
+                Util.debug("[TCPServer]: " + client.getAddress() + " connected.", false);
 
                 // Should we accept remote connections?
+                boolean acceptRemote = CraftBahnPlugin.plugin.getConfig().getBoolean("Portals.Server.AcceptRemoteConnections");
                 if (!acceptRemote && !client.getAddress().equals("127.0.0.1")) {
                     Util.debug("[TCPServer]: " + client.getAddress() + " was kicked. (No remote connections allowed)", false);
                     client.send("Remote connections are not allowed");

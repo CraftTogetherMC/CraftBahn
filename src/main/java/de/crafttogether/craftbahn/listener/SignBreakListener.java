@@ -17,7 +17,9 @@ public class SignBreakListener implements Listener {
 
         if (Portal.isValid(sign)) {
             Portal portal = CraftBahnPlugin.plugin.getPortalStorage().getPortal(sign.getBlock().getLocation());
-            CraftBahnPlugin.plugin.getPortalStorage().delete(portal.getId(), (err, rows) -> {});
+
+            if (portal != null)
+                CraftBahnPlugin.plugin.getPortalStorage().delete(portal.getId(), (err, rows) -> {});
         }
     }
 }

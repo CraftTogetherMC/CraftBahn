@@ -84,11 +84,11 @@ public class PortalStorage {
         }
     }
 
-    public List<Portal> get(String portalName, Portal.PortalType portalType) throws SQLException {
+    public List<Portal> get(String portalName) throws SQLException {
         List<Portal> found = new ArrayList<>();
 
         MySQLConnection MySQL = MySQLAdapter.getConnection();
-        ResultSet result = MySQL.query("SELECT * FROM `%sportals` WHERE `name` = '%s' AND `type` = '%s'", MySQL.getTablePrefix(), portalName, portalType.name());
+        ResultSet result = MySQL.query("SELECT * FROM `%sportals` WHERE `name` = '%s'", MySQL.getTablePrefix(), portalName);
 
         while (result.next()) {
             Portal portal = new Portal(

@@ -1,5 +1,7 @@
 package de.crafttogether;
 
+import com.bergerkiller.bukkit.common.config.ConfigurationNode;
+import com.bergerkiller.bukkit.common.config.FileConfiguration;
 import de.crafttogether.craftbahn.Localization;
 import de.crafttogether.craftbahn.commands.Commands;
 import de.crafttogether.craftbahn.destinations.DestinationStorage;
@@ -9,13 +11,14 @@ import de.crafttogether.craftbahn.listener.TrainEnterListener;
 import de.crafttogether.craftbahn.localization.LocalizationManager;
 import de.crafttogether.craftbahn.portals.PortalHandler;
 import de.crafttogether.craftbahn.portals.PortalStorage;
+import de.crafttogether.craftbahn.util.Util;
 import de.crafttogether.mysql.MySQLAdapter;
 import de.crafttogether.mysql.MySQLConfig;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.Configuration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dynmap.DynmapAPI;
 
@@ -66,10 +69,9 @@ public final class CraftBahnPlugin extends JavaPlugin {
 
         // Create default config
         saveDefaultConfig();
+        serverName = getConfig().getString("Settings.ServerName");
 
-        // Initialize
-        FileConfiguration config = getConfig();
-        serverName = config.getString("Settings.ServerName");
+        Util.debug(serverName);
 
         // Register Listener
         getServer().getPluginManager().registerEvents(new TrainEnterListener(), this);
@@ -81,12 +83,12 @@ public final class CraftBahnPlugin extends JavaPlugin {
 
         // Setup MySQLConfig
         MySQLConfig myCfg = new MySQLConfig();
-        myCfg.setHost(config.getString("MySQL.Host"));
-        myCfg.setPort(config.getInt("MySQL.Port"));
-        myCfg.setUsername(config.getString("MySQL.Username"));
-        myCfg.setPassword(config.getString("MySQL.Password"));
-        myCfg.setDatabase(config.getString("MySQL.Database"));
-        myCfg.setTablePrefix(config.getString("MySQL.TablePrefix"));
+        myCfg.setHost(getConfig().getString("MySQL.Host"));
+        myCfg.setPort(getConfig().getInt("MySQL.Port"));
+        myCfg.setUsername(getConfig().getString("MySQL.Username"));
+        myCfg.setPassword(getConfig().getString("MySQL.Password"));
+        myCfg.setDatabase(getConfig().getString("MySQL.Database"));
+        myCfg.setTablePrefix(getConfig().getString("MySQL.TablePrefix"));
 
         // Validate configuration
         if (!myCfg.checkInputs() || myCfg.getDatabase() == null) {
@@ -97,10 +99,6 @@ public final class CraftBahnPlugin extends JavaPlugin {
 
         // Initialize MySQLAdapter
         mySQLAdapter = new MySQLAdapter(this, myCfg);
-
-        // Initialize Storages
-        destinationStorage = new DestinationStorage();
-        portalStorage = new PortalStorage();
 
         // Initialize LocalizationManager
         localizationManager = new LocalizationManager();
@@ -116,8 +114,12 @@ public final class CraftBahnPlugin extends JavaPlugin {
         commands = new Commands();
         commands.enable(this);
 
+        // Initialize Storages
+        destinationStorage = new DestinationStorage();
+        portalStorage = new PortalStorage();
+
         // Initialize PortalHandler
-        portalHandler = new PortalHandler(config.getString("Portals.Server.Host"), config.getInt("Portals.Server.Port"));
+        portalHandler = new PortalHandler(getConfig().getString("Portals.Server.BindAddress"), getConfig().getInt("Portals.Server.Port"));
         portalHandler.registerActionSigns();
     }
 

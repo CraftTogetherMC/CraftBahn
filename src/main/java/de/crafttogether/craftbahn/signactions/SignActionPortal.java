@@ -12,12 +12,15 @@ import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.Localization;
 import de.crafttogether.craftbahn.localization.PlaceholderResolver;
 import de.crafttogether.craftbahn.portals.Portal;
+import de.crafttogether.craftbahn.portals.PortalHandler;
 import de.crafttogether.craftbahn.util.CTLocation;
+import de.crafttogether.craftbahn.util.Util;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SignActionPortal extends SignAction {
     private final CraftBahnPlugin plugin = CraftBahnPlugin.plugin;
@@ -32,15 +35,18 @@ public class SignActionPortal extends SignAction {
         if (!event.isPowered() || !event.isTrainSign())
             return;
 
-        if (event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasGroup())
-            plugin.getPortalHandler().handleTrain(event);
+        PortalHandler portalHandler = plugin.getPortalHandler();
 
-        if (event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasMember())
-            plugin.getPortalHandler().handleCart(event);
+        if (!portalHandler.getPendingTeleports().containsKey(event.getGroup()) && event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasGroup())
+            portalHandler.handleTrain(event);
+
+        if (portalHandler.getPendingTeleports().containsKey(event.getGroup()) && event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasMember())
+            portalHandler.handleCart(event);
     }
 
     @Override
     public boolean build(SignChangeActionEvent event) {
+        Util.debug("build");
         String[] lines = event.getLines();
         String portalName = lines[2];
 
@@ -54,7 +60,9 @@ public class SignActionPortal extends SignAction {
         // Get existing portals from database
         List<Portal> portals;
         try {
-            portals = plugin.getPortalStorage().get(portalName, Portal.PortalType.BIDIRECTIONAL);
+            portals = plugin.getPortalStorage().get(portalName).stream()
+                    .filter(portal -> portal.getType().equals(Portal.PortalType.BIDIRECTIONAL))
+                    .collect(Collectors.toList());
         } catch (SQLException e) {
             Localization.COMMAND_ERROR.message(event.getPlayer(),
                     PlaceholderResolver.resolver("error", e.getMessage()));
@@ -62,7 +70,7 @@ public class SignActionPortal extends SignAction {
             e.printStackTrace();
             return false;
         }
-
+        Util.debug("Portale gefunden: " + portals.size());
         // Create sign
         if (portals.size() == 0 || portals.size() == 1) {
 
@@ -73,7 +81,8 @@ public class SignActionPortal extends SignAction {
             }
 
             // Sign updated
-            else if (portals.get(0).getTargetLocation().getBukkitLocation().equals(event.getLocation())) {
+            else if (portals.get(0).getTargetLocation().equals(event.getLocation())) {
+                // TODO: Handle sign-updates
                 return true;
             }
 
@@ -101,8 +110,8 @@ public class SignActionPortal extends SignAction {
                 plugin.getPortalStorage().create(
                         portalName,
                         Portal.PortalType.BIDIRECTIONAL,
-                        plugin.getConfig().getString("Portals.Host"),
-                        plugin.getConfig().getInt("Portals.Port"),
+                        plugin.getConfig().getString("Portals.Server.PublicAddress"),
+                        plugin.getConfig().getInt("Portals.Server.Port"),
                         CTLocation.fromBukkitLocation(event.getLocation()));
             } catch (SQLException e) {
                 Localization.COMMAND_ERROR.message(event.getPlayer(),

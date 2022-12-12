@@ -4,7 +4,9 @@ import de.crafttogether.CraftBahnPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
-public class CTLocation {
+import java.io.Serializable;
+
+public class CTLocation implements Serializable {
     private String server;
     private String world;
     private double x;

@@ -11,7 +11,7 @@ public class Passenger {
     private final String trainId;
     private final int cartIndex;
 
-    private Passenger(UUID uuid, String trainId, int cartIndex) {
+    public Passenger(UUID uuid, String trainId, int cartIndex) {
         this.uuid = uuid;
         this.trainId = trainId;
         this.cartIndex = cartIndex;

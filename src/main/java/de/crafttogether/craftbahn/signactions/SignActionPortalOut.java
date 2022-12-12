@@ -17,6 +17,7 @@ import org.bukkit.block.BlockFace;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SignActionPortalOut extends SignAction {
     private final CraftBahnPlugin plugin = CraftBahnPlugin.plugin;
@@ -44,7 +45,10 @@ public class SignActionPortalOut extends SignAction {
         // Get existing portal-out -signs from database
         List<Portal> portals;
         try {
-            portals = plugin.getPortalStorage().get(portalName, Portal.PortalType.OUT);
+            portals = plugin.getPortalStorage().get(portalName).stream()
+                    .filter(portal -> portal.getType().equals(Portal.PortalType.OUT))
+                    .collect(Collectors.toList());
+
         } catch (SQLException e) {
             Localization.COMMAND_ERROR.message(event.getPlayer(),
                     PlaceholderResolver.resolver("error", e.getMessage()));
@@ -59,8 +63,8 @@ public class SignActionPortalOut extends SignAction {
                 plugin.getPortalStorage().create(
                         portalName,
                         Portal.PortalType.OUT,
-                        plugin.getConfig().getString("Portals.Host"),
-                        plugin.getConfig().getInt("Portals.Port"),
+                        plugin.getConfig().getString("Portals.Server.PublicAddress"),
+                        plugin.getConfig().getInt("Portals.Server.Port"),
                         CTLocation.fromBukkitLocation(event.getLocation()));
             } catch (SQLException e) {
                 Localization.COMMAND_ERROR.message(event.getPlayer(),
