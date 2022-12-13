@@ -11,6 +11,7 @@ import org.dynmap.markers.MarkerAPI;
 import org.dynmap.markers.MarkerIcon;
 import org.dynmap.markers.MarkerSet;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -67,7 +68,7 @@ public class DynmapMarker {
 
         // Create MarkerSet if not exists
         if (set == null)
-            dynmap.getMarkerAPI().createMarkerSet("CT_" + destination.getType().name(), destination.getType().toString(), null, true);
+            set = dynmap.getMarkerAPI().createMarkerSet("CT_" + destination.getType().name(), destination.getType().toString(), null, true);
 
         // Delete Marker if already exists
         Marker marker = set.findMarker(destination.getName());
@@ -90,14 +91,12 @@ public class DynmapMarker {
 
         // Load icons
         railIcon = markers.getMarkerIcon("cbRail");
-        if (railIcon == null) {
-            railIcon = markers.createMarkerIcon("cbRail", "Rail", plugin.getResource("rail.png"));
-        }
+        if (railIcon == null)
+            railIcon = markers.createMarkerIcon("cbRail", "Rail", plugin.getResource(plugin.getDataFolder() + File.separator + "rail.png"));
 
         minecartIcon = markers.getMarkerIcon("cbMinecart");
-        if (minecartIcon == null) {
-            minecartIcon = markers.createMarkerIcon("cbMinecart", "Minecart", plugin.getResource("minecart.png"));
-        }
+        if (minecartIcon == null)
+            minecartIcon = markers.createMarkerIcon("cbMinecart", "Minecart", plugin.getResource(plugin.getDataFolder() + File.separator + "minecart.png"));
 
         StringBuilder participants = new StringBuilder(Bukkit.getOfflinePlayer(destination.getOwner()).getName() + ", ");
         for (UUID uuid : destination.getParticipants()) {
@@ -114,9 +113,7 @@ public class DynmapMarker {
                 icon = railIcon;
                 showOwner = false;
             }
-            case "PLAYER_STATION" -> {
-                color = "#ffff55";
-            }
+            case "PLAYER_STATION" ->  color = "#ffff55";
         }
 
         label = "<div style=\"z-index:99999\">" +
