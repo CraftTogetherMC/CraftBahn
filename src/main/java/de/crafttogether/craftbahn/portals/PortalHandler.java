@@ -24,7 +24,6 @@ import de.crafttogether.craftbahn.net.TCPServer;
 import de.crafttogether.craftbahn.net.events.EntityReceivedEvent;
 import de.crafttogether.craftbahn.net.events.PacketReceivedEvent;
 import de.crafttogether.craftbahn.net.packets.EntityPacket;
-import de.crafttogether.craftbahn.net.packets.MessagePacket;
 import de.crafttogether.craftbahn.net.packets.TrainPacket;
 import de.crafttogether.craftbahn.signactions.SignActionPortal;
 import de.crafttogether.craftbahn.signactions.SignActionPortalIn;
@@ -36,7 +35,6 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -46,8 +44,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -176,8 +173,8 @@ public class PortalHandler implements Listener {
         // Try to find train and set player as passenger
         MinecartGroup train = TCHelper.getTrain(passenger.getTrainName());
         if (train == null) {
-            Util.debug("no train found for passenger: " + player.getName());
-            player.sendMessage("Es wurde kein Zug gefunden");
+            Util.debug("Could not find train (" + passenger.getTrainName() + ") for player " + player.getName());
+            // TODO: Inform players
             return;
         }
 
@@ -189,7 +186,7 @@ public class PortalHandler implements Listener {
             Passenger.remove(passenger.getUUID());
         }
         else
-            Util.debug("Unable to re-enter " + player.getName() + " because the cart is not rideable");
+            Util.debug("Unable to put player " + player.getName() + " back on train (" + train.getProperties().getTrainName() + ") the cart is not rideable");
 
         Passenger.remove(passenger.getUUID());
     }
@@ -237,6 +234,9 @@ public class PortalHandler implements Listener {
         boolean success = client.send(packet);
         client.disconnect();
 
+        if (success)
+            Util.debug("Train (" + packet.name + ") was sent to " + packet.target.getServer() + "!");
+
         return success;
     }
 
@@ -247,7 +247,7 @@ public class PortalHandler implements Listener {
     }
 
     public void receiveTrain(TrainPacket packet) {
-        Util.debug("TrainPacket received", false);
+        Util.debug("Received train (" + packet.name + ") from " + packet.sourceServer, false);
 
         // Check if world exists
         World targetWorld = Bukkit.getWorld(packet.target.getWorld());
@@ -266,7 +266,7 @@ public class PortalHandler implements Listener {
         Location targetLocation = packet.target.getBukkitLocation();
         Portal portal = plugin.getPortalStorage().getPortal(targetLocation);
         if (portal == null || portal.getSign() == null) {
-            Util.debug("Portal-Sign was not found at " + targetLocation.getWorld() + ", " + targetLocation.getX() + ", " + targetLocation.getY() + ", " + targetLocation.getZ());
+            Util.debug("Could not find a Portal at " + targetLocation.getWorld() + ", " + targetLocation.getX() + ", " + targetLocation.getY() + ", " + targetLocation.getZ());
             // TODO: Inform players
             //Passenger.sendMessage(trainID, "§cWorld '" + worldName + "' was not found!", 2);
             return;
@@ -275,7 +275,7 @@ public class PortalHandler implements Listener {
         // No Rail!
         RailPiece rail = RailLookup.discoverRailPieceFromSign(portal.getSign().getBlock());
         if (rail == null) {
-            Util.debug("Rail was not found at " + targetLocation.getWorld() + ", " + targetLocation.getX() + ", " + targetLocation.getY() + ", " + targetLocation.getZ());
+            Util.debug("Could not find a Rail at " + targetLocation.getWorld() + ", " + targetLocation.getX() + ", " + targetLocation.getY() + ", " + targetLocation.getZ());
             // TODO: Inform players
             //Passenger.sendMessage(trainID, "§cWorld '" + worldName + "' was not found!", 2);
             return;
@@ -283,7 +283,7 @@ public class PortalHandler implements Listener {
 
         SpawnableGroup.SpawnLocationList spawnLocations = TCHelper.getSpawnLocations(spawnable, rail, portal.getSign());
         if (spawnLocations == null) {
-            Util.debug("Couldn't find the right spot to spawn a train at " + rail.world() + ", " + rail.block().getX() + ", " + rail.block().getY() + ", " + rail.block().getZ());
+            Util.debug("Could not find the right spot to spawn a train at " + rail.world() + ", " + rail.block().getX() + ", " + rail.block().getY() + ", " + rail.block().getZ());
             // TODO: Inform players
             //Passenger.sendMessage(trainID, "§cWorld '" + worldName + "' was not found!", 2);
             return;
@@ -294,7 +294,7 @@ public class PortalHandler implements Listener {
 
         // Check that the area isn't occupied by another train
         if (spawnLocations.isOccupied()) {
-            Util.debug("Track is occupied at " + rail.world() + ", " + rail.block().getX() + ", " + rail.block().getY() + ", " + rail.block().getZ());
+            Util.debug("Track is occupied by another train at " + rail.world() + ", " + rail.block().getX() + ", " + rail.block().getY() + ", " + rail.block().getZ());
             // TODO: Inform players
             //Passenger.sendMessage(trainID, "§cWorld '" + worldName + "' was not found!", 2);
             return;
@@ -320,7 +320,6 @@ public class PortalHandler implements Listener {
         group.head().getActions().addActionLaunch(launchDirection, 2, 0.4);
 
         Util.debug(group.getProperties().getTrainName() + " came from " + packet.sourceServer + " (" + packet.portalName + ") to " + plugin.getServerName() + " (" + portal.getSign().getLine(1) + " - " + portal.getSign().getLine(2) + ")");
-        Util.debug("train spawned: " + newName + " #");
         Util.debug("launchDirection: " + launchDirection.name());
     }
 
@@ -334,12 +333,8 @@ public class PortalHandler implements Listener {
             client.sendAuth(plugin.getConfig().getString("Portals.Server.SecretKey"));
             client.send(new EntityPacket(entity.getUniqueId(), entity.getType()));
 
-            OutputStream outputStream = client.getOutputStream();
-            if (outputStream == null)
-                Util.debug("OutputStream is NULL");
-
             try {
-                tagCompound.writeToStream(outputStream);
+                tagCompound.writeToStream(client.getOutputStream());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -350,13 +345,13 @@ public class PortalHandler implements Listener {
 
     @EventHandler
     public void receiveEntity(EntityReceivedEvent event) {
-        Util.debug("received entity");
+        Util.debug("Received entity (" + event.getType() + ") from " + event.getSourceServer());
 
         Passenger passenger = Passenger.get(event.getUuid());
         MinecartGroup train = TCHelper.getTrain(passenger.getTrainName());
 
         if (train == null) {
-            Util.debug("no train found for entity");
+            Util.debug("Could not find train (" + passenger.getTrainName() + ") for entity");
             return;
         }
 
@@ -365,23 +360,16 @@ public class PortalHandler implements Listener {
         Entity spawnedEntity = location.getWorld().spawnEntity(location, event.getType());
 
         // Load received NBT to spawned Entity
-
-        Util.debug("Load NBT....");
-
         EntityHandle entityHandle = EntityHandle.fromBukkit(spawnedEntity);
         entityHandle.loadFromNBT(event.getTagCompound());
-        Util.debug("NBT Loaded!");
 
-        Util.debug("Set as passenger");
+        // Put entity back on the train
         MinecartMember<?> cart = train.get(passenger.getCartIndex());
         cart.getEntity().setPassenger(spawnedEntity);
-
         Passenger.remove(passenger.getUUID());
     }
 
     public void sendPlayerToServer(Player player, Portal portal) {
-        Util.debug("send player " + player + " to " + portal.getTargetLocation().getServer());
-        // Use PluginMessaging to send players to target server
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF("Connect");
         out.writeUTF(portal.getTargetLocation().getServer());

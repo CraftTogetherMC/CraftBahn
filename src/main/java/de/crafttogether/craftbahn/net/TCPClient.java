@@ -8,7 +8,6 @@ import de.crafttogether.craftbahn.net.events.PacketReceivedEvent;
 import de.crafttogether.craftbahn.net.packets.*;
 import de.crafttogether.craftbahn.util.Util;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.EntityType;
 import org.bukkit.event.Event;
 
 import java.io.*;
@@ -17,7 +16,6 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.UUID;
 
 public class TCPClient extends Thread {
     public static final Collection<TCPClient> activeClients = new ArrayList<>();
@@ -82,7 +80,7 @@ public class TCPClient extends Thread {
             boolean authenticated = false;
 
             while ((inputPacket = objInputStream.readObject()) != null) {
-                Util.debug("Packet received: " + inputPacket.getClass().getTypeName() + " " + inputPacket.getClass().getName());
+                Util.debug("[TCPClient]: Packet received: " + inputPacket.getClass().getTypeName() + " " + inputPacket.getClass().getName());
 
                 // First packet has to be our secretKey
                 if (!authenticated && inputPacket instanceof AuthenticationPacket packet) {
@@ -90,15 +88,15 @@ public class TCPClient extends Thread {
                         authenticated = true;
 
                     else {
-                        Util.debug("invalid authentication");
-                        send("invalid authentication");
-                        //disconnect();
+                        Util.debug("[TCPClient]: " + getAddress() + " has sent an invalid authentication");
+                        send("error:invalid authentication");
+                        disconnect();
                     }
                 }
 
                 else if (authenticated) {
                     if (inputPacket instanceof EntityPacket packet) {
-                        Event event = new EntityReceivedEvent(packet.uuid, packet.type, CommonTagCompound.readFromStream(inputStream));
+                        Event event = new EntityReceivedEvent(packet.uuid, packet.type, CraftBahnPlugin.plugin.getServerName(), CommonTagCompound.readFromStream(inputStream));
                         Bukkit.getServer().getScheduler().runTask(CraftBahnPlugin.plugin, () -> CommonUtil.callEvent(event));
                     }
 
@@ -110,9 +108,9 @@ public class TCPClient extends Thread {
                 }
 
                 else {
-                    Util.debug("authetication failed");
-                    send("authetication failed");
-                    //disconnect();
+                    Util.debug("[TCPClient]: " + getAddress() + " is not authenticated.");
+                    send("error:authetication failed");
+                    disconnect();
                 }
             }
         }
@@ -123,7 +121,7 @@ public class TCPClient extends Thread {
             if ("Socket closed".equals(ex.getMessage())) {
                 Util.debug("[TCPClient]: Connection to " + connection.getInetAddress().getHostAddress() + " was closed.", false);
             } else {
-                Util.debug("[TCPClient]" + ex.getMessage());
+                Util.debug("[TCPClient]: " + ex.getMessage());
             }
         }
 
@@ -138,20 +136,15 @@ public class TCPClient extends Thread {
     }
 
     public boolean send(Packet packet) {
-        if (connection == null || !connection.isConnected() || connection.isClosed()) {
-            Util.debug("send() not connected -> abort");
+        if (connection == null || !connection.isConnected() || connection.isClosed())
             return false;
-        }
 
         try {
             objOutputStream.reset();
             objOutputStream.writeObject(packet);
             objOutputStream.flush();
 
-            if (packet instanceof TrainPacket train)
-                Util.debug(train.name + " was successfully sent to " + train.target.getServer() + "!");
-            else
-                Util.debug("Packet sent: " + packet.getClass().getTypeName() + " " + packet.getClass().getName());
+            Util.debug("[TCPClient]: Packet was sent: " + packet.getClass().getTypeName() + " " + packet.getClass().getName());
         }
         catch (SocketException e) {
             Util.debug(e.getMessage());
@@ -206,9 +199,7 @@ public class TCPClient extends Thread {
     }
 
     public void sendAuth(String secretKey) {
-        AuthenticationPacket packet = new AuthenticationPacket();
-        packet.server = CraftBahnPlugin.plugin.getServerName();
-        packet.key = secretKey;
+        AuthenticationPacket packet = new AuthenticationPacket(CraftBahnPlugin.plugin.getServerName(), secretKey);
         send(packet);
     }
 

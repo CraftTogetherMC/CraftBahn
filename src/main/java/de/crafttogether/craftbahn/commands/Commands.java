@@ -1,18 +1,14 @@
 package de.crafttogether.craftbahn.commands;
 
 import cloud.commandframework.CommandManager;
-import cloud.commandframework.annotations.Argument;
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.CommandPermission;
+import cloud.commandframework.annotations.*;
 import cloud.commandframework.annotations.specifier.Range;
 import com.bergerkiller.bukkit.common.cloud.CloudSimpleHandler;
 import com.bergerkiller.bukkit.common.utils.EntityUtil;
-import com.bergerkiller.bukkit.common.utils.LogicUtil;
 import com.bergerkiller.bukkit.common.utils.WorldUtil;
-import com.bergerkiller.bukkit.tc.commands.annotations.CommandRequiresPermission;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
+import com.google.common.collect.ImmutableMap;
 import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.Localization;
 import de.crafttogether.craftbahn.destinations.Destination;
@@ -37,6 +33,18 @@ public class Commands {
 
         // Command handlers
         DestinationCommands commands_destination = new DestinationCommands(cloud);
+
+        cloud.getParser().stringProcessor(
+            new PropertyReplacingStringProcessor(
+                s -> ImmutableMap.of(
+                    "command.destination", "fahrziel",
+                    "command.destinations", "fahrziele",
+                    "command.destedit", "fahrzieledit",
+                    "command.mobenter", "mobenter",
+                    "command.mobeject", "mobeject"
+                ).get(s)
+            )
+        );
 
         // Suggestions
         cloud.suggest("onlinePlayers", (context, input) -> {
@@ -81,7 +89,7 @@ public class Commands {
         sender.sendMessage(ChatColor.GREEN + "CraftBahn-Version: " + CraftBahnPlugin.plugin.getDescription().getVersion());
     }
 
-    @CommandMethod(value="mobenter [radius]", requiredSender=Player.class)
+    @CommandMethod(value="${command.mobenter} [radius]", requiredSender=Player.class)
     @CommandDescription("Lässt Tiere in der nahen Umgebung in den ausgewählten Zug einsteigen.")
     @CommandPermission("craftbahn.command.mobenter")
     public void mobenter(
@@ -122,7 +130,7 @@ public class Commands {
                     PlaceholderResolver.resolver("radius", String.valueOf(radius)));
     }
 
-    @CommandMethod(value="mobeject", requiredSender=Player.class)
+    @CommandMethod(value="${command.mobeject}", requiredSender=Player.class)
     @CommandDescription("Lässt alle Tiere aus dem ausgewählten Zug aussteigen.")
     @CommandPermission("craftbahn.command.mobeject")
     public void mobeject(

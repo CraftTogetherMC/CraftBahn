@@ -13,11 +13,13 @@ public class EntityReceivedEvent extends Event {
 
     private final UUID uuid;
     private final EntityType type;
+    private final String sourceServer;
     private final CommonTagCompound tagCompound;
 
-    public EntityReceivedEvent(UUID uuid, EntityType type, CommonTagCompound tagCompound) {
+    public EntityReceivedEvent(UUID uuid, EntityType type, String sourceServer, CommonTagCompound tagCompound) {
         this.uuid = uuid;
         this.type = type;
+        this.sourceServer = sourceServer;
         this.tagCompound = tagCompound;
     }
 
@@ -27,6 +29,10 @@ public class EntityReceivedEvent extends Event {
 
     public EntityType getType() {
         return type;
+    }
+
+    public String getSourceServer() {
+        return sourceServer;
     }
 
     public CommonTagCompound getTagCompound() {
