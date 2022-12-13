@@ -12,7 +12,6 @@ import de.crafttogether.craftbahn.portals.PortalStorage;
 import de.crafttogether.craftbahn.util.Util;
 import de.crafttogether.mysql.MySQLAdapter;
 import de.crafttogether.mysql.MySQLConfig;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -67,7 +66,13 @@ public final class CraftBahnPlugin extends JavaPlugin {
 
         // Create default config
         saveDefaultConfig();
+
+        // Export resources
         Util.exportResource("commands.yml");
+        if (dynmap != null) {
+            Util.exportResource("minecart.png");
+            Util.exportResource("rail.png");
+        }
 
         // Register Listener
         getServer().getPluginManager().registerEvents(new TrainEnterListener(), this);
@@ -132,7 +137,6 @@ public final class CraftBahnPlugin extends JavaPlugin {
             portalHandler.shutdown();
     }
 
-    public MySQLAdapter getMySQLAdapter() { return mySQLAdapter; }
     public DynmapAPI getDynmap() { return dynmap; }
     public Commands getCommandManager() {
         return commands;
