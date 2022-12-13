@@ -99,29 +99,29 @@ public class PortalHandler implements Listener {
             e.printStackTrace();
             return;
         }
-        Portal targetPortal = portals.get(0);
+        Portal portal = portals.get(0);
 
         // Abort if the triggered sign is the sign where the train was spawned
-        if (receivedTrains.containsKey(group) && receivedTrains.get(group).getName().equals(targetPortal.getName()))
+        if (receivedTrains.containsKey(group) && receivedTrains.get(group).getName().equals(portal.getName()))
             return;
 
-        if (targetPortal == null || targetPortal.getTargetLocation() == null) {
+        if (portal == null || portal.getTargetLocation() == null) {
             TCHelper.sendMessage(group, Localization.PORTAL_ENTER_NOEXIT,
                     PlaceholderResolver.resolver("name", portalName));
             return;
         }
 
-        Util.debug(event.getGroup().getProperties().getTrainName() + " goes from " + plugin.getServerName() + " (" + event.getLine(2) + " -> " + event.getLine(3) + ") to " + targetPortal.getTargetLocation().getServer() + " (" + targetPortal.getName() + " -> " + targetPortal.getType().name() + ")");
+        Util.debug(event.getGroup().getProperties().getTrainName() + " goes from " + plugin.getServerName() + " (" + event.getLine(2) + " -> " + event.getLine(3) + ") to " + portal.getTargetLocation().getServer() + " (" + portal.getName() + " -> " + portal.getType().name() + ")");
 
         // Should we clear chest-minecarts?
         boolean clearInventory = event.getLine(3).equalsIgnoreCase("clear");
 
         // Try to transfer train to the target server
-        if(!transferTrain(group, targetPortal, clearInventory))
+        if (!transferTrain(group, portal, clearInventory))
             return;
 
         // Cache teleportation-infos
-        pendingTeleports.put(group, targetPortal);
+        pendingTeleports.put(group, portal);
 
         // Apply blindness-effect
         PotionEffect blindness = new PotionEffect(PotionEffectType.BLINDNESS, 40, 1);
@@ -151,7 +151,7 @@ public class PortalHandler implements Listener {
                 sendPlayerToServer((Player) passenger, portal);
 
             else if (passenger instanceof LivingEntity)
-                sendEntityToServer((LivingEntity) passenger, portal);
+                passenger.remove();//sendEntityToServer((LivingEntity) passenger, portal);
         }
 
         group.getProperties().setSpawnItemDrops(false);
@@ -215,6 +215,9 @@ public class PortalHandler implements Listener {
             for (Entity entity : TCHelper.getPassengers(member)) {
                 Passenger passenger = new Passenger(entity.getUniqueId(), entity.getType(), member.getIndex());
                 passengers.add(passenger);
+                
+                if (entity instanceof LivingEntity)
+                    sendEntityToServer((LivingEntity) entity, portal);
             }
         }
 
@@ -325,7 +328,6 @@ public class PortalHandler implements Listener {
         EntityHandle entityHandle = EntityHandle.fromBukkit(entity);
         CommonTagCompound tagCompound = new CommonTagCompound();
         entityHandle.saveToNBT(tagCompound);
-        entity.remove();
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             TCPClient client = new TCPClient(portal.getTargetHost(), portal.getTargetPort());
@@ -377,12 +379,12 @@ public class PortalHandler implements Listener {
         Passenger.remove(passenger.getUUID());
     }
 
-    public void sendPlayerToServer(Player player, Portal targetPortal) {
-        Util.debug("send player " + player + " to " + targetPortal.getTargetLocation().getServer());
+    public void sendPlayerToServer(Player player, Portal portal) {
+        Util.debug("send player " + player + " to " + portal.getTargetLocation().getServer());
         // Use PluginMessaging to send players to target server
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF("Connect");
-        out.writeUTF(targetPortal.getTargetLocation().getServer());
+        out.writeUTF(portal.getTargetLocation().getServer());
         player.sendPluginMessage(plugin, "BungeeCord", out.toByteArray());
     }
 
