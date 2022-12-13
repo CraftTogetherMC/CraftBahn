@@ -62,8 +62,6 @@ public class TCPServer extends Thread {
 
         } catch (BindException e) {
             CraftBahnPlugin.plugin.getLogger().warning("[Portalserver]: Can't bind to " + port + ".. Port already in use!");
-            Util.debug("[TCPServer]: Can't bind to " + port + ".. Port already in use!", false);
-
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -72,10 +70,6 @@ public class TCPServer extends Thread {
             close();
             Util.debug("[TCPServer]: Server stopped.", false);
         }
-    }
-
-    public Boolean isReady() {
-        return listen;
     }
 
     public void close() {

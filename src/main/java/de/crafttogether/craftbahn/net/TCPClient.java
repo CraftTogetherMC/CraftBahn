@@ -1,55 +1,58 @@
 package de.crafttogether.craftbahn.net;
 
+import com.bergerkiller.bukkit.common.nbt.CommonTagCompound;
 import com.bergerkiller.bukkit.common.utils.CommonUtil;
 import de.crafttogether.CraftBahnPlugin;
+import de.crafttogether.craftbahn.net.events.EntityReceivedEvent;
 import de.crafttogether.craftbahn.net.events.PacketReceivedEvent;
-import de.crafttogether.craftbahn.net.packets.AuthenticationPacket;
-import de.crafttogether.craftbahn.net.packets.MessagePacket;
-import de.crafttogether.craftbahn.net.packets.Packet;
-import de.crafttogether.craftbahn.net.packets.TrainPacket;
+import de.crafttogether.craftbahn.net.packets.*;
 import de.crafttogether.craftbahn.util.Util;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.EntityType;
 import org.bukkit.event.Event;
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.UUID;
 
 public class TCPClient extends Thread {
     public static final Collection<TCPClient> activeClients = new ArrayList<>();
 
     private Socket connection;
-    private ObjectInputStream inputStream;
-    private ObjectOutputStream outputStream;
+    private OutputStream outputStream;
+    private InputStream inputStream;
+    private ObjectOutputStream objOutputStream;
+    private ObjectInputStream objInputStream;
 
     public TCPClient(Socket connection) {
         this.connection = connection;
-        activeClients.add(this);
 
         try {
-            outputStream = new ObjectOutputStream(connection.getOutputStream());
-            inputStream = new ObjectInputStream(connection.getInputStream());
+            outputStream = connection.getOutputStream();
+            inputStream = connection.getInputStream();
+            objOutputStream = new ObjectOutputStream(outputStream);
+            objInputStream = new ObjectInputStream(inputStream);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
 
-        start();
+        if (connection.isConnected() && objOutputStream != null)
+            read();
     }
 
     public TCPClient(String host, int port) {
-        activeClients.add(this);
-
         try {
             connection = new Socket(host, port);
-            outputStream = new ObjectOutputStream(connection.getOutputStream());
-            inputStream = new ObjectInputStream(connection.getInputStream());
+            outputStream = connection.getOutputStream();
+            inputStream = connection.getInputStream();
+            objOutputStream = new ObjectOutputStream(outputStream);
+            objInputStream = new ObjectInputStream(inputStream);
         }
+
         catch (ConnectException e) {
             if (!e.getMessage().equalsIgnoreCase("connection refused")) {
                 CraftBahnPlugin.plugin.getLogger().warning("Couldn't connect to server at " + host + ":" + port);
@@ -60,36 +63,32 @@ public class TCPClient extends Thread {
             ex.printStackTrace();
         }
 
-        if (connection != null && connection.isConnected()) {
+        if (connection != null && connection.isConnected() && objOutputStream != null) {
             Util.debug("[TCPClient]: Successfully connected to " + host + ":" + port, false);
-            listen();
+            start();
         }
     }
 
     @Override
     public void run() {
-        listen();
+        read();
     }
 
-    public void listen() {
-        if (connection == null || !connection.isConnected() || connection.isClosed()) {
-            Util.debug("read() not connected -> abort");
-            return;
-        }
+    public void read() {
+        activeClients.add(this);
 
         try {
             Object inputPacket;
             boolean authenticated = false;
 
-            while ((inputPacket = inputStream.readObject()) != null) {
+            while ((inputPacket = objInputStream.readObject()) != null) {
                 Util.debug("Packet received: " + inputPacket.getClass().getTypeName() + " " + inputPacket.getClass().getName());
 
                 // First packet has to be our secretKey
                 if (!authenticated && inputPacket instanceof AuthenticationPacket packet) {
-                    if (packet.key.equals(CraftBahnPlugin.plugin.getConfig().getString("Portals.Server.SecretKey"))) {
+                    if (packet.key.equals(CraftBahnPlugin.plugin.getConfig().getString("Portals.Server.SecretKey")))
                         authenticated = true;
-                        continue;
-                    }
+
                     else {
                         Util.debug("invalid authentication");
                         send("invalid authentication");
@@ -98,13 +97,23 @@ public class TCPClient extends Thread {
                 }
 
                 else if (authenticated) {
-                    Event event = new PacketReceivedEvent(connection, (Packet) inputPacket);
-                    Bukkit.getServer().getScheduler().runTask(CraftBahnPlugin.plugin, () -> CommonUtil.callEvent(event));
+                    if (inputPacket instanceof EntityPacket packet) {
+                        Event event = new EntityReceivedEvent(packet.uuid, packet.type, CommonTagCompound.readFromStream(inputStream));
+                        Bukkit.getServer().getScheduler().runTask(CraftBahnPlugin.plugin, () -> CommonUtil.callEvent(event));
+                    }
+
+                    else {
+                        Util.debug(inputPacket.getClass().getName());
+                        Event event = new PacketReceivedEvent(connection, (Packet) inputPacket);
+                        Bukkit.getServer().getScheduler().runTask(CraftBahnPlugin.plugin, () -> CommonUtil.callEvent(event));
+                    }
                 }
 
-                Util.debug("authetication failed");
-                send("authetication failed");
-                //disconnect();
+                else {
+                    Util.debug("authetication failed");
+                    send("authetication failed");
+                    //disconnect();
+                }
             }
         }
 
@@ -128,42 +137,45 @@ public class TCPClient extends Thread {
         }
     }
 
-
-
-    public void send(Packet packet) {
+    public boolean send(Packet packet) {
         if (connection == null || !connection.isConnected() || connection.isClosed()) {
             Util.debug("send() not connected -> abort");
-            return;
+            return false;
         }
 
         try {
-            outputStream.reset();
-            outputStream.writeObject(packet);
-            outputStream.flush();
+            objOutputStream.reset();
+            objOutputStream.writeObject(packet);
+            objOutputStream.flush();
 
             if (packet instanceof TrainPacket train)
                 Util.debug(train.name + " was successfully sent to " + train.target.getServer() + "!");
             else
                 Util.debug("Packet sent: " + packet.getClass().getTypeName() + " " + packet.getClass().getName());
-
-        } catch (SocketException e) {
-            Util.debug(e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+        catch (SocketException e) {
+            Util.debug(e.getMessage());
+            return false;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
     }
 
-    public void send(String message) {
-        send(new MessagePacket(message));
+    public boolean send(String message) {
+        return send(new MessagePacket(message));
     }
 
     public void disconnect() {
         try {
-            if (inputStream != null)
-                inputStream.close();
+            if (objInputStream != null)
+                objInputStream.close();
 
-            if (outputStream != null)
-                outputStream.close();
+            if (objOutputStream != null)
+                objOutputStream.close();
 
             if (connection != null && !connection.isClosed())
                 connection.close();
@@ -198,5 +210,13 @@ public class TCPClient extends Thread {
         packet.server = CraftBahnPlugin.plugin.getServerName();
         packet.key = secretKey;
         send(packet);
+    }
+
+    public OutputStream getOutputStream() {
+        return outputStream;
+    }
+
+    public InputStream getInputStream() {
+        return inputStream;
     }
 }

@@ -9,7 +9,7 @@ import java.util.Set;
 public class TrainPacket implements Packet {
     public String id;
     public String name;
-    public String newName;
+    public String portalName;
     public Set<String> owners;
     public String properties;
     public CTLocation target;

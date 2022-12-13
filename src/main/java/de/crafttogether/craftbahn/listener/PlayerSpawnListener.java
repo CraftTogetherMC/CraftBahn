@@ -10,12 +10,15 @@ import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 public class PlayerSpawnListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerSpawn(PlayerSpawnLocationEvent e) {
+    public void onPlayerSpawn(PlayerSpawnLocationEvent event) {
         // Look if player should be a passenger
-        Passenger passenger = Passenger.get(e.getPlayer().getUniqueId());
+        Passenger passenger = Passenger.get(event.getPlayer().getUniqueId());
 
-        // This player is not our passenger
-        if (passenger != null)
-            PortalHandler.reEnterPassenger(passenger, e);
+        if (passenger != null) {
+            if (event.getPlayer().isFlying())
+                event.getPlayer().setFlying(false);
+
+            PortalHandler.reEnterPassenger(passenger, event);
+        }
     }
 }

@@ -121,9 +121,8 @@ public class TCHelper {
           Copyright (C) 2013-2022 bergerkiller
         */
 
-        if (spawnable.getMembers().isEmpty()) {
+        if (spawnable.getMembers().isEmpty())
             return null;
-        }
 
         // Find the movement direction vector on the rails
         // This, and the inverted vector, are the two directions in which can be spawned
@@ -140,10 +139,12 @@ public class TCHelper {
         // - Facing of the sign if no direction is set, which enables centering
         boolean isBothDirections;
         boolean useCentering;
+
         Vector spawnDirection;
         {
             boolean spawnA = info.isWatchedDirection(railDirection.clone().multiply(-1.0));
             boolean spawnB = info.isWatchedDirection(railDirection);
+
             if (isBothDirections = (spawnA && spawnB)) {
                 // Decide using redstone power if both directions are watched
                 BlockFace face = com.bergerkiller.bukkit.tc.Util.vecToFace(railDirection, false);
@@ -155,28 +156,32 @@ public class TCHelper {
                 // Definitively into spawn direction A
                 spawnDirection = railDirection;
                 useCentering = false;
-            } else if (!spawnA && spawnB) {
+            }
+
+            else if (!spawnA && spawnB) {
                 // Definitively into spawn direction B
                 spawnDirection = railDirection.clone().multiply(-1.0);
                 useCentering = false;
-            } else {
+            }
+
+            else {
                 // No particular direction is decided
                 // Center the train and spawn relative right of the sign
                 if (FaceUtil.isVertical(com.bergerkiller.bukkit.tc.Util.vecToFace(railDirection, false))) {
                     // Vertical rails, launch downwards
-                    if (railDirection.getY() < 0.0) {
+                    if (railDirection.getY() < 0.0)
                         spawnDirection = railDirection;
-                    } else {
+                    else
                         spawnDirection = railDirection.clone().multiply(-1.0);
-                    }
-                } else {
+                }
+
+                else {
                     // Horizontal rails, launch most relative right of the sign facing
                     Vector facingDir = FaceUtil.faceToVector(FaceUtil.rotate(info.getFacing(), -2));
-                    if (railDirection.dot(facingDir) >= 0.0) {
+                    if (railDirection.dot(facingDir) >= 0.0)
                         spawnDirection = railDirection;
-                    } else {
+                    else
                         spawnDirection = railDirection.clone().multiply(-1.0);
-                    }
                 }
                 useCentering = true;
             }
@@ -184,18 +189,19 @@ public class TCHelper {
 
         // If a center mode is defined in the declared spawned train, then adjust the
         // centering rule accordingly.
-        if (spawnable.getCenterMode() == SpawnableGroup.CenterMode.MIDDLE) {
-            useCentering = true;
-        } else if (spawnable.getCenterMode() == SpawnableGroup.CenterMode.LEFT || spawnable.getCenterMode() == SpawnableGroup.CenterMode.RIGHT) {
+        if (spawnable.getCenterMode() == SpawnableGroup.CenterMode.MIDDLE)
+            useCentering = false; // No centering
+
+        else if (spawnable.getCenterMode() == SpawnableGroup.CenterMode.LEFT || spawnable.getCenterMode() == SpawnableGroup.CenterMode.RIGHT)
             useCentering = false;
-        }
 
         // If CenterMode is LEFT, then we use the REVERSE spawn mode instead of DEFAULT
         // This places the head close to the sign, rather than the tail
         SpawnableGroup.SpawnMode directionalSpawnMode = SpawnableGroup.SpawnMode.DEFAULT;
+        /*
         if (spawnable.getCenterMode() == SpawnableGroup.CenterMode.LEFT) {
             directionalSpawnMode = SpawnableGroup.SpawnMode.REVERSE;
-        }
+        }*/
 
         // Attempt spawning the train in priority of operations
         SpawnableGroup.SpawnLocationList spawnLocations = null;
@@ -217,9 +223,8 @@ public class TCHelper {
         }
 
         // First try the suggested direction
-        if (spawnLocations == null) {
+        if (spawnLocations == null)
             spawnLocations = spawnable.findSpawnLocations(info.getRailPiece(), spawnDirection, directionalSpawnMode);
-        }
 
         // Try opposite direction if not possible
         // If movement into this direction is not possible, and both directions
@@ -237,24 +242,8 @@ public class TCHelper {
         }
 
         // If still not possible, try centered if we had not tried yet, just in case
-        if (spawnLocations == null && !useCentering) {
+        if (spawnLocations == null && !useCentering)
             spawnLocations = spawnable.findSpawnLocations(info.getRailPiece(), spawnDirection, SpawnableGroup.SpawnMode.CENTER);
-        }
-
-        // If still no spawn locations could be found, fail
-        if (spawnLocations == null) {
-            Util.debug("no spawnLocations");
-            return null; // Failed
-        }
-
-        // Load the chunks first
-        spawnLocations.loadChunks();
-
-        // Check that the area isn't occupied by another train
-        if (spawnLocations.isOccupied()) {
-            Util.debug("occupied");
-            //return null; // Occupied
-        }
 
         return spawnLocations;
     }

@@ -1,34 +1,42 @@
 package de.crafttogether.craftbahn.portals;
 
-import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
+import org.bukkit.entity.EntityType;
 
-import java.util.*;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
-public class Passenger {
+public class Passenger implements Serializable {
     private static final Map<UUID, Passenger> passengers = new HashMap<>();
 
+    private String trainName;
     private final UUID uuid;
-    private final String trainId;
+    private final EntityType type;
     private final int cartIndex;
 
-    public Passenger(UUID uuid, String trainId, int cartIndex) {
+    public Passenger(UUID uuid, EntityType type, int cartIndex) {
         this.uuid = uuid;
-        this.trainId = trainId;
+        this.type = type;
         this.cartIndex = cartIndex;
     }
 
-    // Find the corresponding train
-    public MinecartGroup getTrain() {
-        return null;
+    public String getTrainName() {
+        return trainName;
     }
-
     public UUID getUUID() { return this.uuid; }
-    public String getTrainId() { return this.trainId; }
+    public EntityType getType() {
+        return type;
+    }
     public int getCartIndex() { return this.cartIndex; }
 
-    public static Passenger register(UUID uuid, String trainName, int cartIndex) {
-        Passenger passenger = new Passenger(uuid, trainName, cartIndex);
-        passengers.put(uuid, passenger);
+    private void setTrainName(String trainName) {
+        this.trainName = trainName;
+    }
+
+    public static Passenger register(Passenger passenger, String trainName) {
+        passenger.setTrainName(trainName);
+        passengers.put(passenger.getUUID(), passenger);
         return passenger;
     }
 
@@ -40,16 +48,5 @@ public class Passenger {
         if (passengers.containsKey(uuid))
             return passengers.get(uuid);
         return null;
-    }
-
-    public static Collection<Passenger> get(String trainId) {
-        Collection<Passenger> passengerList = new ArrayList<>();
-
-        for (Passenger passenger : passengers.values()) {
-            if (passenger.getTrainId().equals(trainId))
-                passengerList.add(passenger);
-        }
-
-        return passengerList;
     }
 }
