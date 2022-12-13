@@ -1,23 +1,25 @@
 # CraftBahn
    
 ![](https://media.tenor.com/images/b31da936191fcccadb8fc6e0fc777070/tenor.gif)
-   
-CraftBahn ist ein Plugin, welches wir für unseren Server [CraftTogetherMC](https://github.com/CraftTogetherMC) entwickelt haben.  
-Es dient als Add-On für das Plugin [TrainCarts](https://github.com/bergerhealer/TrainCarts) und erfüllt primär den Zweck, Fahrziele zu verwalten.
-   
-### Weitere funktionen:
-- Befehle um Mobs in/aus Züge(n) ein/aussteigen zu lassen.
-- Geschwindigkeitsanzeige in der Actionbar des Spielers, für fahrende Züge.
-- TrainCarts-ActionSigns für serverübergreifende "Teleportation" von Zügen (In Arbeit)
-- Dynmap-Integration -> Für jedes Fahrziel wird ein Marker auf der Karte erstellt.
-- Alle Texte können angepasst werden (localization.yml)
+
+CraftBahn is a plugin for minecraft servers using Bukkit, SpigotMC or PaperMC, that we developed for our [CraftTogetherMC](https://github.com/CraftTogetherMC) server.
+It serves as an add-on for the [TrainCarts](https://github.com/bergerhealer/TrainCarts) plugin and primarily serves the purpose of managing destinations.
+It also adds action signs for TrainCarts which serve as cross-server portals, driving players and mobs from one server to another.
+
+[![](https://i.imgur.com/SzkHTE8.png)](https://www.youtube.com/watch?v=8XCvmY8EPtk)
+
+### More functions:
+- Commands to get mobs on/off train(s).
+- Speedometer in the player's action bar for moving trains.
+- Dynmap integration (A marker is created on the map for each destination)
+- All texts can be customized (localization.yml)
    
    
 ![](https://i.imgur.com/G2U1pKx.png)  
 ![](https://i.imgur.com/cUXQjis.png)  
 ![](https://i.imgur.com/g2UdOvJ.png)   
-   
-   
+
+
 ### Befehle & Berechtigungen:
    
 #### Fahrziel wählen
