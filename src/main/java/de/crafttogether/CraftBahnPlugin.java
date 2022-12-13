@@ -1,7 +1,5 @@
 package de.crafttogether;
 
-import com.bergerkiller.bukkit.common.config.ConfigurationNode;
-import com.bergerkiller.bukkit.common.config.FileConfiguration;
 import de.crafttogether.craftbahn.Localization;
 import de.crafttogether.craftbahn.commands.Commands;
 import de.crafttogether.craftbahn.destinations.DestinationStorage;
@@ -14,11 +12,11 @@ import de.crafttogether.craftbahn.portals.PortalStorage;
 import de.crafttogether.craftbahn.util.Util;
 import de.crafttogether.mysql.MySQLAdapter;
 import de.crafttogether.mysql.MySQLConfig;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.Configuration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dynmap.DynmapAPI;
 
@@ -69,9 +67,7 @@ public final class CraftBahnPlugin extends JavaPlugin {
 
         // Create default config
         saveDefaultConfig();
-        serverName = getConfig().getString("Settings.ServerName");
-
-        Util.debug(serverName);
+        Util.exportResource("commands.yml");
 
         // Register Listener
         getServer().getPluginManager().registerEvents(new TrainEnterListener(), this);
@@ -97,18 +93,13 @@ public final class CraftBahnPlugin extends JavaPlugin {
             return;
         }
 
+        serverName = getConfig().getString("Settings.ServerName");
+
         // Initialize MySQLAdapter
         mySQLAdapter = new MySQLAdapter(this, myCfg);
 
         // Initialize LocalizationManager
         localizationManager = new LocalizationManager();
-
-        // Register Tags/Placeholder for MiniMessage
-        miniMessageParser = MiniMessage.builder()
-                .editTags(t -> t.resolver(TagResolver.resolver("prefix", Tag.selfClosingInserting(Localization.PREFIX.deserialize()))))
-                .editTags(t -> t.resolver(TagResolver.resolver("header", Tag.selfClosingInserting(Localization.HEADER.deserialize()))))
-                .editTags(t -> t.resolver(TagResolver.resolver("footer", Tag.selfClosingInserting(Localization.FOOTER.deserialize()))))
-                .build();
 
         // Register Commands
         commands = new Commands();
@@ -121,6 +112,13 @@ public final class CraftBahnPlugin extends JavaPlugin {
         // Initialize PortalHandler
         portalHandler = new PortalHandler(getConfig().getString("Portals.Server.BindAddress"), getConfig().getInt("Portals.Server.Port"));
         portalHandler.registerActionSigns();
+
+        // Register Tags/Placeholder for MiniMessage
+        miniMessageParser = MiniMessage.builder()
+                .editTags(t -> t.resolver(TagResolver.resolver("prefix", Tag.selfClosingInserting(Localization.PREFIX.deserialize()))))
+                .editTags(t -> t.resolver(TagResolver.resolver("header", Tag.selfClosingInserting(Localization.HEADER.deserialize()))))
+                .editTags(t -> t.resolver(TagResolver.resolver("footer", Tag.selfClosingInserting(Localization.FOOTER.deserialize()))))
+                .build();
     }
 
     @Override
@@ -147,10 +145,8 @@ public final class CraftBahnPlugin extends JavaPlugin {
     public PortalHandler getPortalHandler() {
         return portalHandler;
     }
-
     public MiniMessage getMiniMessageParser() {
         return Objects.requireNonNullElseGet(miniMessageParser, MiniMessage::miniMessage);
     }
-
     public String getServerName() { return serverName; }
 }

@@ -9,6 +9,10 @@ import de.crafttogether.CraftBahnPlugin;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Interface for a LocalizationEnum. Can be implemented by
  * an actual enum to provide localization constants and defaults.
@@ -35,7 +39,11 @@ public interface ILocalizationEnum extends ILocalizationDefault {
         if (LogicUtil.nullOrEmpty(text))
             return null;
 
-        for (PlaceholderResolver resolver : arguments)
+        List<PlaceholderResolver> resolvers = new ArrayList<>();
+        resolvers.addAll(LocalizationManager.getGlobalPlaceholders());
+        resolvers.addAll(Arrays.stream(arguments).toList());
+
+        for (PlaceholderResolver resolver : resolvers)
             text = resolver.parse(text);
 
         return CraftBahnPlugin.plugin.getMiniMessageParser().deserialize(text);

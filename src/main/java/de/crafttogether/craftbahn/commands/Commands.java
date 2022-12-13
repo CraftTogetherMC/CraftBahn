@@ -4,6 +4,7 @@ import cloud.commandframework.CommandManager;
 import cloud.commandframework.annotations.*;
 import cloud.commandframework.annotations.specifier.Range;
 import com.bergerkiller.bukkit.common.cloud.CloudSimpleHandler;
+import com.bergerkiller.bukkit.common.config.FileConfiguration;
 import com.bergerkiller.bukkit.common.utils.EntityUtil;
 import com.bergerkiller.bukkit.common.utils.WorldUtil;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
@@ -21,6 +22,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,20 +30,25 @@ import java.util.stream.Collectors;
 public class Commands {
     private static final CloudSimpleHandler cloud = new CloudSimpleHandler();
 
+    private FileConfiguration config;
+
     public void enable(CraftBahnPlugin plugin) {
         cloud.enable(plugin);
 
         // Command handlers
         DestinationCommands commands_destination = new DestinationCommands(cloud);
 
+        config = new FileConfiguration(plugin.getDataFolder() + File.separator + "commands.yml");
+        config.load();
+
         cloud.getParser().stringProcessor(
             new PropertyReplacingStringProcessor(
                 s -> ImmutableMap.of(
-                    "command.destination", "fahrziel",
-                    "command.destinations", "fahrziele",
-                    "command.destedit", "fahrzieledit",
-                    "command.mobenter", "mobenter",
-                    "command.mobeject", "mobeject"
+                    "command.destination", (String) config.get("commands.destination"),
+                    "command.destinations", (String) config.get("commands.destinations"),
+                    "command.destedit", (String) config.get("commands.destedit"),
+                    "command.mobenter", (String) config.get("commands.mobenter"),
+                    "command.mobeject", (String) config.get("commands.mobeject")
                 ).get(s)
             )
         );
@@ -157,6 +164,10 @@ public class Commands {
 
     public static CloudSimpleHandler getCloud() {
         return cloud;
+    }
+
+    public FileConfiguration getConfig() {
+        return config;
     }
 
     public CommandManager getManager() {

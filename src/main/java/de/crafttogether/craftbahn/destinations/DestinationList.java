@@ -101,7 +101,7 @@ public class DestinationList {
 
                 Collection<Destination> duplicates = CraftBahnPlugin.plugin.getDestinationStorage().getDestinations(dest.getName());
                 Component hoverText = Localization.COMMAND_DESTINATIONS_LIST_ENTRY_HOVER_CAPTION.deserialize(
-                        PlaceholderResolver.resolver("command", "/fahrziel " + dest.getName() + (duplicates.size() > 1 ? (" " + dest.getServer()) : "")));
+                        PlaceholderResolver.resolver("command", "/" + plugin.getCommandManager().getConfig().get("commands.destination") + " " + dest.getName() + (duplicates.size() > 1 ? (" " + dest.getServer()) : "")));
 
                 if (this.showType)
                     hoverText = hoverText.append(Component.newline()).append(Localization.COMMAND_DESTINATIONS_LIST_ENTRY_HOVER_TYPE.deserialize(
@@ -129,7 +129,7 @@ public class DestinationList {
                 }
 
                 btnDestination = btnDestination
-                        .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziel " + dest.getName() + (duplicates.size() > 1 ? dest.getServer() : "")))
+                        .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/" + plugin.getCommandManager().getConfig().get("commands.destination") + " " + dest.getName() + (duplicates.size() > 1 ? " " + (dest.getServer()) : "")))
                         .hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText));
 
                 // Append teleport-button
@@ -247,6 +247,9 @@ public class DestinationList {
     public void showLocation(boolean show) { this.showLocation = show; }
     public void showContentsPage(boolean show) {
         this.showContentsPage = show;
+    }
+    public void setShowType(boolean showType) {
+        this.showType = showType;
     }
     public void showFooterLine(boolean show) { this.showFooterLine = show; }
 }

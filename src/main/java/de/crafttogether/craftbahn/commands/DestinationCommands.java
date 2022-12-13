@@ -65,7 +65,7 @@ public class DestinationCommands {
         // Multiple destinations have been found
         else if (result.size() > 1) {
             DestinationList list = new DestinationList(result);
-            list.setCommand("/fahrziel");
+            list.setCommand("/" + plugin.getCommandManager().getConfig().get("commands.destination"));
             list.setRowsPerPage(12);
             list.showContentsPage(false);
             list.showFooterLine(true);
@@ -174,7 +174,7 @@ public class DestinationCommands {
         }
 
         DestinationList list = new DestinationList(result);
-        list.setCommand("/fahrziele");
+        list.setCommand("/" + plugin.getCommandManager().getConfig().get("commands.destinations"));
         list.setCommandFlags(commandFlags);
         list.showContentsPage(showContentsPage);
         list.showFooterLine(true);

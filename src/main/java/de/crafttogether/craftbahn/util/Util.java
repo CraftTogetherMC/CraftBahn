@@ -1,5 +1,6 @@
 package de.crafttogether.craftbahn.util;
 
+import com.google.common.io.ByteStreams;
 import de.crafttogether.CraftBahnPlugin;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -8,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+import java.io.*;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -29,6 +31,35 @@ public class Util {
 
         CraftBahnPlugin.plugin.getLogger().info(PlainTextComponentSerializer.plainText().serialize(messageComponent));
     }
+
+    public static void exportResource(String resourcePath) {
+        CraftBahnPlugin plugin = CraftBahnPlugin.plugin;
+
+        File inputFile = new File(resourcePath);
+        File outputFile = new File(plugin.getDataFolder() + File.separator + inputFile.getName());
+
+        if (outputFile.exists())
+            return;
+
+        if (!inputFile.exists()) {
+            plugin.getLogger().warning("Could not find resource '" + resourcePath + "'");
+            return;
+        }
+
+        if (!plugin.getDataFolder().exists())
+            plugin.getDataFolder().mkdir();
+
+        try {
+            outputFile.createNewFile();
+            InputStream inputStream = CraftBahnPlugin.plugin.getResource(resourcePath);
+            OutputStream os = new FileOutputStream(outputFile);
+            ByteStreams.copy(inputStream, os);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public static void debug(String message) {
         debug(Component.text(message), false);
     }
