@@ -6,7 +6,8 @@ CraftBahn is a plugin for minecraft servers using Bukkit, SpigotMC or PaperMC, t
 It serves as an add-on for the [TrainCarts](https://github.com/bergerhealer/TrainCarts) plugin and primarily serves the purpose of managing destinations.
 It also adds action signs for TrainCarts which serve as cross-server portals, driving players and mobs from one server to another.
 
-[![](https://i.imgur.com/SzkHTE8.png)](https://www.youtube.com/watch?v=8XCvmY8EPtk)
+[![](https://i.imgur.com/SzkHTE8.png)](https://www.youtube.com/watch?v=8XCvmY8EPtk)  
+![](https://i.imgur.com/0ngfmUA.png)
 
 ### More functions:
 - Commands to get mobs on/off train(s).
