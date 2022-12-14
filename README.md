@@ -1,7 +1,8 @@
 # CraftBahn
-  
+### Dependency: [MySQLAdapter](https://github.com/CraftTogetherMC/MySQLAdapter/releases/tag/Plugin)  
   
 ![](https://media.tenor.com/images/b31da936191fcccadb8fc6e0fc777070/tenor.gif)
+
 
 CraftBahn is a plugin for minecraft servers using [Bukkit](https://bukkit.org), [SpigotMC](https://www.spigotmc.org) or [PaperMC](https://papermc.io), that we developed for our [CraftTogetherMC](https://github.com/CraftTogetherMC) minecraft server.
 It serves as an add-on for the [TrainCarts](https://github.com/bergerhealer/TrainCarts) plugin and primarily serves the purpose of managing destinations.
@@ -13,20 +14,21 @@ Also a lot of appreciation goes to the People behind [Cloud](https://github.com/
 [![](https://i.imgur.com/SzkHTE8.png)](https://www.youtube.com/watch?v=8XCvmY8EPtk)  
 
 ### Features:
-- Cross-Server Portals (Pathfinding supported!)
-- Fancy paginated list off destinations (cross-server)
+- Cross-Server Portals *(Pathfinding supported!)*
+- Fancy paginated list of destinations *(cross-server)*
 - Choose a destination for your train with `/destination` and get appropriate feedback.
-- Dynmap integration (A marker is created on the map for each destination)
+- Dynmap integration *(A marker is created on the map for each destination)*
 - Speedometer in the player's action bar for moving trains.
 - Commands to get mobs on/off train(s).
-- All texts can be customized (localization.yml) 
+- All commands renameable
+- All texts can be customized *(localization.yml)*
 
 ### Action-Signs
 
 |                                      |                                                                                                                                                                                                                                                |
 |:-------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| ![](https://i.imgur.com/F0sMhvF.png) | **Bidirectional** Portal<br/><br/>This sign represents a portal entrance and exit at the same time.<br/>A pair of these signs that have the same channel name can be passed from either side.<br/>The other sign acts as a portal exit.        |
-| ![](https://i.imgur.com/ybuisvC.png) | **Directiona Portal** *(Entrance)*<br/><br/>This sign represents a portal entrance.<br/>A portal of this type requires a `portal-out`-sign that has the same channel name.<br/>Any number of `portal-in`-signs can be created for one channel. |
+| ![](https://i.imgur.com/F0sMhvF.png) | **Bidirectional Portal**<br/><br/>This sign represents a portal entrance and exit at the same time.<br/>A pair of these signs that have the same channel name can be passed from either side.<br/>The other sign acts as a portal exit.        |
+| ![](https://i.imgur.com/ybuisvC.png) | **Directional Portal** *(Entrance)*<br/><br/>This sign represents a portal entrance.<br/>A portal of this type requires a `portal-out`-sign that has the same channel name.<br/>Any number of `portal-in`-signs can be created for one channel. |
 | ![](https://i.imgur.com/3UlGw1q.png) | **Directional Portal** *(Exit)*<br/><br/>This sign represents a portal exit.<br/>Signs of this type can only exist once per channel name.                                                                                                      |
 
 ### Cross-Server Pathfinding
@@ -50,7 +52,7 @@ The first destination of the route is the server name or channel name and the se
 |:----------------------------------------------------------|:----------------------------------------|:--------------------------------------------------------------|
 | `/destedit info <destination> [server]`                   | craftbahn.command.destedit.info         | Displays detailed information about the specified destination |
 | `/destedit tp <destination> [server]`                     | craftbahn.command.destedit.teleport     | Teleports the player to the specified destination             |
-| `/destinationedit add <destination> <type> `              | craftbahn.command.destedit.add          | Adds a new destination with the specified station type        |
+| `/destedit add <destination> <type> `              | craftbahn.command.destedit.add          | Adds a new destination with the specified station type        |
 | `/destedit remove <destination> [server] `                | craftbahn.command.destedit.remove       | Removes an existing destination                               |
 | `/destedit addmember <destination> <player> [server]`     | craftbahn.command.destedit.addmember    | Adds a secondary owner to the specified destination           |
 | `/destedit removemember <destination> <player> [server]`  | craftbahn.command.destedit.removemember | Removes a secondary owner of the specified destination        |
@@ -64,7 +66,7 @@ The first destination of the route is the server name or channel name and the se
 ### Libraries used 
 - [BKCommonLib](https://github.com/bergerhealer) (Extensive plugin library)
 - [Cloud](https://github.com/Incendo/cloud) (Command Framework)
-- [Adventure](https://github.com/KyoriPowered/adventure) (UI)
+- [Adventure](https://github.com/KyoriPowered/adventure) (UI Framework)
   
   
 ### MySQL Table-structure:
