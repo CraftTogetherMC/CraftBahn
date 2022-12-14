@@ -15,7 +15,7 @@ Also a lot of appreciation goes to the People behind [Cloud](https://github.com/
 
 ### Features:
 - Cross-Server Portals *(Pathfinding supported!)*
-- Fancy paginated list off destinations *(cross-server)*
+- Fancy paginated list of destinations *(cross-server)*
 - Choose a destination for your train with `/destination` and get appropriate feedback.
 - Dynmap integration *(A marker is created on the map for each destination)*
 - Speedometer in the player's action bar for moving trains.
@@ -52,7 +52,7 @@ The first destination of the route is the server name or channel name and the se
 |:----------------------------------------------------------|:----------------------------------------|:--------------------------------------------------------------|
 | `/destedit info <destination> [server]`                   | craftbahn.command.destedit.info         | Displays detailed information about the specified destination |
 | `/destedit tp <destination> [server]`                     | craftbahn.command.destedit.teleport     | Teleports the player to the specified destination             |
-| `/destinationedit add <destination> <type> `              | craftbahn.command.destedit.add          | Adds a new destination with the specified station type        |
+| `/destedit add <destination> <type> `              | craftbahn.command.destedit.add          | Adds a new destination with the specified station type        |
 | `/destedit remove <destination> [server] `                | craftbahn.command.destedit.remove       | Removes an existing destination                               |
 | `/destedit addmember <destination> <player> [server]`     | craftbahn.command.destedit.addmember    | Adds a secondary owner to the specified destination           |
 | `/destedit removemember <destination> <player> [server]`  | craftbahn.command.destedit.removemember | Removes a secondary owner of the specified destination        |
