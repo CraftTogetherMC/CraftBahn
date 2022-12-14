@@ -1,7 +1,8 @@
 # CraftBahn
-  
+### Dependency: [MySQLAdapter](https://github.com/CraftTogetherMC/MySQLAdapter/releases/tag/Plugin)  
   
 ![](https://media.tenor.com/images/b31da936191fcccadb8fc6e0fc777070/tenor.gif)
+
 
 CraftBahn is a plugin for minecraft servers using [Bukkit](https://bukkit.org), [SpigotMC](https://www.spigotmc.org) or [PaperMC](https://papermc.io), that we developed for our [CraftTogetherMC](https://github.com/CraftTogetherMC) minecraft server.
 It serves as an add-on for the [TrainCarts](https://github.com/bergerhealer/TrainCarts) plugin and primarily serves the purpose of managing destinations.
