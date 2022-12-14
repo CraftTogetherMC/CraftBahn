@@ -7,18 +7,15 @@ It serves as an add-on for the [TrainCarts](https://github.com/bergerhealer/Trai
 It also adds action signs for TrainCarts which serve as cross-server portals, driving players and mobs from one server to another.
 
 [![](https://i.imgur.com/SzkHTE8.png)](https://www.youtube.com/watch?v=8XCvmY8EPtk)  
-![](https://i.imgur.com/0ngfmUA.png)
 
-### More features:
-- Commands to get mobs on/off train(s).
-- Speedometer in the player's action bar for moving trains.
+### Features:
+- Cross-Server Portals (Pathfinding supported!)
+- Fancy paginated list off destinations (cross-server)
+- Choose a destination for your train with `/destination` and get appropriate feedback.
 - Dynmap integration (A marker is created on the map for each destination)
-- All texts can be customized (localization.yml)
-   
-   
-![](https://i.imgur.com/G2U1pKx.png)  
-![](https://i.imgur.com/cUXQjis.png)  
-![](https://i.imgur.com/g2UdOvJ.png)   
+- Speedometer in the player's action bar for moving trains.
+- Commands to get mobs on/off train(s).
+- All texts can be customized (localization.yml) 
 
 ### Action-Signs
 
@@ -28,6 +25,11 @@ It also adds action signs for TrainCarts which serve as cross-server portals, dr
 | ![](https://i.imgur.com/ybuisvC.png) | **Directiona Portal** *(Entrance)*<br/><br/>This sign represents a portal entrance.<br/>A portal of this type requires a `portal-out`-sign that has the same channel name.<br/>Any number of `portal-in`-signs can be created for one channel. |
 | ![](https://i.imgur.com/3UlGw1q.png) | **Directional Portal** *(Exit)*<br/><br/>This sign represents a portal exit.<br/>Signs of this type can only exist once per channel name.                                                                                                      |
 
+### Cross-Server Pathfinding
+For cross-server pathfinding support, a corresponding portal is required for each world, which has the name of the world as the channel name.
+
+If a player chooses a target that is on another server, e.g. freebuild2, then the plugin will create a route for the associated train.
+The first destination of the route is the server name or channel name and the second is the player's desired destination
 
 ### Commands & Permissions:
    
