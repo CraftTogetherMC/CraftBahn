@@ -1,6 +1,7 @@
 package de.crafttogether.craftbahn.portals;
 
 import com.bergerkiller.bukkit.common.config.ConfigurationNode;
+import com.bergerkiller.bukkit.common.entity.CommonEntity;
 import com.bergerkiller.bukkit.common.nbt.CommonTagCompound;
 import com.bergerkiller.bukkit.tc.TrainCarts;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
@@ -156,6 +157,7 @@ public class PortalHandler implements Listener {
         // Destroy cart per cart
         if (group.size() <= 1) {
             group.destroy();
+            group.remove();
             pendingTeleports.remove(group);
         }
         else {
@@ -306,8 +308,8 @@ public class PortalHandler implements Listener {
 
         // Rename
         String newName = packet.name;
-        if (!group.getProperties().getTrainName().equals(packet.name) && TCHelper.getTrain(packet.name) != null)
-            newName = TrainProperties.generateTrainName(packet.name + "#");
+        if (TCHelper.getTrain(newName) != null)
+            newName = TrainProperties.generateTrainName(packet.name + "-#");
         group.getProperties().setTrainName(newName);
 
         // Process passengers
@@ -334,7 +336,7 @@ public class PortalHandler implements Listener {
             client.send(new EntityPacket(entity.getUniqueId(), entity.getType()));
 
             try {
-                tagCompound.writeToStream(client.getOutputStream());
+                tagCompound.writeToStream(client.getOutputStream(), false);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -358,15 +360,15 @@ public class PortalHandler implements Listener {
         // Spawn Entity
         Location location = train.head().getLastBlock().getLocation().add(0, 1, 0);
         Entity spawnedEntity = location.getWorld().spawnEntity(location, event.getType());
-
-        // Load received NBT to spawned Entity
         EntityHandle entityHandle = EntityHandle.fromBukkit(spawnedEntity);
-        entityHandle.loadFromNBT(event.getTagCompound());
 
         // Put entity back on the train
         MinecartMember<?> cart = train.get(passenger.getCartIndex());
         cart.getEntity().setPassenger(spawnedEntity);
         Passenger.remove(passenger.getUUID());
+
+        // Load received NBT to spawned Entity
+        entityHandle.loadFromNBT(event.getTagCompound());
     }
 
     public void sendPlayerToServer(Player player, Portal portal) {
