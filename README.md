@@ -1,10 +1,14 @@
 # CraftBahn
-   
+  
+  
 ![](https://media.tenor.com/images/b31da936191fcccadb8fc6e0fc777070/tenor.gif)
 
 CraftBahn is a plugin for minecraft servers using [Bukkit](https://bukkit.org), [SpigotMC](https://www.spigotmc.org) or [PaperMC](https://papermc.io), that we developed for our [CraftTogetherMC](https://github.com/CraftTogetherMC) minecraft server.
 It serves as an add-on for the [TrainCarts](https://github.com/bergerhealer/TrainCarts) plugin and primarily serves the purpose of managing destinations.
 It also adds action signs for TrainCarts which serve as cross-server portals, driving players and mobs from one server to another.
+
+### A big thank you and lots of love go out to [TeamBergerhealer](https://github.com/bergerhealer)
+Also a lot of appreciation goes to the People behind [Cloud](https://github.com/Incendo/cloud) and [Adventure](https://github.com/KyoriPowered/adventure)!
 
 [![](https://i.imgur.com/SzkHTE8.png)](https://www.youtube.com/watch?v=8XCvmY8EPtk)  
 
@@ -56,8 +60,13 @@ The first destination of the route is the server name or channel name and the se
 |:----------------------|:---------------------------|:------------------------------------------------------------|
 | `/mobenter [radius]`  | craftbahn.command.mobenter | Allows animals around the selected train to board the train |
 | `/mobeject`           | craftbahn.command.mobeject | Ejects all animals from the selected train                  |
-   
-   
+
+### Libraries used 
+- [BKCommonLib](https://github.com/bergerhealer) (Extensive plugin library)
+- [Cloud](https://github.com/Incendo/cloud) (Command Framework)
+- [Adventure](https://github.com/KyoriPowered/adventure) (UI)
+  
+  
 ### MySQL Table-structure:
 
 ``` sql
