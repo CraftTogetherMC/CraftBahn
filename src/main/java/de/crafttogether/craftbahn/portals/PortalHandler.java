@@ -1,7 +1,6 @@
 package de.crafttogether.craftbahn.portals;
 
 import com.bergerkiller.bukkit.common.config.ConfigurationNode;
-import com.bergerkiller.bukkit.common.entity.CommonEntity;
 import com.bergerkiller.bukkit.common.nbt.CommonTagCompound;
 import com.bergerkiller.bukkit.tc.TrainCarts;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
@@ -48,6 +47,7 @@ import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class PortalHandler implements Listener {
@@ -57,8 +57,8 @@ public class PortalHandler implements Listener {
     private static final SignActionPortalOut signActionPortalOut = new SignActionPortalOut();
 
     private final TCPServer tcpServer;
-    private final Map<MinecartGroup, Portal> pendingTeleports = new HashMap<>();
-    private final Map<MinecartGroup, Portal> receivedTrains = new HashMap<>();
+    private final ConcurrentHashMap<MinecartGroup, Portal> pendingTeleports = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<MinecartGroup, Portal> receivedTrains = new ConcurrentHashMap<>();
 
     public PortalHandler(String host, int port) {
         // Create Server Socket
@@ -119,6 +119,8 @@ public class PortalHandler implements Listener {
             return;
 
         // Cache teleportation-infos
+        for (MinecartGroup pendingGroup : pendingTeleports.keySet())
+            if (pendingGroup.size() < 1) pendingTeleports.remove(pendingGroup);
         pendingTeleports.put(group, portal);
 
         // Apply blindness-effect
@@ -304,6 +306,10 @@ public class PortalHandler implements Listener {
 
         // Spawn
         MinecartGroup group = spawnable.spawn(spawnLocations);
+
+        // Cache received trains
+        for (MinecartGroup receivedGroup : receivedTrains.keySet())
+            if (receivedGroup.size() < 1) receivedTrains.remove(receivedGroup);
         receivedTrains.put(group, portal);
 
         // Rename
