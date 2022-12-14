@@ -28,15 +28,16 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `cb_portals` (
-  `id` int(11) NOT NULL,
-  `name` int(16) NOT NULL,
-  `target_host` int(255) DEFAULT NULL,
-  `target_port` int(11) DEFAULT NULL,
-  `target_server` int(24) DEFAULT NULL,
-  `target_world` varchar(24) DEFAULT NULL,
-  `target_x` double DEFAULT NULL,
-  `target_y` double DEFAULT NULL,
-  `target_z` double DEFAULT NULL
+    `id` int(11) NOT NULL,
+    `name` varchar(16) NOT NULL,
+    `type` varchar(16) NOT NULL,
+    `target_host` varchar(128) DEFAULT NULL,
+    `target_port` int(11) DEFAULT NULL,
+    `target_server` varchar(128) DEFAULT NULL,
+    `target_world` varchar(128) DEFAULT NULL,
+    `target_x` double DEFAULT NULL,
+    `target_y` double DEFAULT NULL,
+    `target_z` double DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -47,8 +48,8 @@ CREATE TABLE `cb_portals` (
 -- Indizes für die Tabelle `cb_portals`
 --
 ALTER TABLE `cb_portals`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `name` (`name`);
+    ADD PRIMARY KEY (`id`),
+    ADD KEY `name` (`name`) USING BTREE;
 
 --
 -- AUTO_INCREMENT für exportierte Tabellen

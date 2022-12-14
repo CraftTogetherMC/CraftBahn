@@ -2,226 +2,406 @@ package de.crafttogether.craftbahn.portals;
 
 import com.bergerkiller.bukkit.common.config.ConfigurationNode;
 import com.bergerkiller.bukkit.common.entity.CommonEntity;
+import com.bergerkiller.bukkit.common.nbt.CommonTagCompound;
+import com.bergerkiller.bukkit.tc.TrainCarts;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
+import com.bergerkiller.bukkit.tc.controller.components.RailPiece;
 import com.bergerkiller.bukkit.tc.controller.spawnable.SpawnableGroup;
 import com.bergerkiller.bukkit.tc.controller.type.MinecartMemberRideable;
-import com.bergerkiller.bukkit.tc.properties.CartProperties;
+import com.bergerkiller.bukkit.tc.events.SignActionEvent;
 import com.bergerkiller.bukkit.tc.properties.TrainProperties;
-import com.bergerkiller.bukkit.tc.signactions.SignActionSpawn;
-import com.bergerkiller.bukkit.tc.utils.LauncherConfig;
+import com.bergerkiller.bukkit.tc.properties.standard.type.CollisionOptions;
+import com.bergerkiller.bukkit.tc.rails.RailLookup;
+import com.bergerkiller.bukkit.tc.signactions.SignAction;
+import com.bergerkiller.generated.net.minecraft.world.entity.EntityHandle;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import de.crafttogether.CraftBahnPlugin;
-import de.crafttogether.craftbahn.net.Client;
-import de.crafttogether.craftbahn.util.Message;
+import de.crafttogether.craftbahn.Localization;
+import de.crafttogether.craftbahn.localization.PlaceholderResolver;
+import de.crafttogether.craftbahn.net.TCPClient;
+import de.crafttogether.craftbahn.net.TCPServer;
+import de.crafttogether.craftbahn.net.events.EntityReceivedEvent;
+import de.crafttogether.craftbahn.net.events.PacketReceivedEvent;
+import de.crafttogether.craftbahn.net.packets.EntityPacket;
+import de.crafttogether.craftbahn.net.packets.TrainPacket;
+import de.crafttogether.craftbahn.signactions.SignActionPortal;
+import de.crafttogether.craftbahn.signactions.SignActionPortalIn;
+import de.crafttogether.craftbahn.signactions.SignActionPortalOut;
 import de.crafttogether.craftbahn.util.TCHelper;
+import de.crafttogether.craftbahn.util.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.Sign;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.Rail;
-import org.bukkit.block.data.Rotatable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.Vector;
 import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
-public class PortalHandler {
+public class PortalHandler implements Listener {
+    private static final CraftBahnPlugin plugin = CraftBahnPlugin.plugin;
+    private static final SignActionPortal signActionPortal = new SignActionPortal();
+    private static final SignActionPortalIn signActionPortalIn = new SignActionPortalIn();
+    private static final SignActionPortalOut signActionPortalOut = new SignActionPortalOut();
 
-    public static void transmitTrain(MinecartGroup group, Portal portal) {
+    private final TCPServer tcpServer;
+    private final Map<MinecartGroup, Portal> pendingTeleports = new HashMap<>();
+    private final Map<MinecartGroup, Portal> receivedTrains = new HashMap<>();
+
+    public PortalHandler(String host, int port) {
+        // Create Server Socket
+        this.tcpServer = new TCPServer(host, port);
+
+        // Register as EventHandler
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+
+        // Register TrainCarts-ActionSigns
+        registerActionSigns();
+    }
+
+    public void handleTrain(SignActionEvent event) {
+        Util.debug("#handleTrain");
+
+        MinecartGroup group = event.getGroup();
+        String portalName = event.getLine(2);
+        Portal.PortalType targetType = null;
+
+        if (event.getLine(1).equals("portal"))
+            targetType = Portal.PortalType.BIDIRECTIONAL;
+        else if (event.getLine(1).equals("portal-in"))
+            targetType = Portal.PortalType.OUT;
+
+        // Get existing portal-out -signs from database
+        List<Portal> portals;
+        try {
+            Portal.PortalType finalTargetType = targetType;
+            portals = plugin.getPortalStorage().get(portalName).stream()
+                    .filter(portal -> portal.getType().equals(finalTargetType))
+                    .filter(portal -> !portal.getTargetLocation().getServer().equals(plugin.getServerName()))
+                    .collect(Collectors.toList());
+        } catch (SQLException e) {
+            TCHelper.sendMessage(group, Localization.COMMAND_ERROR,
+                    PlaceholderResolver.resolver("error", e.getMessage()));
+            e.printStackTrace();
+            return;
+        }
+        Portal portal = portals.get(0);
+
+        // Abort if the triggered sign is the sign where the train was spawned
+        if (receivedTrains.containsKey(group) && receivedTrains.get(group).getName().equals(portal.getName()))
+            return;
+
+        if (portal == null || portal.getTargetLocation() == null) {
+            TCHelper.sendMessage(group, Localization.PORTAL_ENTER_NOEXIT,
+                    PlaceholderResolver.resolver("name", portalName));
+            return;
+        }
+
+        Util.debug(event.getGroup().getProperties().getTrainName() + " goes from " + plugin.getServerName() + " (" + event.getLine(2) + " -> " + event.getLine(3) + ") to " + portal.getTargetLocation().getServer() + " (" + portal.getName() + " -> " + portal.getType().name() + ")");
+
+        // Should we clear chest-minecarts?
+        boolean clearInventory = event.getLine(3).equalsIgnoreCase("clear");
+
+        // Try to transfer train to the target server
+        if (!transferTrain(group, portal, clearInventory))
+            return;
+
+        // Cache teleportation-infos
+        pendingTeleports.put(group, portal);
+
+        // Apply blindness-effect
+        PotionEffect blindness = new PotionEffect(PotionEffectType.BLINDNESS, 40, 1);
+        List<Player> playerPassengers = TCHelper.getPlayerPassengers(group);
+        for (Player passenger : playerPassengers)
+            passenger.addPotionEffect(blindness);
+
+        // Disable collisions after train is sent to avoid they're being pushed back by players
+        group.getProperties().setCollision(CollisionOptions.CANCEL);
+    }
+
+    public void handleCart(SignActionEvent event) {
+        Util.debug("#handleCart");
+
+        MinecartGroup group = event.getGroup();
+        Portal portal = pendingTeleports.get(group);
+
+        // Abort if no pendingTeleport was created
+        if (portal == null)
+            return;
+
+        // Transfer passengers to target server
+        MinecartMember<?> member = event.getMember();
+
+        for (Entity passenger : member.getEntity().getEntity().getPassengers()) {
+            if (passenger instanceof Player)
+                sendPlayerToServer((Player) passenger, portal);
+
+            else if (passenger instanceof LivingEntity)
+                passenger.remove();//sendEntityToServer((LivingEntity) passenger, portal);
+        }
+
+        group.getProperties().setSpawnItemDrops(false);
+
+        // Destroy cart per cart
+        if (group.size() <= 1) {
+            group.destroy();
+            group.remove();
+            pendingTeleports.remove(group);
+        }
+        else {
+            Entity cartEntity = member.getEntity().getEntity();
+            group.removeSilent(member);
+            cartEntity.remove();
+        }
+    }
+
+    // Handle joined player if he was a passenger
+    public static void reEnterPassenger(Passenger passenger, PlayerSpawnLocationEvent event) {
+        Player player = event.getPlayer();
+        int cartIndex = passenger.getCartIndex();
+
+        // Try to find train and set player as passenger
+        MinecartGroup train = TCHelper.getTrain(passenger.getTrainName());
+        if (train == null) {
+            Util.debug("Could not find train (" + passenger.getTrainName() + ") for player " + player.getName());
+            // TODO: Inform players
+            return;
+        }
+
+        MinecartMember<?> member = train.get(cartIndex);
+
+        if (member instanceof MinecartMemberRideable) {
+            event.setSpawnLocation(member.getEntity().getLocation());
+            member.getEntity().setPassenger(player);
+            Passenger.remove(passenger.getUUID());
+        }
+        else
+            Util.debug("Unable to put player " + player.getName() + " back on train (" + train.getProperties().getTrainName() + ") the cart is not rideable");
+
+        Passenger.remove(passenger.getUUID());
+    }
+
+    public boolean transferTrain(MinecartGroup group, Portal portal, boolean clearInventory) {
+        Util.debug("#transferTrain");
+
         // Save train and get properties
         ConfigurationNode trainProperties = group.saveConfig();
 
         // Remove lastPathNode from cartProperties
-        Set<ConfigurationNode> nodes = trainProperties.getNode("carts").getNodes();
-        for (ConfigurationNode cart : nodes) {
-            if (cart.contains("lastPathNode"))
-                cart.set("lastPathNode", "");
+        Set<ConfigurationNode> cartNodes = trainProperties.getNode("carts").getNodes();
+        for (ConfigurationNode node : cartNodes) {
+            if (node.contains("lastPathNode"))
+                node.set("lastPathNode", "");
         }
 
-        // Generate new name
-        String trainID = UUID.randomUUID().toString().split("-")[0];
-        String trainName = CraftBahnPlugin.getInstance().getServerName() + "-" + group.getProperties().getTrainName();
+        // TODO: Clear Inventory
 
-        // Get train-owners
-        Set<String> owners = group.getProperties().getOwners();
-
-        // Get passengers
-        List<Player> playerPassengers = new ArrayList<>();
-        //List<String> mobPassengers = new ArrayList<>();
-        List<String> passengerList = new ArrayList<>();
-
-        /* Save & Load Entity NBT
-        Entity entity = member.getEntity().getEntity();
-        EntityHandle entityHandle = EntityHandle.fromBukkit(entity);
-
-        CommonTagCompound tagCompound = CommonTagCompound.create(entityHandle);
-        entityHandle.saveToNBT(tagCompound);
-
-        entityHandle.loadFromNBT(tagCompound);
-        */
-
+        // Get passengers and seat numbers
+        List<Passenger> passengers = new ArrayList<>();
         for (MinecartMember<?> member : group) {
-            for (Entity passenger : member.getEntity().getPassengers()) {
-                if (passenger instanceof Player) {
-                    playerPassengers.add((Player) passenger);
-                    passengerList.add(passenger.getUniqueId() + ";" + trainID + ";" + member.getIndex());
-                }
-
-                else if (passenger instanceof LivingEntity) {
-                    // Coming soon
-                }
+            for (Entity entity : TCHelper.getPassengers(member)) {
+                Passenger passenger = new Passenger(entity.getUniqueId(), entity.getType(), member.getIndex());
+                passengers.add(passenger);
+                
+                if (entity instanceof LivingEntity)
+                    sendEntityToServer((LivingEntity) entity, portal);
             }
         }
 
-        // Use ConfigurationNode to store informations
-        ConfigurationNode dataPacket = new ConfigurationNode();
-        dataPacket.set("target.world", portal.getTargetLocation().getWorld());
-        dataPacket.set("target.x", portal.getTargetLocation().getX());
-        dataPacket.set("target.y", portal.getTargetLocation().getY());
-        dataPacket.set("target.z", portal.getTargetLocation().getZ());
-        dataPacket.set("train.id", trainID);
-        dataPacket.set("train.newName", trainName);
-        dataPacket.set("train.owners", owners);
-        dataPacket.set("train.properties", trainProperties);
-        dataPacket.set("train.passengers", passengerList);
+        TrainPacket packet = new TrainPacket();
+        packet.name = group.getProperties().getTrainName();
+        packet.owners = group.getProperties().getOwners();
+        packet.properties = trainProperties.toString();
+        packet.passengers = passengers;
+        packet.portalName = portal.getName();
+        packet.sourceServer = plugin.getServerName();
+        packet.target = portal.getTargetLocation();
 
-        // Send dataPacket to server
-        Client client = new Client(portal.getTargetPort());
-        client.send(dataPacket.toString()); // Serialize ConfigurationNode
+        // Transfer train
+        TCPClient client = new TCPClient(portal.getTargetHost(), portal.getTargetPort());
+        client.sendAuth(plugin.getConfig().getString("Portals.Server.SecretKey"));
+
+        boolean success = client.send(packet);
         client.disconnect();
+
+        if (success)
+            Util.debug("Train (" + packet.name + ") was sent to " + packet.target.getServer() + "!");
+
+        return success;
     }
 
-    public static void receiveTrain(ConfigurationNode trainData) {
-        String worldName = ((String) trainData.get("target.world"));
-        World world = Bukkit.getWorld(worldName);
+    @EventHandler
+    public void receivePacket(PacketReceivedEvent event) {
+        if (event.getPacket() instanceof TrainPacket)
+            receiveTrain((TrainPacket) event.getPacket());
+    }
 
-        double x = (double) trainData.get("target.x");
-        double y = (double) trainData.get("target.y");
-        double z = (double) trainData.get("target.z");
-
-        Location targetLocation = new Location(world, x, y, z);
-        String trainID = (String) trainData.get("train.id");
-        String trainNewName = (String) trainData.get("train.newName");
-        List<Object> owners = trainData.getList("train.owners");
-        SpawnableGroup train = SpawnableGroup.fromConfig(trainData.getNode("train.properties"));
-        List<Object> passengers = trainData.getList("train.passengers");
-
-        // Add players to passengerQueue
-        for (Object passengerData : passengers) {
-            String[] passenger = ((String) passengerData).split(";");
-            Passenger.register(UUID.fromString(passenger[0]), passenger[1], Integer.parseInt(passenger[2]));
-        }
+    public void receiveTrain(TrainPacket packet) {
+        Util.debug("Received train (" + packet.name + ") from " + packet.sourceServer, false);
 
         // Check if world exists
-        if (world == null) {
-            Passenger.sendMessage(trainID, "§cWorld '" + worldName + "' was not found!", 2);
+        World targetWorld = Bukkit.getWorld(packet.target.getWorld());
+        if (targetWorld == null) {
+            Util.debug("World '" + packet.target.getWorld() + "' was not found!");
+            // TODO: Inform players
+            //Passenger.sendMessage(trainID, "§cWorld '" + worldName + "' was not found!", 2);
             return;
         }
 
-        // Use scheduler to be sync with main-thread
-        Bukkit.getServer().getScheduler().runTask(CraftBahnPlugin.getInstance(), () -> {
-            
-            /* Look for "portal-out"-sign */
-            Block signBlock = targetLocation.getBlock();
-            Sign sign;
-            BlockData blockData;
-            BlockFace facing;
+        // Load train from received config
+        ConfigurationNode trainConfig = new ConfigurationNode();
+        trainConfig.loadFromString(packet.properties);
+        SpawnableGroup spawnable = SpawnableGroup.fromConfig(TrainCarts.plugin, trainConfig);
 
-            if (signBlock.getState() instanceof Sign) {
-                sign = (Sign) signBlock.getState();
-                blockData = signBlock.getState().getBlockData();
+        Location targetLocation = packet.target.getBukkitLocation();
+        Portal portal = plugin.getPortalStorage().getPortal(targetLocation);
+        if (portal == null || portal.getSign() == null) {
+            Util.debug("Could not find a Portal at " + targetLocation.getWorld() + ", " + targetLocation.getX() + ", " + targetLocation.getY() + ", " + targetLocation.getZ());
+            // TODO: Inform players
+            //Passenger.sendMessage(trainID, "§cWorld '" + worldName + "' was not found!", 2);
+            return;
+        }
 
-                if (blockData instanceof Rotatable)
-                    facing = ((Rotatable) blockData).getRotation();
+        // No Rail!
+        RailPiece rail = RailLookup.discoverRailPieceFromSign(portal.getSign().getBlock());
+        if (rail == null) {
+            Util.debug("Could not find a Rail at " + targetLocation.getWorld() + ", " + targetLocation.getX() + ", " + targetLocation.getY() + ", " + targetLocation.getZ());
+            // TODO: Inform players
+            //Passenger.sendMessage(trainID, "§cWorld '" + worldName + "' was not found!", 2);
+            return;
+        }
 
-                else {
-                    Passenger.sendMessage(trainID, "§cSign not placed underneath the rails", 3);
-                    return;
-                }
-            } else {
-                Passenger.sendMessage(trainID, "§cNo Sign found! (" + signBlock.getType().name() + ")", 3);
-                return;
+        SpawnableGroup.SpawnLocationList spawnLocations = TCHelper.getSpawnLocations(spawnable, rail, portal.getSign());
+        if (spawnLocations == null) {
+            Util.debug("Could not find the right spot to spawn a train at " + rail.world() + ", " + rail.block().getX() + ", " + rail.block().getY() + ", " + rail.block().getZ());
+            // TODO: Inform players
+            //Passenger.sendMessage(trainID, "§cWorld '" + worldName + "' was not found!", 2);
+            return;
+        }
+
+        // Load the chunks first
+        spawnLocations.loadChunks();
+
+        // Check that the area isn't occupied by another train
+        if (spawnLocations.isOccupied()) {
+            Util.debug("Track is occupied by another train at " + rail.world() + ", " + rail.block().getX() + ", " + rail.block().getY() + ", " + rail.block().getZ());
+            // TODO: Inform players
+            //Passenger.sendMessage(trainID, "§cWorld '" + worldName + "' was not found!", 2);
+            return;
+        }
+
+        // Spawn
+        MinecartGroup group = spawnable.spawn(spawnLocations);
+        receivedTrains.put(group, portal);
+
+        // Rename
+        String newName = packet.name;
+        if (TCHelper.getTrain(newName) != null)
+            newName = TrainProperties.generateTrainName(packet.name + "-#");
+        group.getProperties().setTrainName(newName);
+
+        // Process passengers
+        for (Passenger passenger : packet.passengers)
+            Passenger.register(passenger, newName);
+
+        // Launch
+        Vector headDirection = spawnLocations.locations.get(spawnLocations.locations.size()-1).forward;
+        BlockFace launchDirection = com.bergerkiller.bukkit.tc.Util.vecToFace(headDirection, false);
+        group.head().getActions().addActionLaunch(launchDirection, 2, 0.4);
+
+        Util.debug(group.getProperties().getTrainName() + " came from " + packet.sourceServer + " (" + packet.portalName + ") to " + plugin.getServerName() + " (" + portal.getSign().getLine(1) + " - " + portal.getSign().getLine(2) + ")");
+        Util.debug("launchDirection: " + launchDirection.name());
+    }
+
+    public void sendEntityToServer(LivingEntity entity, Portal portal) {
+        EntityHandle entityHandle = EntityHandle.fromBukkit(entity);
+        CommonTagCompound tagCompound = new CommonTagCompound();
+        entityHandle.saveToNBT(tagCompound);
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            TCPClient client = new TCPClient(portal.getTargetHost(), portal.getTargetPort());
+            client.sendAuth(plugin.getConfig().getString("Portals.Server.SecretKey"));
+            client.send(new EntityPacket(entity.getUniqueId(), entity.getType()));
+
+            try {
+                tagCompound.writeToStream(client.getOutputStream(), false);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
-            /* Get spawn-rail */
-            Location railLoc = signBlock.getLocation();
-            railLoc.setY(targetLocation.getY() + 2);
-            Block railBlock = railLoc.getBlock();
-
-            if (!(railLoc.getBlock().getBlockData() instanceof Rail)) {
-                Passenger.sendMessage(trainID, "§cNo Rail found! (" + railBlock.getType().name() + ")", 3);
-                return;
-            }
-
-            List<Location> spawnLocations = SignActionSpawn.getSpawnPositions(railLoc, false, facing, train.getMembers());
-
-            // load chunks
-            for(Location spawnLoc : spawnLocations)
-                spawnLoc.getChunk().load();
-
-            // Spawn train
-            Message.debug("Spawn train #" + trainID);
-            MinecartGroup spawnedTrain = MinecartGroup.spawn(train, spawnLocations);
-            TrainProperties trainProperties = spawnedTrain.getProperties();
-
-            // Clear Inventory if needed
-            if (sign.getLine(3).equalsIgnoreCase("clear"))
-                TCHelper.clearInventory(spawnedTrain);
-
-            // Set properties
-            spawnedTrain.getProperties().setTrainName(trainID);
-
-            Set<String> ownerSet = new HashSet<>();
-            for (Object owner : owners)
-                ownerSet.add(Objects.toString(owner, null));
-
-            for (CartProperties cartProp : spawnedTrain.getProperties())
-                cartProp.setOwners(ownerSet);
-
-            // Launch train
-            double launchSpeed = (trainProperties.getSpeedLimit() > 0) ? trainProperties.getSpeedLimit() : 0.4;
-            spawnedTrain.head().getActions().addActionLaunch(facing, LauncherConfig.parse("10b"), launchSpeed);
+            client.disconnect();
         });
     }
 
-    // Handle joined player if he was a passenger
-    public static void reEnterPassenger(Passenger passenger, PlayerJoinEvent e) {
-        Player player = e.getPlayer();
-        String trainId = passenger.getTrainId();
-        int cartIndex = passenger.getCartIndex();
+    @EventHandler
+    public void receiveEntity(EntityReceivedEvent event) {
+        Util.debug("Received entity (" + event.getType() + ") from " + event.getSourceServer());
 
-        // Try to find train and set player as passenger
-        MinecartGroup train = TCHelper.getTrain(trainId);
+        Passenger passenger = Passenger.get(event.getUuid());
+        MinecartGroup train = TCHelper.getTrain(passenger.getTrainName());
 
-        if (train == null)
+        if (train == null) {
+            Util.debug("Could not find train (" + passenger.getTrainName() + ") for entity");
             return;
-
-        MinecartMember<?> cart = train.get(cartIndex);
-
-        if (cart instanceof MinecartMemberRideable) {
-            if (player.isFlying())
-                player.setFlying(false);
-
-            //e.setSpawnLocation(cart.getEntity().getLocation());
-            player.teleport(cart.getEntity().getLocation());
-            cart.getEntity().setPassenger(player);
-            Passenger.remove(passenger.getUUID());
         }
+
+        // Spawn Entity
+        Location location = train.head().getLastBlock().getLocation().add(0, 1, 0);
+        Entity spawnedEntity = location.getWorld().spawnEntity(location, event.getType());
+        EntityHandle entityHandle = EntityHandle.fromBukkit(spawnedEntity);
+
+        // Put entity back on the train
+        MinecartMember<?> cart = train.get(passenger.getCartIndex());
+        cart.getEntity().setPassenger(spawnedEntity);
+        Passenger.remove(passenger.getUUID());
+
+        // Load received NBT to spawned Entity
+        entityHandle.loadFromNBT(event.getTagCompound());
     }
 
-    public static void sendToServer(Player player, String server) {
-        Message.debug("PluginMessage: Send " + player.getName() + " to " + server);
+    public void sendPlayerToServer(Player player, Portal portal) {
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF("Connect");
-        out.writeUTF(server);
-        player.sendPluginMessage(CraftBahnPlugin.getInstance(), "BungeeCord", out.toByteArray());
+        out.writeUTF(portal.getTargetLocation().getServer());
+        player.sendPluginMessage(plugin, "BungeeCord", out.toByteArray());
+    }
+
+    public void registerActionSigns() {
+        SignAction.register(signActionPortal);
+        SignAction.register(signActionPortalIn);
+        SignAction.register(signActionPortalOut);
+    }
+
+    public void unregisterActionSigns() {
+        SignAction.unregister(signActionPortal);
+        SignAction.unregister(signActionPortalIn);
+        SignAction.unregister(signActionPortalOut);
+    }
+
+    public void shutdown() {
+        // Close server
+        if (tcpServer != null)
+            tcpServer.close();
+
+        // Close all active clients
+        TCPClient.closeAll();
+
+        unregisterActionSigns();
+    }
+
+    public Map<MinecartGroup, Portal> getPendingTeleports() {
+        return pendingTeleports;
     }
 }

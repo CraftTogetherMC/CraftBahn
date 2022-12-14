@@ -1,169 +1,111 @@
 package de.crafttogether.craftbahn.signactions;
 
 import com.bergerkiller.bukkit.common.resources.SoundEffect;
+import com.bergerkiller.bukkit.common.utils.LogicUtil;
 import com.bergerkiller.bukkit.common.utils.WorldUtil;
-import com.bergerkiller.bukkit.tc.Util;
-import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
-import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.events.SignActionEvent;
 import com.bergerkiller.bukkit.tc.events.SignChangeActionEvent;
-import com.bergerkiller.bukkit.tc.properties.standard.type.CollisionMobCategory;
-import com.bergerkiller.bukkit.tc.properties.standard.type.CollisionOptions;
 import com.bergerkiller.bukkit.tc.signactions.SignAction;
 import com.bergerkiller.bukkit.tc.signactions.SignActionType;
 import com.bergerkiller.bukkit.tc.utils.SignBuildOptions;
 import de.crafttogether.CraftBahnPlugin;
+import de.crafttogether.craftbahn.Localization;
+import de.crafttogether.craftbahn.localization.PlaceholderResolver;
 import de.crafttogether.craftbahn.portals.Portal;
 import de.crafttogether.craftbahn.portals.PortalHandler;
-import de.crafttogether.craftbahn.util.Message;
-import de.crafttogether.craftbahn.util.TCHelper;
-import org.bukkit.Bukkit;
+import de.crafttogether.craftbahn.util.CTLocation;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 
-import java.util.HashMap;
+import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SignActionPortalIn extends SignAction {
-    private Map<MinecartGroup, Portal> pendingTeleports = new HashMap<>();
+    private final CraftBahnPlugin plugin = CraftBahnPlugin.plugin;
 
     @Override
     public boolean match(SignActionEvent event) {
-        return event.isType("portal-in");
+        return event.getLine(1).equalsIgnoreCase("portal-in");
     }
 
     @Override
     public void execute(SignActionEvent event) {
-        if (!event.isPowered()) return;
+        if (!event.isPowered() || !event.isTrainSign())
+            return;
 
-        // Train arrives sign
-        if (!pendingTeleports.containsKey(event.getGroup()) && event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasGroup()) {
-            Message.debug("#trainEnter");
-            onTrainEnter(event);
-        }
+        PortalHandler portalHandler = plugin.getPortalHandler();
 
-        // Cart arrives sign
-        if (pendingTeleports.containsKey(event.getGroup()) && event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasMember()) {
-            Message.debug("#cartEnter");
-            onCartEnter(event);
-        }
+        if (!portalHandler.getPendingTeleports().containsKey(event.getGroup()) && event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasGroup())
+            portalHandler.handleTrain(event);
+
+        if (portalHandler.getPendingTeleports().containsKey(event.getGroup()) && event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasMember())
+            portalHandler.handleCart(event);
     }
 
     @Override
     public boolean build(SignChangeActionEvent event) {
         String[] lines = event.getLines();
+        String portalName = lines[2];
 
         // Validate third line
-        if (lines[2].length() < 1) {
-            event.getPlayer().sendMessage("&§cPlease write a name for this portal on the third line");
+        if (LogicUtil.nullOrEmpty(portalName)) {
+            Localization.PORTAL_CREATE_NONAME.message(event.getPlayer());
             displayError(event);
             return false;
         }
 
-        // Get portal from database or create new entry
-        CraftBahnPlugin.getInstance().getPortalStorage().getOrCreate(lines[2], (err, portal) -> {
-            if (err != null) {
-                Message.debug(event.getPlayer(), err.getMessage());
-                err.printStackTrace();
-                return;
-            }
+        // Get existing portal-out -signs from database
+        List<Portal> portals;
+        try {
+            portals = plugin.getPortalStorage().get(portalName).stream()
+                    .filter(portal -> portal.getType().equals(Portal.PortalType.OUT))
+                    .collect(Collectors.toList());
+        } catch (SQLException e) {
+            Localization.COMMAND_ERROR.message(event.getPlayer(),
+                    PlaceholderResolver.resolver("error", e.getMessage()));
 
-            Bukkit.getScheduler().runTaskLaterAsynchronously(CraftBahnPlugin.getInstance(), () -> {
-                if (portal.getTargetHost() == null || portal.getTargetPort() == null || portal.getTargetLocation() == null)
-                    event.getPlayer().sendMessage("§cCouldn't find an §rPortal-Exit §cfor §r'§e" + lines[2] + "§r'§c! Please create one");
-                else {
-                    event.getPlayer().sendMessage("Portal-Exit §ewas found at §r" + portal.getTargetLocation().getServer() +
-                        " (" + portal.getTargetLocation().getWorld() +
-                        ", " + portal.getTargetLocation().getX() +
-                        ", " + portal.getTargetLocation().getY() +
-                        ", " + portal.getTargetLocation().getZ() + ")");
-                }
-            }, 10L);
-        });
+            e.printStackTrace();
+            return false;
+        }
 
-        // Respond
-        return SignBuildOptions.create()
-            .setName("Portal-Entrance")
-                .setName("Portal-Exit").setDescription("allow trains to travel between servers" + ((event.getLine(3).equalsIgnoreCase("clear")) ? ".\n§eChest-Minecarts will be cleared" : ""))
-            .handle(event.getPlayer());
+        if (portals.size() < 1)
+            Localization.PORTAL_CREATE_IN_NOTEXIST.message(event.getPlayer(),
+                    PlaceholderResolver.resolver("name", portalName));
+
+        // Save to database
+        try {
+            plugin.getPortalStorage().create(
+                    portalName,
+                    Portal.PortalType.IN,
+                    null,
+                    0,
+                    CTLocation.fromBukkitLocation(event.getLocation()));
+        } catch (SQLException e) {
+            Localization.COMMAND_ERROR.message(event.getPlayer(),
+                    PlaceholderResolver.resolver("error", e.getMessage()));
+
+            e.printStackTrace();
+            return false;
+        }
+
+        Localization.PORTAL_CREATE_IN_SUCCESS.message(event.getPlayer(),
+                PlaceholderResolver.resolver("name", portalName));
+
+        SignBuildOptions.create()
+                .setName("ServerPortal-Entrance").setDescription("allow trains to travel between servers" + ((event.getLine(3).equalsIgnoreCase("clear")) ? ".\n§eChest-Minecarts will be cleared" : ""))
+                .handle(event.getPlayer());
+
+        return true;
     }
 
-    private void displayError(SignActionEvent event) {
-        // When not successful, display particles at the sign to indicate such
-        BlockFace facingInv = event.getFacing().getOppositeFace();
-        Location effectLocation = event.getSign().getLocation()
-            .add(0.5, 0.5, 0.5)
-            .add(0.3 * facingInv.getModX(), 0.0, 0.3 * facingInv.getModZ());
+    private void displayError(SignActionEvent info) {
+        BlockFace facingInv = info.getFacing().getOppositeFace();
+        Location effectLocation = info.getSign().getLocation()
+                .add(0.5, 0.5, 0.5)
+                .add(0.3 * facingInv.getModX(), 0.0, 0.3 * facingInv.getModZ());
 
-        Util.spawnDustParticle(effectLocation, 255.0, 255.0, 0.0);
+        com.bergerkiller.bukkit.tc.Util.spawnDustParticle(effectLocation, 255.0, 255.0, 0.0);
         WorldUtil.playSound(effectLocation, SoundEffect.EXTINGUISH, 1.0f, 2.0f);
-    }
-
-    private void onTrainEnter(SignActionEvent event) {
-        MinecartGroup group = event.getGroup();
-        String portalName = event.getLine(2);
-        Portal portal = CraftBahnPlugin.getInstance().getPortalStorage().getPortal(portalName);
-
-        if (portal == null || portal.getTargetLocation() == null) {
-            TCHelper.sendMessage(event.getGroup(), "§cCouldn't find an §rPortal-Exit §cfor §r'§e" + portalName + "§r'§c!");
-            group.destroy();
-            return;
-        }
-
-        // Clear Inventory if needed
-        if (event.getLine(3).equalsIgnoreCase("clear"))
-            TCHelper.clearInventory(group);
-
-        // cache teleportation-infos
-        pendingTeleports.put(group, portal);
-
-        // Transmit collected Data to other server
-        PortalHandler.transmitTrain(group, portal);
-
-        // Disable collisions after train is sent to avoid they're being pushed back by players
-        group.getProperties().setCollision(CollisionOptions.CANCEL);
-    }
-
-    private void onCartEnter(SignActionEvent event) {
-        MinecartGroup group = event.getGroup();
-        Portal portal = pendingTeleports.get(group);
-
-        Message.debug("Look for passengers in #" + event.getMember().getIndex());
-        if (portal == null) {
-            Message.debug("Portal is null");
-            return;
-        }
-
-        MinecartMember<?> member = event.getMember();
-
-        Message.debug("entered cart is a " + member.getEntity().getType().name() + "(" + member.getEntity().getUniqueId() + ")");
-
-        for (Entity passenger : member.getEntity().getPassengers()) {
-
-            if (passenger instanceof Player) {
-                Player playerPassenger = (Player) passenger;
-                PortalHandler.sendToServer(playerPassenger, portal.getTargetLocation().getServer());
-
-                Message.debug(playerPassenger, "Try to send you to: " + portal.getTargetLocation().toString());
-                Message.debug("Try to send " + playerPassenger.getName() + " to: " + portal.getTargetLocation().toString());
-            }
-
-            else if (passenger instanceof LivingEntity) {
-                // Coming Soon
-            }
-
-        }
-
-        // Destroy cart and remove group
-        if (group.size() <= 1) {
-            pendingTeleports.remove(group);
-            group.destroy();
-        }
-        else
-            member.onDie(true);
     }
 }

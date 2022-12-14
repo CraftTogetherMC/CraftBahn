@@ -1,37 +1,39 @@
 package de.crafttogether;
 
+import de.crafttogether.craftbahn.Localization;
 import de.crafttogether.craftbahn.commands.Commands;
-import de.crafttogether.craftbahn.commands.ListCommand;
-import de.crafttogether.craftbahn.commands.MobEnterCommand;
 import de.crafttogether.craftbahn.destinations.DestinationStorage;
 import de.crafttogether.craftbahn.listener.PlayerSpawnListener;
+import de.crafttogether.craftbahn.listener.SignBreakListener;
 import de.crafttogether.craftbahn.listener.TrainEnterListener;
-import de.crafttogether.craftbahn.net.Client;
-import de.crafttogether.craftbahn.net.Server;
+import de.crafttogether.craftbahn.localization.LocalizationManager;
+import de.crafttogether.craftbahn.portals.PortalHandler;
 import de.crafttogether.craftbahn.portals.PortalStorage;
-import de.crafttogether.craftbahn.util.TCHelper;
+import de.crafttogether.craftbahn.util.Util;
 import de.crafttogether.mysql.MySQLAdapter;
 import de.crafttogether.mysql.MySQLConfig;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.Tag;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Bukkit;
-import org.bukkit.command.TabExecutor;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dynmap.DynmapAPI;
 
 import java.util.Objects;
 
 public final class CraftBahnPlugin extends JavaPlugin {
-    private static CraftBahnPlugin plugin;
+    public static CraftBahnPlugin plugin;
 
     private String serverName;
     private DynmapAPI dynmap;
 
-    private MySQLAdapter MySQLAdapter;
-    private PortalStorage portalStorage;
+    private Commands commands;
+    private MySQLAdapter mySQLAdapter;
+    private LocalizationManager localizationManager;
     private DestinationStorage destinationStorage;
-
-    // Socket Server (CB-Portals)
-    private Server server;
+    private PortalStorage portalStorage;
+    private PortalHandler portalHandler;
+    private MiniMessage miniMessageParser;
 
     @Override
     public void onEnable() {
@@ -56,46 +58,37 @@ public final class CraftBahnPlugin extends JavaPlugin {
             return;
         }
 
-        if (!getServer().getPluginManager().isPluginEnabled("dynmap")) {
-            plugin.getLogger().warning("Couldn't find Dynmap");
-            Bukkit.getServer().getPluginManager().disablePlugin(plugin);
-            return;
+        if (getServer().getPluginManager().isPluginEnabled("dynmap")) {
+            plugin.getLogger().warning("Dynmap found!");
+            dynmap = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("dynmap");
         }
 
         // Create default config
         saveDefaultConfig();
 
-        // Initialize
-        FileConfiguration config = getConfig();
-        dynmap = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("Dynmap");
-        serverName = config.getString("Settings.ServerName");
+        // Export resources
+        Util.exportResource("commands.yml");
+        if (dynmap != null) {
+            Util.exportResource("minecart.png");
+            Util.exportResource("rail.png");
+        }
 
         // Register Listener
         getServer().getPluginManager().registerEvents(new TrainEnterListener(), this);
+        getServer().getPluginManager().registerEvents(new SignBreakListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerSpawnListener(), this);
 
         // Register PluginChannel
         this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 
-        // Register Commands
-        Commands commands = new Commands();
-        registerCommand("rbf", commands);
-        registerCommand("fahrziel", commands);
-        registerCommand("fahrziele", new ListCommand());
-        registerCommand("mobenter", new MobEnterCommand());
-        registerCommand("setroute", new ListCommand());
-        registerCommand("setdestination", new ListCommand());
-        registerCommand("fahrzieledit", commands);
-        registerCommand("fze", commands);
-
         // Setup MySQLConfig
         MySQLConfig myCfg = new MySQLConfig();
-        myCfg.setHost(config.getString("MySQL.Host"));
-        myCfg.setPort(config.getInt("MySQL.Port"));
-        myCfg.setUsername(config.getString("MySQL.Username"));
-        myCfg.setPassword(config.getString("MySQL.Password"));
-        myCfg.setDatabase(config.getString("MySQL.Database"));
-        myCfg.setTablePrefix(config.getString("MySQL.TablePrefix"));
+        myCfg.setHost(getConfig().getString("MySQL.Host"));
+        myCfg.setPort(getConfig().getInt("MySQL.Port"));
+        myCfg.setUsername(getConfig().getString("MySQL.Username"));
+        myCfg.setPassword(getConfig().getString("MySQL.Password"));
+        myCfg.setDatabase(getConfig().getString("MySQL.Database"));
+        myCfg.setTablePrefix(getConfig().getString("MySQL.TablePrefix"));
 
         // Validate configuration
         if (!myCfg.checkInputs() || myCfg.getDatabase() == null) {
@@ -104,48 +97,59 @@ public final class CraftBahnPlugin extends JavaPlugin {
             return;
         }
 
+        serverName = getConfig().getString("Settings.ServerName");
+
         // Initialize MySQLAdapter
-        MySQLAdapter = new MySQLAdapter(this, myCfg);
+        mySQLAdapter = new MySQLAdapter(this, myCfg);
 
-        // Initialize Storage-Adapter
-        portalStorage = new PortalStorage();
+        // Initialize LocalizationManager
+        localizationManager = new LocalizationManager();
+
+        // Register Commands
+        commands = new Commands();
+        commands.enable(this);
+
+        // Initialize Storages
         destinationStorage = new DestinationStorage();
+        portalStorage = new PortalStorage();
 
-        // Create Server Socket
-        server = new Server();
-        server.listen(config.getInt("Settings.Port"));
+        // Initialize PortalHandler
+        portalHandler = new PortalHandler(getConfig().getString("Portals.Server.BindAddress"), getConfig().getInt("Portals.Server.Port"));
+        portalHandler.registerActionSigns();
 
-        // Register SignActions (TrainCarts)
-        TCHelper.registerActionSigns();
+        // Register Tags/Placeholder for MiniMessage
+        miniMessageParser = MiniMessage.builder()
+                .editTags(t -> t.resolver(TagResolver.resolver("prefix", Tag.selfClosingInserting(Localization.PREFIX.deserialize()))))
+                .editTags(t -> t.resolver(TagResolver.resolver("header", Tag.selfClosingInserting(Localization.HEADER.deserialize()))))
+                .editTags(t -> t.resolver(TagResolver.resolver("footer", Tag.selfClosingInserting(Localization.FOOTER.deserialize()))))
+                .build();
     }
 
+    @Override
     public void onDisable() {
-        // Unregister SignActions (TrainCarts)
-        TCHelper.unregisterActionSigns();
-
-        // Close server
-        if (server != null)
-            server.close();
-
-        // Close all active clients
-        Client.closeAll();
-
         // Shutdown MySQL-Adapter
-        if(MySQLAdapter != null)
-            MySQLAdapter.disconnect();
+        if(mySQLAdapter != null)
+            mySQLAdapter.disconnect();
+
+        // Close TCPServer/TCPClients & Unregister ActionSigns
+        if (portalHandler != null)
+            portalHandler.shutdown();
     }
 
-    private void registerCommand(String cmd, TabExecutor executor) {
-        Objects.requireNonNull(getCommand(cmd)).setExecutor(executor);
-        Objects.requireNonNull(getCommand(cmd)).setTabCompleter(executor);
-    }
-
-    public MySQLAdapter getMySQLAdapter() { return MySQLAdapter; }
     public DynmapAPI getDynmap() { return dynmap; }
-
-    public PortalStorage getPortalStorage() { return portalStorage; }
+    public Commands getCommandManager() {
+        return commands;
+    }
+    public LocalizationManager getLocalizationManager() { return localizationManager; }
     public DestinationStorage getDestinationStorage() { return destinationStorage; }
-
+    public PortalStorage getPortalStorage() {
+        return portalStorage;
+    }
+    public PortalHandler getPortalHandler() {
+        return portalHandler;
+    }
+    public MiniMessage getMiniMessageParser() {
+        return Objects.requireNonNullElseGet(miniMessageParser, MiniMessage::miniMessage);
+    }
     public String getServerName() { return serverName; }
-    public static CraftBahnPlugin getInstance() { return plugin; }
 }

@@ -1,108 +1,48 @@
 package de.crafttogether.craftbahn.destinations;
+
 import de.crafttogether.CraftBahnPlugin;
-import de.crafttogether.craftbahn.util.Message;
-import net.md_5.bungee.api.chat.*;
+import de.crafttogether.craftbahn.Localization;
+import de.crafttogether.craftbahn.localization.PlaceholderResolver;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
 
 import java.util.*;
 
 public class DestinationList {
+    private CraftBahnPlugin plugin;
 
     private final List<Destination> destinations;
-    private final List<TextComponent> pages;
-    private Destination.DestinationType filterType;
-    private String filterName;
+    private final List<Component> pages;
 
-    private int itemsPerPage = 8;
+    private int rowsPerPage = 8;
     private boolean showOwner = false;
     private boolean showLocation = false;
-    private boolean suggestCommands = false;
-    private boolean showContents = false;
-    private boolean showFooter = false;
+    private boolean showContentsPage = false;
+    private boolean showFooterLine = false;
     private boolean showType = true;
 
-    public DestinationList() {
-        this.destinations = new ArrayList<>(CraftBahnPlugin.getInstance().getDestinationStorage().getDestinations());
-        this.pages = new ArrayList<>();
-        this.filterType = null;
-        this.filterName = null;
-    }
+    private String command;
+    private String commandFlags;
 
     public DestinationList(List<Destination> destinations) {
+        this.plugin = CraftBahnPlugin.plugin;
         this.destinations = destinations;
         this.pages = new ArrayList<>();
-        this.filterType = null;
-    }
-
-    public TextComponent getContentsPage() {
-        TextComponent contents = new TextComponent();
-
-        TextComponent info = Message.format("&e-------------- &c&lCraftBahn &e--------------");
-        info.addExtra(Message.newLine());
-        info.addExtra(Message.newLine());
-        info.addExtra(Message.format("&6CraftBahn &8» &eGuten Tag, Reisender!"));
-        info.addExtra(Message.newLine());
-        info.addExtra(Message.format("&6CraftBahn &8» &eVerstehst du nur "));
-        info.addExtra(Message.format("&c/bahnhof&e?"));
-        info.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/bahnhof"));
-        info.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format("&2Informationen zum Schienennetz"))).create()));
-
-        contents.addExtra(info);
-        contents.addExtra(Message.newLine());
-
-        contents.addExtra(Message.format("&6CraftBahn &8»"));
-        contents.addExtra(Message.newLine());
-        contents.addExtra(Message.format("&6CraftBahn &8» &6&lMögliche Fahrziele:"));
-        contents.addExtra(Message.newLine());
-        contents.addExtra(Message.format("&6CraftBahn &8»"));
-        contents.addExtra(Message.newLine());
-
-        TextComponent btnMainStations = Message.format("&6CraftBahn &8» &2> &eHauptbahnhöfe");
-        btnMainStations.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele MAIN_STATION 2"));
-        btnMainStations.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format("&2Hauptbahnhöfe"))).create()));
-        contents.addExtra(btnMainStations);
-        contents.addExtra(Message.newLine());
-
-        TextComponent btnStations = Message.format("&6CraftBahn &8» &2> &eSystem-Bahnhöfe");
-        btnStations.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele STATION 2"));
-        btnStations.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format("&2Bahnhöfe"))).create()));
-        contents.addExtra(btnStations);
-        contents.addExtra(Message.newLine());
-
-        TextComponent btnPublicStations = Message.format("&6CraftBahn &8» &2> &eÖffentliche Bahnhöfe");
-        btnPublicStations.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele PUBLIC_STATION 2"));
-        btnPublicStations.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format("&2Öffentlich"))).create()));
-        contents.addExtra(btnPublicStations);
-        contents.addExtra(Message.newLine());
-
-        TextComponent btnPlayerStations = Message.format("&6CraftBahn &8» &2> &eSpieler-Bahnhöfe");
-        btnPlayerStations.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele PLAYER_STATION 2"));
-        btnPlayerStations.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format("&2Spielerbahnhöfe"))).create()));
-        contents.addExtra(btnPlayerStations);
-        contents.addExtra(Message.newLine());
-
-        return contents;
     }
 
     public void build() {
-        TextComponent page = new TextComponent();
         int row = 0;
+        Component page = Component.text("");
 
-        // Add contents-page
-        if (this.showContents)
-            this.pages.add(this.getContentsPage());
+        if (this.showContentsPage)
+            this.pages.add(Localization.COMMAND_DESTINATIONS_HEAD.deserialize());
 
         TreeMap<String, List<Destination>> serverMap = new TreeMap<>();
-
         for (Destination dest : this.destinations) {
-            if (this.filterType != null && !dest.getType().equals(this.filterType))
-                continue;
-
             if (!serverMap.containsKey(dest.getServer()))
                 serverMap.put(dest.getServer(), new ArrayList<>());
 
@@ -116,8 +56,7 @@ public class DestinationList {
         String lastKey = null;
 
         for (String key : keys) {
-            Message.debug(key + " - " + CraftBahnPlugin.getInstance().getServerName());
-            if (key.equalsIgnoreCase(CraftBahnPlugin.getInstance().getServerName()))
+            if (key.equalsIgnoreCase(CraftBahnPlugin.plugin.getServerName()))
                 firstKey = key;
             else if (key.equalsIgnoreCase("creative"))
                 lastKey = key;
@@ -125,32 +64,26 @@ public class DestinationList {
                 sortedList.add(key);
         }
 
-        if (firstKey != null)
-            sortedList.add(0, firstKey);
-
-        if (lastKey != null)
-            sortedList.add(sortedList.size(), lastKey);
-
-        for (String bla : sortedList) {
-            Message.debug("SORTED: ");
-            Message.debug(bla);
-        }
+        if (firstKey != null) sortedList.add(0, firstKey);
+        if (lastKey != null) sortedList.add(sortedList.size(), lastKey);
 
         for (String serverName : sortedList) {
-            if ((this.itemsPerPage - row) < 4) {
+            if ((this.rowsPerPage - row) < 4) {
                 // New Page
                 this.pages.add(page);
-                page = new TextComponent();
+                page = Component.text("");
                 row = 0;
             }
 
             if (row != 0) {
-                page.addExtra(Message.newLine());
+                page = page.append(Component.newline());
                 row++;
             }
 
-            page.addExtra(Message.format("&6CraftBahn &8» &7# &6&l" + capitalize(serverName) + ":"));
-            page.addExtra(Message.newLine());
+            page = page
+                    .append(Localization.COMMAND_DESTINATIONS_LIST_CAPTION.deserialize(PlaceholderResolver.resolver(
+                        "server", capitalize(serverName))))
+                    .append(Component.newline());
 
             row = row + 2;
 
@@ -158,61 +91,62 @@ public class DestinationList {
             for (Destination dest : serverMap.get(serverName)) {
                 row++;
 
-                TextComponent btnFahrziel;
+                Component btnDestination;
+                PlaceholderResolver placeholderResolver = PlaceholderResolver.resolver("destination", dest.getName());
+
                 if (dest.getType() == Destination.DestinationType.PLAYER_STATION)
-                    btnFahrziel = Message.format("&6CraftBahn &8» &e" + dest.getName());
+                    btnDestination = Localization.COMMAND_DESTINATIONS_LIST_ENTRY_PLAYER.deserialize(placeholderResolver);
                 else
-                    btnFahrziel = Message.format("&6CraftBahn &8» &6" + dest.getName());
+                    btnDestination = Localization.COMMAND_DESTINATIONS_LIST_ENTRY_OTHER.deserialize(placeholderResolver);
 
-                Collection<Destination> duplicates = CraftBahnPlugin.getInstance().getDestinationStorage().getDestinations(dest.getName());
-
-                String hoverText = "&2/fahrziel " + dest.getName() + (duplicates.size() > 1 ? (" &7" + dest.getServer()) : "");
+                Collection<Destination> duplicates = CraftBahnPlugin.plugin.getDestinationStorage().getDestinations(dest.getName());
+                Component hoverText = Localization.COMMAND_DESTINATIONS_LIST_ENTRY_HOVER_CAPTION.deserialize(
+                        PlaceholderResolver.resolver("command", "/" + plugin.getCommandManager().getConfig().get("commands.destination") + " " + dest.getName() + (duplicates.size() > 1 ? (" " + dest.getServer()) : "")));
 
                 if (this.showType)
-                    hoverText += "\n&6Stations-Typ: &e" + dest.getType().toString();
+                    hoverText = hoverText.append(Component.newline()).append(Localization.COMMAND_DESTINATIONS_LIST_ENTRY_HOVER_TYPE.deserialize(
+                            PlaceholderResolver.resolver("type", dest.getType().toString())));
 
                 if ((dest.getType().equals(Destination.DestinationType.PLAYER_STATION) || dest.getType().equals(Destination.DestinationType.PUBLIC_STATION)) && dest.getOwner() != null && this.showOwner) {
                     OfflinePlayer owner = Bukkit.getOfflinePlayer(dest.getOwner());
-
-                    StringBuilder strOwner = new StringBuilder((owner.hasPlayedBefore() ? owner.getName() : "Unbekannt") + ", ");
+                    String unkown = Localization.COMMAND_DESTINATIONS_LIST_ENTRY_HOVER_OWNERUNKOWN.get();
+                    StringBuilder strOwner = new StringBuilder((owner.hasPlayedBefore() ? owner.getName() : unkown) + ", ");
                     for (UUID uuid : dest.getParticipants()) {
                         OfflinePlayer participant = Bukkit.getOfflinePlayer(uuid);
                         if (!participant.hasPlayedBefore()) continue;
                         strOwner.append(participant.getName()).append(", ");
                     }
 
-                    hoverText += "\n&6Besitzer: &e" + strOwner.substring(0, strOwner.length()-2);
+                    hoverText = hoverText.append(Component.newline()).append(Localization.COMMAND_DESTINATIONS_LIST_ENTRY_HOVER_OWNER.deserialize(
+                            PlaceholderResolver.resolver("owner", strOwner.substring(0, strOwner.length()-2))));
                 }
 
                 if (dest.getLocation() != null && this.showLocation) {
-                    hoverText += "\n&6Koordinaten: &e" + Math.round(dest.getLocation().getX()) + ", " + Math.round(dest.getLocation().getY()) + ", " + Math.round(dest.getLocation().getZ());
-                    hoverText += "\n&6Welt: &e" + dest.getWorld();
+                    hoverText = hoverText.append(Component.newline()).append(Localization.COMMAND_DESTINATIONS_LIST_ENTRY_HOVER_LOCATION.deserialize(
+                            PlaceholderResolver.resolver("location", Math.round(dest.getLocation().getX()) + ", " + Math.round(dest.getLocation().getY()) + ", " + Math.round(dest.getLocation().getZ()))));
+                    hoverText = hoverText.append(Component.newline()).append(Localization.COMMAND_DESTINATIONS_LIST_ENTRY_HOVER_WORLD.deserialize(
+                            PlaceholderResolver.resolver("world", dest.getWorld())));
                 }
 
-                if (this.suggestCommands)
-                    btnFahrziel.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/fahrziel " + dest.getName() + (duplicates.size() > 1 ? (" " + dest.getServer()) : "")));
-                else
-                    btnFahrziel.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziel " + dest.getName() + (duplicates.size() > 1 ? (" " + dest.getServer()) : "")));
+                btnDestination = btnDestination
+                        .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/" + plugin.getCommandManager().getConfig().get("commands.destination") + " " + dest.getName() + (duplicates.size() > 1 ? " " + (dest.getServer()) : "")))
+                        .hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText));
 
-                btnFahrziel.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format(hoverText))).create()));
+                // Append teleport-button
+                if (dest.getLocation() != null && this.showLocation)
+                    btnDestination = btnDestination.append(Localization.COMMAND_DESTINATIONS_BTN_TELEPORT.deserialize());
 
-                if (dest.getLocation() != null && this.showLocation) {
-                    TextComponent tpBtn = new TextComponent();
-                    tpBtn.addExtra(Message.format(" &7[&fTP&7]"));
-                    tpBtn.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrzieledit tp " + dest.getName()));
-                    tpBtn.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(Message.format("&6Teleportiere zum Zielort"))).create()));
-                    btnFahrziel.addExtra(tpBtn);
-                }
-
-                page.addExtra(btnFahrziel);
-                page.addExtra(Message.newLine());
+                page = page
+                        .append(Localization.PREFIX.deserialize())
+                        .append(btnDestination)
+                        .append(Component.newline());
 
                 items++;
 
-                if (row >= this.itemsPerPage && serverMap.get(serverName).size() > items) {
-                    // New Page
+                // New Page
+                if (row >= this.rowsPerPage && serverMap.get(serverName).size() > items) {
                     this.pages.add(page);
-                    page = new TextComponent();
+                    page = Component.text("");
                     row = 0;
                 }
             }
@@ -221,126 +155,65 @@ public class DestinationList {
         this.pages.add(page);
     }
 
-    public TextComponent renderPage(int pageIndex) {
+    public Component renderPage(int pageIndex) {
         if (this.pages.size() < 1)
             return null;
 
-        TextComponent output = new TextComponent();
-        TextComponent page = this.pages.get(pageIndex - 1);
-
-        output.addExtra(Message.newLine());
-        output.addExtra(page);
-
-        String filter = (filterType == null ? "" : filterType.name() + " ");
-        filter = (filterName == null ? filter : filterName + " ");
-
-        String command = "/fahrziele";
-
-        if (filterName != null)
-            command = "/fahrziel";
+        Component page = this.pages.get(pageIndex - 1);
+        Component output = Component.newline().append(page);
 
         if (pages.size() > 1) {
-            output.addExtra(Message.newLine());
-            TextComponent btnPrevious;
+            output = output.append(Component.newline());
+
+            Component btnBackwards;
             if (pageIndex > 1) {
-                btnPrevious = Message.format("&a----<< &6Zurück");
-                btnPrevious.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command + " " + filter + (pageIndex - 1)));
-                btnPrevious.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (
-                        new ComponentBuilder(Message.format("&6Vorherige Seite: &e" + (pageIndex - 1)))
-                ).create()));
+                btnBackwards = Localization.COMMAND_DESTINATIONS_BTN_BACKWARDS_ON.deserialize(
+                        PlaceholderResolver.resolver("command", this.command + this.commandFlags + " --page " + (pageIndex - 1)),
+                        PlaceholderResolver.resolver("page", String.valueOf(pageIndex - 1)));
             } else
-                btnPrevious = Message.format("&2----<< &7Zurück");
+                btnBackwards = Localization.COMMAND_DESTINATIONS_BTN_BACKWARDS_OFF.deserialize();
 
-            output.addExtra(btnPrevious);
-
-            output.addExtra(Message.format(" &2" + pageIndex + "&7/&2" + pages.size() + " "));
-
-            TextComponent btnForward;
+            Component btnForwards;
             if (pageIndex < this.pages.size()) {
-                btnForward = Message.format("&6Weiter &2>>----");
-                btnForward.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command + " " + filter + (pageIndex + 1)));
-                btnForward.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (
-                        new ComponentBuilder(Message.format("&6Nächste Seite: &e" + (pageIndex + 1)))
-                ).create()));
+                btnForwards = Localization.COMMAND_DESTINATIONS_BTN_FORWARDS_ON.deserialize(
+                        PlaceholderResolver.resolver("command", this.command + this.commandFlags + " --page " + (pageIndex + 1)),
+                        PlaceholderResolver.resolver("page", String.valueOf(pageIndex + 1)));
             } else
-                btnForward = Message.format("&7Weiter >>----");
+                btnForwards = Localization.COMMAND_DESTINATIONS_BTN_FORWARDS_OFF.deserialize();
 
-            output.addExtra(btnForward);
-            output.addExtra(Message.newLine());
+            output = output
+                    .append(btnBackwards)
+                    .append(Localization.COMMAND_DESTINATIONS_LIST_INDICATOR.deserialize(
+                            PlaceholderResolver.resolver("actual", String.valueOf(pageIndex)),
+                            PlaceholderResolver.resolver("total", String.valueOf(pages.size()))
+                    ))
+                    .append(btnForwards)
+                    .append(Component.newline());
         }
 
         return output;
-    }
-
-    public void setPage(int i, TextComponent page) {
-        this.pages.set(i, page);
-    }
-
-    public void setItemsPerPage(int itemsPerPage) {
-        this.itemsPerPage = itemsPerPage;
-    }
-
-    public void setFilterType(Destination.DestinationType destinationType) {
-        this.filterType = destinationType;
-    }
-
-    public void setFilterName(String destinationName) { this.filterName = destinationName; }
-
-    public TextComponent getPage(int i) {
-        return this.pages.get(i);
-    }
-
-    public int getPageCount() {
-        return pages.size();
-    }
-
-    public ItemStack getBook() {
-        if (itemsPerPage > 8) // Set maximum items per book page
-            itemsPerPage = 8;
-
-        // Suggesting commands don't work in books
-        suggestCommands(false);
-
-        // Generate pages
-        build();
-
-        ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
-        BookMeta bookMeta = (BookMeta) book.getItemMeta();
-
-        for (TextComponent page : this.pages) {
-            BaseComponent[] component = new ComponentBuilder().append(page).create();
-            bookMeta.spigot().addPage(component);
-        }
-
-        bookMeta.setTitle("Fahrziele");
-        bookMeta.setAuthor("CraftBahn");
-        book.setItemMeta(bookMeta);
-
-        return book;
     }
 
     public void sendPage(Player player, int pageIndex) {
         // Build pages
         build();
 
-        if (pageIndex < 1) {
-            player.sendMessage(Message.format("&6CraftBahn &8» &cUngültige Seitennummer."));
-            return;
+        if (pageIndex < 1)
+            Localization.COMMAND_DESTINATIONS_LIST_INVALIDPAGE.message(player);
+        else if (pageIndex > getPageCount())
+            Localization.COMMAND_DESTINATIONS_LIST_UNKOWNPAGE.message(player,
+                    PlaceholderResolver.resolver("pages", String.valueOf(getPageCount())));
+        else {
+            Component message = renderPage(pageIndex);
+
+            if (this.showFooterLine) {
+                message = message
+                        .append(Component.newline())
+                        .append(Localization.FOOTER.deserialize());
+            }
+
+            player.sendMessage(message);
         }
-
-        if (pageIndex > getPageCount()) {
-            player.sendMessage(Message.format("&6CraftBahn &8» &cEs gibt nur " + getPageCount() + " Seite" + (getPageCount() > 1 ? "n":"")));
-            return;
-        }
-
-        TextComponent message = renderPage(pageIndex);
-
-        if (this.showFooter) {
-            message.addExtra(Message.newLine());
-            message.addExtra(Message.format("&e----------------------------------------"));
-        }
-
-        player.sendMessage(message);
     }
 
     private String capitalize(String name) {
@@ -350,27 +223,33 @@ public class DestinationList {
         return firstLetter + remainingLetters;
     }
 
-    public void showOwner(boolean show) {
-        this.showOwner = show;
+    public void setPage(int i, Component page) {
+        this.pages.set(i, page);
+    }
+    public void setRowsPerPage(int rowsPerPage) {
+        this.rowsPerPage = rowsPerPage;
+    }
+    public void setCommand(String command) {
+        this.command = command;
+    }
+    public void setCommandFlags(String commandFlags) {
+        this.commandFlags = commandFlags;
     }
 
-    public void showLocation(boolean show) {
-        this.showLocation = show;
+    public Component getPage(int i) {
+        return this.pages.get(i);
+    }
+    public int getPageCount() {
+        return pages.size();
     }
 
-    public void suggestCommands(boolean suggest) {
-        this.suggestCommands = suggest;
+    public void showOwner(boolean show) { this.showOwner = show; }
+    public void showLocation(boolean show) { this.showLocation = show; }
+    public void showContentsPage(boolean show) {
+        this.showContentsPage = show;
     }
-
-    public void showContents(boolean show) {
-        this.showContents = show;
+    public void setShowType(boolean showType) {
+        this.showType = showType;
     }
-
-    public void showFooter(boolean show) {
-        this.showFooter = show;
-    }
-
-    public void showType(boolean show) {
-        this.showType = show;
-    }
+    public void showFooterLine(boolean show) { this.showFooterLine = show; }
 }
