@@ -61,7 +61,6 @@ public final class CraftBahnPlugin extends JavaPlugin {
         if (getServer().getPluginManager().isPluginEnabled("dynmap")) {
             plugin.getLogger().warning("Dynmap found!");
             dynmap = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("dynmap");
-            return;
         }
 
         // Create default config

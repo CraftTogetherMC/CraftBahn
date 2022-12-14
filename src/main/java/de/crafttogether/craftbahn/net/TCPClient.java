@@ -96,7 +96,7 @@ public class TCPClient extends Thread {
 
                 else if (authenticated) {
                     if (inputPacket instanceof EntityPacket packet) {
-                        Event event = new EntityReceivedEvent(packet.uuid, packet.type, CraftBahnPlugin.plugin.getServerName(), CommonTagCompound.readFromStream(inputStream));
+                        Event event = new EntityReceivedEvent(packet.uuid, packet.type, CraftBahnPlugin.plugin.getServerName(), CommonTagCompound.readFromStream(inputStream, false));
                         Bukkit.getServer().getScheduler().runTask(CraftBahnPlugin.plugin, () -> CommonUtil.callEvent(event));
                     }
 
