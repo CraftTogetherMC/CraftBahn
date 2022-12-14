@@ -14,13 +14,14 @@ Also a lot of appreciation goes to the People behind [Cloud](https://github.com/
 [![](https://i.imgur.com/SzkHTE8.png)](https://www.youtube.com/watch?v=8XCvmY8EPtk)  
 
 ### Features:
-- Cross-Server Portals (Pathfinding supported!)
-- Fancy paginated list off destinations (cross-server)
+- Cross-Server Portals *(Pathfinding supported!)*
+- Fancy paginated list off destinations *(cross-server)*
 - Choose a destination for your train with `/destination` and get appropriate feedback.
-- Dynmap integration (A marker is created on the map for each destination)
+- Dynmap integration *(A marker is created on the map for each destination)*
 - Speedometer in the player's action bar for moving trains.
 - Commands to get mobs on/off train(s).
-- All texts can be customized (localization.yml) 
+- All commands renameable
+- All texts can be customized *(localization.yml) *
 
 ### Action-Signs
 
