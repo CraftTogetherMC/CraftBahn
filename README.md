@@ -66,7 +66,7 @@ The first destination of the route is the server name or channel name and the se
 ### Libraries used 
 - [BKCommonLib](https://github.com/bergerhealer) (Extensive plugin library)
 - [Cloud](https://github.com/Incendo/cloud) (Command Framework)
-- [Adventure](https://github.com/KyoriPowered/adventure) (UI)
+- [Adventure](https://github.com/KyoriPowered/adventure) (UI Framework)
   
   
 ### MySQL Table-structure:
