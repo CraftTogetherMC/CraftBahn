@@ -21,7 +21,7 @@ Also a lot of appreciation goes to the People behind [Cloud](https://github.com/
 - Speedometer in the player's action bar for moving trains.
 - Commands to get mobs on/off train(s).
 - All commands renameable
-- All texts can be customized *(localization.yml) *
+- All texts can be customized *(localization.yml)*
 
 ### Action-Signs
 
