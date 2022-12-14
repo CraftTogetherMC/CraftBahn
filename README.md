@@ -2,14 +2,14 @@
    
 ![](https://media.tenor.com/images/b31da936191fcccadb8fc6e0fc777070/tenor.gif)
 
-CraftBahn is a plugin for minecraft servers using Bukkit, SpigotMC or PaperMC, that we developed for our [CraftTogetherMC](https://github.com/CraftTogetherMC) server.
+CraftBahn is a plugin for minecraft servers using [Bukkit](https://bukkit.org), [SpigotMC](https://www.spigotmc.org) or [PaperMC](https://papermc.io), that we developed for our [CraftTogetherMC](https://github.com/CraftTogetherMC) minecraft server.
 It serves as an add-on for the [TrainCarts](https://github.com/bergerhealer/TrainCarts) plugin and primarily serves the purpose of managing destinations.
 It also adds action signs for TrainCarts which serve as cross-server portals, driving players and mobs from one server to another.
 
 [![](https://i.imgur.com/SzkHTE8.png)](https://www.youtube.com/watch?v=8XCvmY8EPtk)  
 ![](https://i.imgur.com/0ngfmUA.png)
 
-### More functions:
+### More features:
 - Commands to get mobs on/off train(s).
 - Speedometer in the player's action bar for moving trains.
 - Dynmap integration (A marker is created on the map for each destination)
@@ -20,37 +20,43 @@ It also adds action signs for TrainCarts which serve as cross-server portals, dr
 ![](https://i.imgur.com/cUXQjis.png)  
 ![](https://i.imgur.com/g2UdOvJ.png)   
 
+### Action-Signs
 
-### Befehle & Berechtigungen:
+|                                      |                                                                                                                                                                                                                                                |
+|:-------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ![](https://i.imgur.com/F0sMhvF.png) | **Bidirectional** Portal<br/><br/>This sign represents a portal entrance and exit at the same time.<br/>A pair of these signs that have the same channel name can be passed from either side.<br/>The other sign acts as a portal exit.        |
+| ![](https://i.imgur.com/ybuisvC.png) | **Directiona Portal** *(Entrance)*<br/><br/>This sign represents a portal entrance.<br/>A portal of this type requires a `portal-out`-sign that has the same channel name.<br/>Any number of `portal-in`-signs can be created for one channel. |
+| ![](https://i.imgur.com/3UlGw1q.png) | **Directional Portal** *(Exit)*<br/><br/>This sign represents a portal exit.<br/>Signs of this type can only exist once per channel name.                                                                                                      |
+
+
+### Commands & Permissions:
    
-#### Fahrziel wählen
-| Befehl                      | Permission                            | Beschreibung                                                                             |
-|:----------------------------|:--------------------------------------|:-----------------------------------------------------------------------------------------|
-| `/fahrziel`                 | craftbahn.command.destination         | Zeigt Grundlegende Informationen zur Benutzung des Befehls                               |
-| `/fahrziel <name>`          | craftbahn.command.destination         | Setzt dem aktuell ausgewählten Zug das angegebene Ziel                                   |
-| `/fahrziele [typ]`          | craftbahn.command.destinations        | Zeigt eine Liste mit allen Fahrzielen                                                    |
-| `/fahrziele [typ] [filter]` | craftbahn.command.destinations.filter | Zeigt eine gefilterte Liste mit allen Fahrzielen **Filter-Flags:** `--server` `--player` |
+#### Select Destination
+| Command                         | Permissions                           | Description                                                                       |
+|:--------------------------------|:--------------------------------------|:----------------------------------------------------------------------------------|
+| `/destination`                  | craftbahn.command.destination         | Shows basic information about using the command                                   |
+| `/destination <name>`           | craftbahn.command.destination         | Sets the specified destination to the currently selected train                    |
+| `/destinations [type]`          | craftbahn.command.destinations        | Shows a list of all destinations                                                  |
+| `/destinations [type] [filter]` | craftbahn.command.destinations.filter | Shows a filtered list of all destinations **Filter flags:** `--server` `--player` |  
+   
+#### Manage destinations
+| Command                                                   | Permissions                             | Description                                                   |
+|:----------------------------------------------------------|:----------------------------------------|:--------------------------------------------------------------|
+| `/destedit info <destination> [server]`                   | craftbahn.command.destedit.info         | Displays detailed information about the specified destination |
+| `/destedit tp <destination> [server]`                     | craftbahn.command.destedit.teleport     | Teleports the player to the specified destination             |
+| `/destinationedit add <destination> <type> `              | craftbahn.command.destedit.add          | Adds a new destination with the specified station type        |
+| `/destedit remove <destination> [server] `                | craftbahn.command.destedit.remove       | Removes an existing destination                               |
+| `/destedit addmember <destination> <player> [server]`     | craftbahn.command.destedit.addmember    | Adds a secondary owner to the specified destination           |
+| `/destedit removemember <destination> <player> [server]`  | craftbahn.command.destedit.removemember | Removes a secondary owner of the specified destination        |
+   
+#### Other commands
+| Befehl                | Permission                 | Beschreibung                                                |
+|:----------------------|:---------------------------|:------------------------------------------------------------|
+| `/mobenter [radius]`  | craftbahn.command.mobenter | Allows animals around the selected train to board the train |
+| `/mobeject`           | craftbahn.command.mobeject | Ejects all animals from the selected train                  |
    
    
-#### Fahrziele verwalten
-| Befehl                                                       | Permission                              | Beschreibung                                                            |
-|:-------------------------------------------------------------|:----------------------------------------|:------------------------------------------------------------------------|
-| `/fahrzieledit info <destination> [server]`                  | craftbahn.command.destedit.info         | Zeigt detaillierte Informationen zum angegebenen Fahrziel an            |
-| `/fahrzieledit tp <destination> [server]`                    | craftbahn.command.destedit.teleport     | Teleportiert den Spieler zur hinterlegten Position angegebenen Fahrziel |
-| `/fahrzieledit add <destination> <type>  `                   | craftbahn.command.destedit.add          | Fügt ein neues Fahrziel mit dem angegebenen Stationstyp hinzu           |
-| `/fahrzieledit remove <destination>  [server] `              | craftbahn.command.destedit.remove       | Entfernt ein vorhandenes Fahrziel                                       |
-| `/fahrzieledit addmember <destination> <player> [server]`    | craftbahn.command.destedit.addmember    | Fügt dem angegebenen Fahrziel einen sekundären Besitzer hinzu           |
-| `/fahrzieledit removemember <destination> <player> [server]` | craftbahn.command.destedit.removemember | Entfernt einen sekundären Besitzer des angegebenen Fahrziel             |
-   
-   
-#### Sonstige Befehle
-| Befehl                | Permission                 | Beschreibung                                                       |
-|:----------------------|:---------------------------|:-------------------------------------------------------------------|
-| `/mobenter [radius]`  | craftbahn.command.mobenter | Lässt Tiere im Umkreis des ausgewählten Zug, in den Zug einsteigen |
-| `/mobeject`           | craftbahn.command.mobeject | Wirft alle Tiere aus dem ausgewählten Zug heraus                   |
-   
-   
-### Tabellestruktur:
+### MySQL Table-structure:
 
 ``` sql
 CREATE TABLE `cb_destinations` (
