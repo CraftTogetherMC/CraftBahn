@@ -97,6 +97,7 @@
                         <configuration>
                             <target>
                                 <copy file="target/${project.name}-${project.version}.jar" tofile="target/static/${project.name}.jar"/>
+                                <copy file="target/${project.name}-${project.version}.jar" tofile="target/static/${project.name}-${project.version}-${project.build.number}.jar"/>
                             </target>
                         </configuration>
                     </execution>
