@@ -1,5 +1,5 @@
 # CraftBahn
-### Dependency: [MySQLAdapter](https://github.com/CraftTogetherMC/MySQLAdapter/releases/tag/Plugin)  
+#### Dependency: [MySQLAdapter](https://ci.craft-together-mc.de/job/MySQLAdapter)  
   
 ![](https://media.tenor.com/images/b31da936191fcccadb8fc6e0fc777070/tenor.gif)
 
@@ -11,7 +11,11 @@ It also adds action signs for TrainCarts which serve as cross-server portals, dr
 ### A big thank you and lots of love go out to [TeamBergerhealer](https://github.com/bergerhealer)
 Also a lot of appreciation goes to the People behind [Cloud](https://github.com/Incendo/cloud) and [Adventure](https://github.com/KyoriPowered/adventure)!
 
+#### Dev-Builds: [See here](https://ci.craft-together-mc.de/job/CraftBahn)
+
 [![](https://i.imgur.com/SzkHTE8.png)](https://www.youtube.com/watch?v=8XCvmY8EPtk)  
+
+#### Dev-Builds: [See here](https://ci.craft-together-mc.de/job/CraftBahn/)
 
 ### Features:
 - Cross-Server Portals *(Pathfinding supported!)*
