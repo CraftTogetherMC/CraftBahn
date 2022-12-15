@@ -48,15 +48,22 @@ The first destination of the route is the server name or channel name and the se
 | `/destinations [type] [filter]` | craftbahn.command.destinations.filter | Shows a filtered list of all destinations **Filter flags:** `--server` `--player` |  
    
 #### Manage destinations
-| Command                                                   | Permissions                             | Description                                                   |
-|:----------------------------------------------------------|:----------------------------------------|:--------------------------------------------------------------|
-| `/destedit info <destination> [server]`                   | craftbahn.command.destedit.info         | Displays detailed information about the specified destination |
-| `/destedit tp <destination> [server]`                     | craftbahn.command.destedit.teleport     | Teleports the player to the specified destination             |
-| `/destedit add <destination> <type> `              | craftbahn.command.destedit.add          | Adds a new destination with the specified station type        |
-| `/destedit remove <destination> [server] `                | craftbahn.command.destedit.remove       | Removes an existing destination                               |
-| `/destedit addmember <destination> <player> [server]`     | craftbahn.command.destedit.addmember    | Adds a secondary owner to the specified destination           |
-| `/destedit removemember <destination> <player> [server]`  | craftbahn.command.destedit.removemember | Removes a secondary owner of the specified destination        |
-   
+| Command                                                  | Permissions                             | Description                                                                                                                |
+|:---------------------------------------------------------|:----------------------------------------|:---------------------------------------------------------------------------------------------------------------------------|
+| `/destedit info <destination> [server]`                  | craftbahn.command.destedit.info         | Displays detailed information about the specified destination                                                              |
+| `/destedit tp <destination> [server]`                    | craftbahn.command.destedit.teleport     | Teleports the player to the specified destination                                                                          |
+| `/destedit add <destination> <type> `                    | craftbahn.command.destedit.add          | Adds a new destination with the specified station type                                                                     |
+| `/destedit remove <destination> [server] `               | craftbahn.command.destedit.remove       | Removes an existing destination                                                                                            |
+| `/destedit addmember <destination> <player> [server]`    | craftbahn.command.destedit.addmember    | Adds a secondary owner to the specified destination                                                                        |
+| `/destedit removemember <destination> <player> [server]` | craftbahn.command.destedit.removemember | Removes a secondary owner of the specified destination                                                                     |
+| `/destedit settype <destination> <player> [server]`      | craftbahn.command.destedit.settype      | Specifies the type of specified destination                                                                                |
+| `/destedit setowner <destination> <player> [server]`     | craftbahn.command.destedit.setowner     | Sets the owner of a destination                                                                                            |
+| `/destedit setprivate <destination> <player> [server]`   | craftbahn.command.destedit.setprivate   | Specifies that this target is private. Only players with permission `craftbahn.destination.see.private` can use and see it |
+| `/destedit setpublic <destination> <player> [server]`    | craftbahn.command.destedit.setpublic    | Sets this game to be viewable by all players. (This is the default setting for newly created destinations)                 |                                                
+| `/destedit setwarp <destination> <player> [server]`      | craftbahn.command.destedit.setwarp      | Sets the teleport point of this target for players                                                                         |
+| `/destedit setlocation <destination> <player> [server]`  | craftbahn.command.destedit.setlocation  | Specifies the position of the destination (Mainly used to locate dynmap markers)                                           |
+| `/destedit updatemarker <destination> <player> [server]` | craftbahn.command.destedit.updatemarker | Renews all markers to be displayed on the dynmap                                                                           |
+
 #### Other commands
 | Befehl                | Permission                 | Beschreibung                                                |
 |:----------------------|:---------------------------|:------------------------------------------------------------|

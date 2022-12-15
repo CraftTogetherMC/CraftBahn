@@ -1,6 +1,6 @@
 commands:
-  destination: fahrziel
-  destinations: fahrziele
-  destedit: fahrzieledit
+  destination: destination
+  destinations: destinations
+  destedit: destedit
   mobenter: mobenter
   mobeject: mobeject
