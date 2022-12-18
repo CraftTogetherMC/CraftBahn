@@ -14,7 +14,7 @@
     <url>https://github.com/CraftTogetherMC/CraftBahn</url>
 
     <properties>
-        <java.version>18</java.version>
+        <java.version>17</java.version>
         <project.paper.version>1.19.3-R0.1-SNAPSHOT</project.paper.version>
         <project.bkcommonlib.version>1.19.3-v1-SNAPSHOT</project.bkcommonlib.version>
         <project.traincarts.version>1.19.3-v1-SNAPSHOT</project.traincarts.version>
@@ -116,17 +116,12 @@
     <repositories>
         <repository>
             <id>ctogether</id>
-            <url>https://repo.craft-together.de/</url>
+            <url>https://maven.craft-together-mc.de/</url>
         </repository>
 
         <repository>
             <id>papermc-repo</id>
             <url>https://papermc.io/repo/repository/maven-public/</url>
-        </repository>
-
-        <repository>
-            <id>sonatype</id>
-            <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
 
         <repository>
@@ -205,16 +200,5 @@
             <scope>provided</scope>
         </dependency>
 
-        <dependency>
-            <groupId>net.kyori</groupId>
-            <artifactId>adventure-text-minimessage</artifactId>
-            <version>4.12.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>net.kyori</groupId>
-            <artifactId>adventure-text-serializer-legacy</artifactId>
-            <version>4.12.0</version>
-        </dependency>
     </dependencies>
 </project>
