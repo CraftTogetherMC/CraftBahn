@@ -151,7 +151,7 @@ public class PortalHandler implements Listener {
                 sendPlayerToServer((Player) passenger, portal);
 
             else if (passenger instanceof LivingEntity)
-                passenger.remove();//sendEntityToServer((LivingEntity) passenger, portal);
+                passenger.remove();
         }
 
         group.getProperties().setSpawnItemDrops(false);
@@ -217,7 +217,7 @@ public class PortalHandler implements Listener {
                 Passenger passenger = new Passenger(entity.getUniqueId(), entity.getType(), member.getIndex());
                 passengers.add(passenger);
                 
-                if (entity instanceof LivingEntity)
+                if (entity instanceof LivingEntity && !(entity instanceof Player))
                     sendEntityToServer((LivingEntity) entity, portal);
             }
         }
