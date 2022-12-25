@@ -98,7 +98,7 @@ public class PortalHandler implements Listener {
             e.printStackTrace();
             return;
         }
-        Portal portal = portals.get(0);
+        Portal portal = (portals.size() < 1) ? null : portals.get(0);
 
         // Abort if the triggered sign is the sign where the train was spawned
         if (receivedTrains.containsKey(group) && receivedTrains.get(group).getName().equals(portal.getName()))
