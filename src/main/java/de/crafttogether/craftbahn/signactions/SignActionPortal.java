@@ -70,7 +70,7 @@ public class SignActionPortal extends SignAction {
             e.printStackTrace();
             return false;
         }
-        Util.debug("Portale gefunden: " + portals.size());
+
         // Create sign
         if (portals.size() == 0 || portals.size() == 1) {
 
