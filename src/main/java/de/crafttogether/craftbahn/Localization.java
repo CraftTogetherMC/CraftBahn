@@ -29,8 +29,6 @@ public class Localization extends LocalizationEnum {
     public static final Localization ENTERMESSAGE_NODEST = new Localization("entermessage.nodest", "<hover:show_text:'<green>Verfügbare Fahrziele auflisten</green>'><click:run_command:{cmd_destinations}><prefix/><red><bold>Hinweis:</bold></red><newLine><prefix/><red>Dieser Zug hat noch kein Fahrziel</red></click></hover>");
 
     public static final Localization PORTAL_ENTER_NOEXIT = new Localization("portal.enter.noexit", "<prefix/><red>Es wurde kein Portal-Ausgang für den Kanal</red> <yellow>{name}</yellow> <red>gefunden.</red>");
-    public static final Localization PORTAL_ENTER_WORLDNOTFOUND = new Localization("portal.enter.worldnotfound", "<prefix/><red>Es existiert keine Welt mit dem Namen</red> <yellow>{world}</yellow><red>.</red>");
-    public static final Localization PORTAL_ENTER_SIGNNOTFOUND = new Localization("portal.enter.signnotfound", "<prefix/><red>Es wurde kein Portal-Schild für den Kanal</red> <yellow>{name}</yellow> <red>gefunden.</red><newLine><yellow>{world}, {x}, {y}, {z}</yellow>");
     public static final Localization PORTAL_CREATE_NONAME = new Localization("portal.create.noname", "<prefix/><red>Bitte schreibe einen Namen für das Portal in die dritte Zeile des Schildes.</red>");
     public static final Localization PORTAL_CREATE_IN_NOTEXIST = new Localization("portal.create.in.notexist", "<prefix/><gold>Hinweis:</gold> <red>Es wurde noch kein Ausgangs-Portal für den Kanal </red> <yellow>{name}</yellow> <red>erstellt.</red>");
     public static final Localization PORTAL_CREATE_IN_SUCCESS = new Localization("portal.create.in.success", "<prefix/><red>Portal-Eingang wurde erstellt (</red><yellow>{name}</yellow><red>)</red>");

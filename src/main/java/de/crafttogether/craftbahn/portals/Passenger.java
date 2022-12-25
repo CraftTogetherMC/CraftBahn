@@ -1,16 +1,11 @@
 package de.crafttogether.craftbahn.portals;
 
-import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class Passenger implements Serializable {
     private static final Map<UUID, Passenger> passengers = new HashMap<>();
@@ -43,19 +38,6 @@ public class Passenger implements Serializable {
         passenger.setTrainName(trainName);
         passengers.put(passenger.getUUID(), passenger);
         return passenger;
-    }
-
-    public static void sendMessage(String trainName, Component message) {
-        List<Passenger> passengerList = passengers.values().stream()
-                .filter(passenger -> passenger.type.equals(EntityType.PLAYER))
-                .filter(passenger -> passenger.trainName.equals(trainName))
-                .toList();
-
-        for (Passenger passenger : passengerList) {
-            Player player = Bukkit.getPlayer(passenger.getUUID());
-            if (player == null || !player.isOnline()) continue;
-            player.sendMessage(message);
-        }
     }
 
     public static void remove(UUID uuid) {

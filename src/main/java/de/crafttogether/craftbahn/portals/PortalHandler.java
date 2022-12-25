@@ -30,7 +30,6 @@ import de.crafttogether.craftbahn.signactions.SignActionPortalIn;
 import de.crafttogether.craftbahn.signactions.SignActionPortalOut;
 import de.crafttogether.craftbahn.util.TCHelper;
 import de.crafttogether.craftbahn.util.Util;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -258,8 +257,8 @@ public class PortalHandler implements Listener {
         World targetWorld = Bukkit.getWorld(packet.target.getWorld());
         if (targetWorld == null) {
             Util.debug("World '" + packet.target.getWorld() + "' was not found!");
-            Passenger.sendMessage(packet.name, Localization.PORTAL_ENTER_WORLDNOTFOUND.deserialize(
-                    PlaceholderResolver.resolver("world", packet.target.getWorld())));
+            // TODO: Inform players
+            //Passenger.sendMessage(trainID, "§cWorld '" + worldName + "' was not found!", 2);
             return;
         }
 
@@ -272,12 +271,8 @@ public class PortalHandler implements Listener {
         Portal portal = plugin.getPortalStorage().getPortal(targetLocation);
         if (portal == null || portal.getSign() == null) {
             Util.debug("Could not find a Portal at " + targetLocation.getWorld() + ", " + targetLocation.getX() + ", " + targetLocation.getY() + ", " + targetLocation.getZ());
-            Passenger.sendMessage(packet.name, Localization.PORTAL_ENTER_SIGNNOTFOUND.deserialize(
-                    PlaceholderResolver.resolver("name", packet.portalName),
-                    PlaceholderResolver.resolver("world", packet.target.getWorld()),
-                    PlaceholderResolver.resolver("x", String.valueOf(packet.target.getX())),
-                    PlaceholderResolver.resolver("y", String.valueOf(packet.target.getY())),
-                    PlaceholderResolver.resolver("z", String.valueOf(packet.target.getZ()))));
+            // TODO: Inform players
+            //Passenger.sendMessage(trainID, "§cWorld '" + worldName + "' was not found!", 2);
             return;
         }
 

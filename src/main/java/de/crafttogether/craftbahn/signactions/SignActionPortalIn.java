@@ -74,7 +74,7 @@ public class SignActionPortalIn extends SignAction {
                     PlaceholderResolver.resolver("name", portalName));
 
         // Save to database
-        /*try {
+        try {
             plugin.getPortalStorage().create(
                     portalName,
                     Portal.PortalType.IN,
@@ -87,7 +87,7 @@ public class SignActionPortalIn extends SignAction {
 
             e.printStackTrace();
             return false;
-        }*/
+        }
 
         Localization.PORTAL_CREATE_IN_SUCCESS.message(event.getPlayer(),
                 PlaceholderResolver.resolver("name", portalName));
