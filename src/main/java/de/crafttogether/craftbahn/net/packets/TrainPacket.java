@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 
 public class TrainPacket implements Packet {
-    public String id;
     public String name;
     public String portalName;
     public Set<String> owners;
