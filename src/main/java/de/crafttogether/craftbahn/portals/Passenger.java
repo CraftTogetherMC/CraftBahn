@@ -67,4 +67,11 @@ public class Passenger implements Serializable {
             return passengers.get(uuid);
         return null;
     }
+
+    public static void updateName(String oldName, String newName) {
+        for (Passenger passenger : passengers.values()) {
+            if (passenger.trainName.equals(oldName))
+                passenger.trainName = newName;
+        }
+    }
 }

@@ -317,13 +317,13 @@ public class PortalHandler implements Listener {
             if (receivedGroup.size() < 1) receivedTrains.remove(receivedGroup);
         receivedTrains.put(group, portal);
 
-        // Rename
+        // Name train
         String newName = packet.name;
-        if (TrainProperties.get(newName) != null)
+        if (TrainProperties.get(newName) != null) {
             newName = TrainProperties.generateTrainName(newName + "-#");
+            Passenger.updateName(packet.name, newName);
+        }
         group.getProperties().setTrainName(newName);
-
-
 
         // Route fix
         if (group.getProperties().getDestination().equals(CraftBahnPlugin.plugin.getServerName()) && group.getProperties().getNextDestinationOnRoute() != null) {
