@@ -319,9 +319,17 @@ public class PortalHandler implements Listener {
 
         // Rename
         String newName = packet.name;
-        if (TCHelper.getTrain(newName) != null)
-            newName = TrainProperties.generateTrainName(packet.name + "-#");
+        if (TrainProperties.get(newName) != null)
+            newName = TrainProperties.generateTrainName(newName + "-#");
         group.getProperties().setTrainName(newName);
+
+
+
+        // Route fix
+        if (group.getProperties().getDestination().equals(CraftBahnPlugin.plugin.getServerName()) && group.getProperties().getNextDestinationOnRoute() != null) {
+            Util.debug("GetNextDestinationOnRoute");
+            group.getProperties().setDestination(group.getProperties().getNextDestinationOnRoute());
+        }
 
         // Process passengers
         for (Passenger passenger : packet.passengers)
