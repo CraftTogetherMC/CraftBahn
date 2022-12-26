@@ -32,7 +32,7 @@ public class SignActionPortal extends SignAction {
 
     @Override
     public void execute(SignActionEvent event) {
-        if (!event.isPowered() || !event.isTrainSign())
+        if (!event.isPowered() || !event.isTrainSign() || event.getGroup() == null)
             return;
 
         PortalHandler portalHandler = plugin.getPortalHandler();
