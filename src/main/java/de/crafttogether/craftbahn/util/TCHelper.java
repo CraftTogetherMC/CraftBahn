@@ -25,6 +25,7 @@ import org.bukkit.util.Vector;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TCHelper {
 
@@ -45,8 +46,12 @@ public class TCHelper {
     }
 
     public static MinecartGroup getTrain(String trainName) {
-        TrainProperties trainProperties = TrainPropertiesStore.get(trainName);
-        return (trainProperties == null) ? null : trainProperties.getHolder();
+        for (MinecartGroup group : MinecartGroupStore.getGroups()) {
+            if (group.getProperties().getTrainName().equals(trainName))
+                return  group;
+        }
+
+        return null;
     }
 
     public static List<Player> getPlayerPassengers(MinecartMember<?> member) {

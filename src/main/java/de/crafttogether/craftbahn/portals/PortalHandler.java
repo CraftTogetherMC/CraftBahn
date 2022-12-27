@@ -10,6 +10,7 @@ import com.bergerkiller.bukkit.tc.controller.spawnable.SpawnableGroup;
 import com.bergerkiller.bukkit.tc.controller.type.MinecartMemberRideable;
 import com.bergerkiller.bukkit.tc.events.SignActionEvent;
 import com.bergerkiller.bukkit.tc.properties.TrainProperties;
+import com.bergerkiller.bukkit.tc.properties.TrainPropertiesStore;
 import com.bergerkiller.bukkit.tc.properties.standard.type.CollisionOptions;
 import com.bergerkiller.bukkit.tc.rails.RailLookup;
 import com.bergerkiller.bukkit.tc.signactions.SignAction;
@@ -266,6 +267,7 @@ public class PortalHandler implements Listener {
         // Load train from received config
         ConfigurationNode trainConfig = new ConfigurationNode();
         trainConfig.loadFromString(packet.properties);
+        Util.debug(packet.properties);
         SpawnableGroup spawnable = SpawnableGroup.fromConfig(TrainCarts.plugin, trainConfig);
 
         Location targetLocation = packet.target.getBukkitLocation();
@@ -319,17 +321,13 @@ public class PortalHandler implements Listener {
 
         // Name train
         String newName = packet.name;
-        if (TrainProperties.get(newName) != null) {
+        if (TrainPropertiesStore.get(newName) != null)
             newName = TrainProperties.generateTrainName(newName + "-#");
-            Passenger.updateName(packet.name, newName);
-        }
         group.getProperties().setTrainName(newName);
 
         // Route fix
-        if (group.getProperties().getDestination().equals(CraftBahnPlugin.plugin.getServerName()) && group.getProperties().getNextDestinationOnRoute() != null) {
-            Util.debug("GetNextDestinationOnRoute");
+        if (group.getProperties().getDestination().equals(CraftBahnPlugin.plugin.getServerName()) && group.getProperties().getNextDestinationOnRoute() != null)
             group.getProperties().setDestination(group.getProperties().getNextDestinationOnRoute());
-        }
 
         // Process passengers
         for (Passenger passenger : packet.passengers)
