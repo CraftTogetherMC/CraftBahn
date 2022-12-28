@@ -46,12 +46,8 @@ public class TCHelper {
     }
 
     public static MinecartGroup getTrain(String trainName) {
-        for (MinecartGroup group : MinecartGroupStore.getGroups()) {
-            if (group.getProperties().getTrainName().equals(trainName))
-                return  group;
-        }
-
-        return null;
+        TrainProperties properties = TrainPropertiesStore.get(trainName);
+        return (properties != null && properties.hasHolder()) ? properties.getHolder() : null;
     }
 
     public static List<Player> getPlayerPassengers(MinecartMember<?> member) {

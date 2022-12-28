@@ -9,8 +9,6 @@ import com.bergerkiller.bukkit.tc.controller.components.RailPiece;
 import com.bergerkiller.bukkit.tc.controller.spawnable.SpawnableGroup;
 import com.bergerkiller.bukkit.tc.controller.type.MinecartMemberRideable;
 import com.bergerkiller.bukkit.tc.events.SignActionEvent;
-import com.bergerkiller.bukkit.tc.properties.TrainProperties;
-import com.bergerkiller.bukkit.tc.properties.TrainPropertiesStore;
 import com.bergerkiller.bukkit.tc.properties.standard.type.CollisionOptions;
 import com.bergerkiller.bukkit.tc.rails.RailLookup;
 import com.bergerkiller.bukkit.tc.signactions.SignAction;
@@ -177,14 +175,16 @@ public class PortalHandler implements Listener {
         int cartIndex = passenger.getCartIndex();
 
         // Try to find train and set player as passenger
-        MinecartGroup train = TCHelper.getTrain(passenger.getTrainName());
-        if (train == null) {
+        MinecartGroup group = TCHelper.getTrain(passenger.getTrainName());
+
+        if (group == null) {
             Util.debug("Could not find train (" + passenger.getTrainName() + ") for player " + player.getName());
             // TODO: Inform players
+            Passenger.error(passenger.getTrainId(), Component.text("Could not find train (" + passenger.getTrainName() + ") for player " + player.getName()));
             return;
         }
 
-        MinecartMember<?> member = train.get(cartIndex);
+        MinecartMember<?> member = group.get(passenger.getCartIndex());
 
         if (member instanceof MinecartMemberRideable) {
             event.setSpawnLocation(member.getEntity().getLocation());
@@ -192,7 +192,7 @@ public class PortalHandler implements Listener {
             Passenger.remove(passenger.getUUID());
         }
         else
-            Util.debug("Unable to put player " + player.getName() + " back on train (" + train.getProperties().getTrainName() + ") the cart is not rideable");
+            Util.debug("Unable to put player " + player.getName() + " back on train (" + group.getProperties().getTrainName() + ") the cart is not rideable");
 
         Passenger.remove(passenger.getUUID());
     }
@@ -200,8 +200,12 @@ public class PortalHandler implements Listener {
     public boolean transferTrain(MinecartGroup group, Portal portal, boolean clearInventory) {
         Util.debug("#transferTrain");
 
+        // Generate unique id to identify the train later
+        UUID trainId = UUID.randomUUID();
+
         // Save train and get properties
-        ConfigurationNode trainProperties = group.saveConfig();
+        ConfigurationNode trainProperties = group.saveConfig().clone();
+        trainProperties.set("name", group.getProperties().getTrainName() + "-#");
 
         // Remove lastPathNode from cartProperties
         Set<ConfigurationNode> cartNodes = trainProperties.getNode("carts").getNodes();
@@ -216,7 +220,7 @@ public class PortalHandler implements Listener {
         List<Passenger> passengers = new ArrayList<>();
         for (MinecartMember<?> member : group) {
             for (Entity entity : TCHelper.getPassengers(member)) {
-                Passenger passenger = new Passenger(entity.getUniqueId(), entity.getType(), member.getIndex());
+                Passenger passenger = new Passenger(trainId, entity.getUniqueId(), entity.getType(), member.getIndex());
                 passengers.add(passenger);
                 
                 if (entity instanceof LivingEntity && !(entity instanceof Player))
@@ -225,7 +229,8 @@ public class PortalHandler implements Listener {
         }
 
         TrainPacket packet = new TrainPacket();
-        packet.name = group.getProperties().getTrainName();
+        packet.id = trainId;
+        packet.oldName = group.getProperties().getTrainName();
         packet.owners = group.getProperties().getOwners();
         packet.properties = trainProperties.toString();
         packet.passengers = passengers;
@@ -241,7 +246,7 @@ public class PortalHandler implements Listener {
         client.disconnect();
 
         if (success)
-            Util.debug("Train (" + packet.name + ") was sent to " + packet.target.getServer() + "!");
+            Util.debug("Train (" + packet.oldName + ") was sent to " + packet.target.getServer() + "!");
 
         return success;
     }
@@ -253,13 +258,17 @@ public class PortalHandler implements Listener {
     }
 
     public void receiveTrain(TrainPacket packet) {
-        Util.debug("Received train (" + packet.name + ") from " + packet.sourceServer, false);
+        Util.debug("Received train (" + packet.oldName + ") from " + packet.sourceServer, false);
+
+        // Register passengers
+        for (Passenger passenger : packet.passengers)
+            Passenger.register(passenger);
 
         // Check if world exists
         World targetWorld = Bukkit.getWorld(packet.target.getWorld());
         if (targetWorld == null) {
             Util.debug("World '" + packet.target.getWorld() + "' was not found!");
-            Passenger.sendMessage(packet.name, Localization.PORTAL_ENTER_WORLDNOTFOUND.deserialize(
+            Passenger.error(packet.id, Localization.PORTAL_ENTER_WORLDNOTFOUND.deserialize(
                     PlaceholderResolver.resolver("world", packet.target.getWorld())));
             return;
         }
@@ -267,14 +276,15 @@ public class PortalHandler implements Listener {
         // Load train from received config
         ConfigurationNode trainConfig = new ConfigurationNode();
         trainConfig.loadFromString(packet.properties);
-        Util.debug(packet.properties);
         SpawnableGroup spawnable = SpawnableGroup.fromConfig(TrainCarts.plugin, trainConfig);
+
+        Util.debug(packet.properties);
 
         Location targetLocation = packet.target.getBukkitLocation();
         Portal portal = plugin.getPortalStorage().getPortal(targetLocation);
         if (portal == null || portal.getSign() == null) {
             Util.debug("Could not find a Portal at " + targetLocation.getWorld() + ", " + targetLocation.getX() + ", " + targetLocation.getY() + ", " + targetLocation.getZ());
-            Passenger.sendMessage(packet.name, Localization.PORTAL_ENTER_SIGNNOTFOUND.deserialize(
+            Passenger.error(packet.id, Localization.PORTAL_ENTER_SIGNNOTFOUND.deserialize(
                     PlaceholderResolver.resolver("name", packet.portalName),
                     PlaceholderResolver.resolver("world", packet.target.getWorld()),
                     PlaceholderResolver.resolver("x", String.valueOf(packet.target.getX())),
@@ -288,7 +298,7 @@ public class PortalHandler implements Listener {
         if (rail == null) {
             Util.debug("Could not find a Rail at " + targetLocation.getWorld() + ", " + targetLocation.getX() + ", " + targetLocation.getY() + ", " + targetLocation.getZ());
             // TODO: Inform players
-            //Passenger.sendMessage(trainID, "§cWorld '" + worldName + "' was not found!", 2);
+            Passenger.error(packet.id, Component.text("Could not find a Rail at " + targetLocation.getWorld() + ", " + targetLocation.getX() + ", " + targetLocation.getY() + ", " + targetLocation.getZ()));
             return;
         }
 
@@ -296,7 +306,7 @@ public class PortalHandler implements Listener {
         if (spawnLocations == null) {
             Util.debug("Could not find the right spot to spawn a train at " + rail.world() + ", " + rail.block().getX() + ", " + rail.block().getY() + ", " + rail.block().getZ());
             // TODO: Inform players
-            //Passenger.sendMessage(trainID, "§cWorld '" + worldName + "' was not found!", 2);
+            Passenger.error(packet.id, Component.text("Could not find the right spot to spawn a train at " + rail.world() + ", " + rail.block().getX() + ", " + rail.block().getY() + ", " + rail.block().getZ()));
             return;
         }
 
@@ -307,31 +317,25 @@ public class PortalHandler implements Listener {
         if (spawnLocations.isOccupied()) {
             Util.debug("Track is occupied by another train at " + rail.world() + ", " + rail.block().getX() + ", " + rail.block().getY() + ", " + rail.block().getZ());
             // TODO: Inform players
-            //Passenger.sendMessage(trainID, "§cWorld '" + worldName + "' was not found!", 2);
+            Passenger.error(packet.id, Component.text("Track is occupied by another train at " + rail.world() + ", " + rail.block().getX() + ", " + rail.block().getY() + ", " + rail.block().getZ()));
             return;
         }
 
         // Spawn
         MinecartGroup group = spawnable.spawn(spawnLocations);
 
+        // Tell passengers the new train name
+        Util.debug("Train spawned! Name: " + group.getProperties().getTrainName() + " OldName: " + packet.oldName);
+        Passenger.setTrainName(packet.id, group.getProperties().getTrainName());
+
         // Cache received trains
         for (MinecartGroup receivedGroup : receivedTrains.keySet())
             if (receivedGroup.size() < 1) receivedTrains.remove(receivedGroup);
         receivedTrains.put(group, portal);
 
-        // Name train
-        String newName = packet.name;
-        if (TrainPropertiesStore.get(newName) != null)
-            newName = TrainProperties.generateTrainName(newName + "-#");
-        group.getProperties().setTrainName(newName);
-
         // Route fix
         if (group.getProperties().getDestination().equals(CraftBahnPlugin.plugin.getServerName()) && group.getProperties().getNextDestinationOnRoute() != null)
             group.getProperties().setDestination(group.getProperties().getNextDestinationOnRoute());
-
-        // Process passengers
-        for (Passenger passenger : packet.passengers)
-            Passenger.register(passenger, newName);
 
         // Launch
         Vector headDirection = spawnLocations.locations.get(spawnLocations.locations.size()-1).forward;

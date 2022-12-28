@@ -10,45 +10,63 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class Passenger implements Serializable {
     private static final Map<UUID, Passenger> passengers = new HashMap<>();
+    private static final Map<UUID, Component> errors = new HashMap<>();
 
-    private String trainName;
+    private final UUID trainId;
+    private String trainName = null;
     private final UUID uuid;
     private final EntityType type;
     private final int cartIndex;
 
-    public Passenger(UUID uuid, EntityType type, int cartIndex) {
+    public Passenger(UUID trainId, UUID uuid, EntityType type, int cartIndex) {
+        this.trainId = trainId;
         this.uuid = uuid;
         this.type = type;
         this.cartIndex = cartIndex;
     }
 
-    public String getTrainName() {
-        return trainName;
+    public boolean hasError() {
+        return errors.get(trainId) != null;
     }
+
+    public Component getError() {
+        return errors.get(trainId);
+    }
+
+    public UUID getTrainId() {
+        return trainId;
+    }
+    public String getTrainName() { return trainName; }
     public UUID getUUID() { return this.uuid; }
-    public EntityType getType() {
-        return type;
-    }
+    public EntityType getType() { return type; }
     public int getCartIndex() { return this.cartIndex; }
 
-    private void setTrainName(String trainName) {
-        this.trainName = trainName;
-    }
-
-    public static Passenger register(Passenger passenger, String trainName) {
-        passenger.setTrainName(trainName);
+    public static Passenger register(Passenger passenger) {
         passengers.put(passenger.getUUID(), passenger);
         return passenger;
     }
 
-    public static void sendMessage(String trainName, Component message) {
+    public static void error(UUID trainId, Component error) {
+        errors.put(trainId, error);
+
+        // Send to online users
+        sendMessage(trainId, error);
+    }
+
+    public static void setTrainName(UUID trainId, String trainName) {
+        for (Passenger passenger : passengers.values()) {
+            if (passenger.trainId.equals(trainId))
+                passenger.trainName = trainName;
+        }
+    }
+
+    public static void sendMessage(UUID trainId, Component message) {
         List<Passenger> passengerList = passengers.values().stream()
                 .filter(passenger -> passenger.type.equals(EntityType.PLAYER))
-                .filter(passenger -> passenger.trainName.equals(trainName))
+                .filter(passenger -> passenger.trainId.equals(trainId))
                 .toList();
 
         for (Passenger passenger : passengerList) {
