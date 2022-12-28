@@ -205,7 +205,7 @@ public class PortalHandler implements Listener {
 
         // Save train and get properties
         ConfigurationNode trainProperties = group.saveConfig().clone();
-        trainProperties.set("name", group.getProperties().getTrainName() + "-#");
+        trainProperties.set("name", "train1");
 
         // Remove lastPathNode from cartProperties
         Set<ConfigurationNode> cartNodes = trainProperties.getNode("carts").getNodes();
