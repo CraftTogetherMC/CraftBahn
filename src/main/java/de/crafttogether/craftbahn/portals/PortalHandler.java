@@ -1,5 +1,6 @@
 package de.crafttogether.craftbahn.portals;
 
+import com.bergerkiller.bukkit.common.chunk.ForcedChunk;
 import com.bergerkiller.bukkit.common.config.ConfigurationNode;
 import com.bergerkiller.bukkit.common.nbt.CommonTagCompound;
 import com.bergerkiller.bukkit.tc.TrainCarts;
@@ -9,6 +10,8 @@ import com.bergerkiller.bukkit.tc.controller.components.RailPiece;
 import com.bergerkiller.bukkit.tc.controller.spawnable.SpawnableGroup;
 import com.bergerkiller.bukkit.tc.controller.type.MinecartMemberRideable;
 import com.bergerkiller.bukkit.tc.events.SignActionEvent;
+import com.bergerkiller.bukkit.tc.properties.TrainProperties;
+import com.bergerkiller.bukkit.tc.properties.TrainPropertiesStore;
 import com.bergerkiller.bukkit.tc.properties.standard.type.CollisionOptions;
 import com.bergerkiller.bukkit.tc.rails.RailLookup;
 import com.bergerkiller.bukkit.tc.signactions.SignAction;
@@ -72,8 +75,6 @@ public class PortalHandler implements Listener {
     }
 
     public void handleTrain(SignActionEvent event) {
-        Util.debug("#handleTrain");
-
         MinecartGroup group = event.getGroup();
         String portalName = event.getLine(2);
         Portal.PortalType targetType = null;
@@ -134,8 +135,6 @@ public class PortalHandler implements Listener {
     }
 
     public void handleCart(SignActionEvent event) {
-        Util.debug("#handleCart");
-
         MinecartGroup group = event.getGroup();
         Portal portal = pendingTeleports.get(group);
 
@@ -179,8 +178,6 @@ public class PortalHandler implements Listener {
 
         if (group == null) {
             Util.debug("Could not find train (" + passenger.getTrainName() + ") for player " + player.getName());
-            // TODO: Inform players
-            Passenger.error(passenger.getTrainId(), Component.text("Could not find train (" + passenger.getTrainName() + ") for player " + player.getName()));
             return;
         }
 
@@ -311,7 +308,7 @@ public class PortalHandler implements Listener {
         }
 
         // Load the chunks first
-        spawnLocations.loadChunks();
+        List<ForcedChunk> forcedChunks = TCHelper.loadChunks(spawnLocations, 30);
 
         // Check that the area isn't occupied by another train
         if (spawnLocations.isOccupied()) {
@@ -323,9 +320,9 @@ public class PortalHandler implements Listener {
 
         // Spawn
         MinecartGroup group = spawnable.spawn(spawnLocations);
+        Util.debug("Train spawned! Name: " + group.getProperties().getTrainName() + " OldName: " + packet.oldName);
 
         // Tell passengers the new train name
-        Util.debug("Train spawned! Name: " + group.getProperties().getTrainName() + " OldName: " + packet.oldName);
         Passenger.setTrainName(packet.id, group.getProperties().getTrainName());
 
         // Cache received trains

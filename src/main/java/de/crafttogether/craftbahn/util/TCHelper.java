@@ -1,20 +1,24 @@
 package de.crafttogether.craftbahn.util;
 
+import com.bergerkiller.bukkit.common.chunk.ForcedChunk;
 import com.bergerkiller.bukkit.common.utils.FaceUtil;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
-import com.bergerkiller.bukkit.tc.controller.MinecartGroupStore;
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.controller.MinecartMemberStore;
 import com.bergerkiller.bukkit.tc.controller.components.RailPiece;
 import com.bergerkiller.bukkit.tc.controller.components.RailState;
 import com.bergerkiller.bukkit.tc.controller.spawnable.SpawnableGroup;
+import com.bergerkiller.bukkit.tc.controller.spawnable.SpawnableMember;
 import com.bergerkiller.bukkit.tc.controller.type.MinecartMemberChest;
 import com.bergerkiller.bukkit.tc.events.SignActionEvent;
 import com.bergerkiller.bukkit.tc.properties.TrainProperties;
 import com.bergerkiller.bukkit.tc.properties.TrainPropertiesStore;
+import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.Localization;
 import de.crafttogether.craftbahn.localization.PlaceholderResolver;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Entity;
@@ -25,9 +29,41 @@ import org.bukkit.util.Vector;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class TCHelper {
+
+    public static List<ForcedChunk> loadChunks(SpawnableGroup.SpawnLocationList spawnLocations, int unloadDelaySeconds) {
+        List<String> chunksToLoad = new ArrayList<>();
+        List<ForcedChunk> forcedChunks = new ArrayList<>();
+
+        spawnLocations.loadChunks();
+
+        for (SpawnableMember.SpawnLocation spawnLocation : spawnLocations.locations) {
+            World world = spawnLocation.location.getWorld();
+            int chunk_x = spawnLocation.location.getChunk().getX();
+            int chunk_z = spawnLocation.location.getChunk().getZ();
+
+            for (int x = chunk_x - 2; x < chunk_x + 2; x++) {
+                for (int z = chunk_z - 2; z < chunk_z + 2; z++) {
+                    if (chunksToLoad.contains(x + "/" + z)) continue;
+                    chunksToLoad.add(x + "/" + z);
+
+                    ForcedChunk forcedChunk = ForcedChunk.load(world.getChunkAt(x, z));
+                    forcedChunk.getChunk();
+                    forcedChunks.add(forcedChunk);
+                }
+            }
+        }
+
+        if (unloadDelaySeconds > 0) {
+            Bukkit.getScheduler().runTaskLater(CraftBahnPlugin.plugin, () -> {
+                for (ForcedChunk forcedChunk : forcedChunks)
+                    forcedChunk.close();
+            }, 20L * 30);
+        }
+
+        return forcedChunks;
+    }
 
     public static MinecartGroup getTrain(Player p) {
         Entity entity = p.getVehicle();
