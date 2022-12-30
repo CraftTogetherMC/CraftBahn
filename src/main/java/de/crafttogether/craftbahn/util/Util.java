@@ -20,18 +20,6 @@ public class Util {
                 .filter(offlinePlayer -> Objects.requireNonNull(offlinePlayer.getName()).equalsIgnoreCase(name)).toList().get(0);
     }
 
-    public static void debug(String message, boolean broadcast) {
-        Component messageComponent = LegacyComponentSerializer.legacyAmpersand().deserialize("&7&l[Debug]: &r" + message);
-
-        // Broadcast to online players with permission
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (CraftBahnPlugin.plugin.getConfig().getBoolean("Settings.Debug")) continue;
-            player.sendMessage(messageComponent);
-        }
-
-        CraftBahnPlugin.plugin.getLogger().info(PlainTextComponentSerializer.plainText().serialize(messageComponent));
-    }
-
     public static void exportResource(String resourcePath) {
         CraftBahnPlugin plugin = CraftBahnPlugin.plugin;
 
@@ -58,6 +46,18 @@ public class Util {
             e.printStackTrace();
         }
 
+    }
+
+    public static void debug(String message, boolean broadcast) {
+        Component messageComponent = LegacyComponentSerializer.legacyAmpersand().deserialize("&7&l[Debug]: &r" + message);
+
+        // Broadcast to online players with permission
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (CraftBahnPlugin.plugin.getConfig().getBoolean("Settings.Debug")) continue;
+            player.sendMessage(messageComponent);
+        }
+
+        CraftBahnPlugin.plugin.getLogger().info(PlainTextComponentSerializer.plainText().serialize(messageComponent));
     }
 
     public static void debug(String message) {
