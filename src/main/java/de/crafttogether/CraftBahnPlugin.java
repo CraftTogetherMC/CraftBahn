@@ -3,6 +3,7 @@ package de.crafttogether;
 import de.crafttogether.craftbahn.Localization;
 import de.crafttogether.craftbahn.commands.Commands;
 import de.crafttogether.craftbahn.destinations.DestinationStorage;
+import de.crafttogether.craftbahn.listener.CreatureSpawnListener;
 import de.crafttogether.craftbahn.listener.PlayerSpawnListener;
 import de.crafttogether.craftbahn.listener.SignBreakListener;
 import de.crafttogether.craftbahn.listener.TrainEnterListener;
@@ -77,6 +78,7 @@ public final class CraftBahnPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new TrainEnterListener(), this);
         getServer().getPluginManager().registerEvents(new SignBreakListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerSpawnListener(), this);
+        getServer().getPluginManager().registerEvents(new CreatureSpawnListener(), this);
 
         // Register PluginChannel
         this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
