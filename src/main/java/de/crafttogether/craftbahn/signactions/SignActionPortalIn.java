@@ -13,7 +13,6 @@ import de.crafttogether.craftbahn.Localization;
 import de.crafttogether.craftbahn.localization.PlaceholderResolver;
 import de.crafttogether.craftbahn.portals.Portal;
 import de.crafttogether.craftbahn.portals.PortalHandler;
-import de.crafttogether.craftbahn.util.CTLocation;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 
@@ -31,16 +30,21 @@ public class SignActionPortalIn extends SignAction {
 
     @Override
     public void execute(SignActionEvent event) {
-        if (!event.isPowered() || !event.isTrainSign() || event.getGroup() == null)
+        if (event.getGroup() == null
+                || !event.hasMember()
+                || !event.isTrainSign()
+                || !event.isPowered()
+                || !event.isAction(SignActionType.MEMBER_ENTER, SignActionType.REDSTONE_ON))
+        {
             return;
+        }
 
         PortalHandler portalHandler = plugin.getPortalHandler();
 
-        if (!portalHandler.getPendingTeleports().containsKey(event.getGroup()) && event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasGroup())
+        if (!portalHandler.getPendingTeleports().containsKey(event.getGroup().getProperties().getTrainName()))
             portalHandler.handleTrain(event);
 
-        if (portalHandler.getPendingTeleports().containsKey(event.getGroup()) && event.isAction(SignActionType.GROUP_ENTER, SignActionType.REDSTONE_ON) && event.hasMember())
-            portalHandler.handleCart(event);
+        portalHandler.handleCart(event);
     }
 
     @Override
