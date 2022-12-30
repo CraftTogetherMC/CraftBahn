@@ -14,17 +14,7 @@ public class PlayerSpawnListener implements Listener {
         // Look if player should be a passenger
         Passenger passenger = Passenger.get(event.getPlayer().getUniqueId());
 
-        if (passenger != null) {
-            if (passenger.hasError()) {
-                event.getPlayer().sendMessage(passenger.getError());
-            }
-
-            else {
-                if (event.getPlayer().isFlying())
-                    event.getPlayer().setFlying(false);
-
-                PortalHandler.reEnterPassenger(passenger, event);
-            }
-        }
+        if (passenger != null)
+            PortalHandler.reEnterPlayer(passenger, event);
     }
 }

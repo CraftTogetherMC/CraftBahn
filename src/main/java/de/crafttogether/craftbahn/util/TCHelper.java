@@ -18,6 +18,7 @@ import de.crafttogether.craftbahn.Localization;
 import de.crafttogether.craftbahn.localization.PlaceholderResolver;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
@@ -32,26 +33,27 @@ import java.util.List;
 
 public class TCHelper {
 
-    public static List<ForcedChunk> loadChunks(SpawnableGroup.SpawnLocationList spawnLocations, int unloadDelaySeconds) {
-        List<String> chunksToLoad = new ArrayList<>();
+    public static List<ForcedChunk> loadChunks(SpawnableGroup.SpawnLocationList spawnLocations, int surrounding, int unloadDelaySeconds) {
         List<ForcedChunk> forcedChunks = new ArrayList<>();
-
         spawnLocations.loadChunks();
 
-        for (SpawnableMember.SpawnLocation spawnLocation : spawnLocations.locations) {
-            World world = spawnLocation.location.getWorld();
-            int chunk_x = spawnLocation.location.getChunk().getX();
-            int chunk_z = spawnLocation.location.getChunk().getZ();
+        for (SpawnableMember.SpawnLocation spawnLocation : spawnLocations.locations)
+            forcedChunks.addAll(loadChunks(spawnLocation.location.getChunk(), surrounding, unloadDelaySeconds));
 
-            for (int x = chunk_x - 2; x < chunk_x + 2; x++) {
-                for (int z = chunk_z - 2; z < chunk_z + 2; z++) {
-                    if (chunksToLoad.contains(x + "/" + z)) continue;
-                    chunksToLoad.add(x + "/" + z);
+        return forcedChunks;
+    }
 
-                    ForcedChunk forcedChunk = ForcedChunk.load(world.getChunkAt(x, z));
-                    forcedChunk.getChunk();
-                    forcedChunks.add(forcedChunk);
-                }
+    public static List<ForcedChunk> loadChunks(Chunk chunk, int surrounding, int unloadDelaySeconds) {
+        List<ForcedChunk> forcedChunks = new ArrayList<>();
+        World world = chunk.getWorld();
+        int chunk_x = chunk.getX();
+        int chunk_z = chunk.getZ();
+
+        for (int x = chunk_x - surrounding; x < chunk_x + surrounding; x++) {
+            for (int z = chunk_z - surrounding; z < chunk_z + surrounding; z++) {
+                ForcedChunk forcedChunk = ForcedChunk.load(world.getChunkAt(x, z));
+                forcedChunk.getChunk();
+                forcedChunks.add(forcedChunk);
             }
         }
 
@@ -59,7 +61,7 @@ public class TCHelper {
             Bukkit.getScheduler().runTaskLater(CraftBahnPlugin.plugin, () -> {
                 for (ForcedChunk forcedChunk : forcedChunks)
                     forcedChunk.close();
-            }, 20L * 30);
+            }, 20L * unloadDelaySeconds);
         }
 
         return forcedChunks;
