@@ -134,6 +134,34 @@ public class TCHelper {
             clearInventory(member);
     }
 
+    // Send actionbar to all passengers of a train
+    public static void sendActionbar(MinecartGroup group, Component message) {
+        for (MinecartMember<?> member : group)
+            sendActionbar(member, message);
+    }
+
+    // Send permission-based actionbar to all passengers of a train
+    public static void sendActionbar(MinecartGroup group, String permission, Component message) {
+        for (MinecartMember<?> member : group)
+            sendActionbar(member, permission, message);
+    }
+
+    // Send actionBar to all passengers of a cart
+    public static void sendActionbar(MinecartMember<?> member, Component message) {
+        for (Object passenger : getPlayerPassengers(member)) {
+            if (passenger instanceof Player player)
+                player.sendActionBar(message);
+        }
+    }
+
+    // Send permission-based actionbar to all passengers of a cart
+    public static void sendActionbar(MinecartMember<?> member, String permission, Component message) {
+        for (Object passenger : getPlayerPassengers(member)) {
+            if (passenger instanceof Player player && player.hasPermission(permission))
+                player.sendActionBar(message);
+        }
+    }
+
     public static void sendMessage(MinecartMember<?> member, Localization localization, PlaceholderResolver... arguments) {
         for (Player passenger : getPlayerPassengers(member))
             localization.message(passenger, arguments);
@@ -152,6 +180,16 @@ public class TCHelper {
     public static void sendMessage(MinecartGroup group, Component message) {
         for (Player passenger : getPlayerPassengers(group))
             passenger.sendMessage(message);
+    }
+
+    public static BlockFace getDirection(String junctionName) {
+        return switch (junctionName) {
+            default -> null;
+            case "n" -> BlockFace.NORTH;
+            case "e" -> BlockFace.EAST;
+            case "s" -> BlockFace.SOUTH;
+            case "w" -> BlockFace.WEST;
+        };
     }
 
     public static SpawnableGroup.SpawnLocationList getSpawnLocations(SpawnableGroup spawnable, RailPiece rail, Sign sign) {

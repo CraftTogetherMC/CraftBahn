@@ -3,13 +3,11 @@ package de.crafttogether;
 import de.crafttogether.craftbahn.Localization;
 import de.crafttogether.craftbahn.commands.Commands;
 import de.crafttogether.craftbahn.destinations.DestinationStorage;
-import de.crafttogether.craftbahn.listener.CreatureSpawnListener;
-import de.crafttogether.craftbahn.listener.PlayerSpawnListener;
-import de.crafttogether.craftbahn.listener.SignBreakListener;
-import de.crafttogether.craftbahn.listener.TrainEnterListener;
+import de.crafttogether.craftbahn.listener.*;
 import de.crafttogether.craftbahn.localization.LocalizationManager;
 import de.crafttogether.craftbahn.portals.PortalHandler;
 import de.crafttogether.craftbahn.portals.PortalStorage;
+import de.crafttogether.craftbahn.speedometer.Speedometer;
 import de.crafttogether.craftbahn.util.Util;
 import de.crafttogether.mysql.MySQLAdapter;
 import de.crafttogether.mysql.MySQLConfig;
@@ -34,6 +32,7 @@ public final class CraftBahnPlugin extends JavaPlugin {
     private DestinationStorage destinationStorage;
     private PortalStorage portalStorage;
     private PortalHandler portalHandler;
+    private Speedometer speedometer;
     private MiniMessage miniMessageParser;
 
     @Override
@@ -76,6 +75,7 @@ public final class CraftBahnPlugin extends JavaPlugin {
 
         // Register Listener
         getServer().getPluginManager().registerEvents(new TrainEnterListener(), this);
+        getServer().getPluginManager().registerEvents(new TrainExitListener(), this);
         getServer().getPluginManager().registerEvents(new SignBreakListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerSpawnListener(), this);
         getServer().getPluginManager().registerEvents(new CreatureSpawnListener(), this);
@@ -119,6 +119,10 @@ public final class CraftBahnPlugin extends JavaPlugin {
         portalHandler = new PortalHandler(getConfig().getString("Portals.Server.BindAddress"), getConfig().getInt("Portals.Server.Port"));
         portalHandler.registerActionSigns();
 
+        // Start Speedometer-Task
+        if (getConfig().getBoolean("Speedometer.Enabled"))
+            speedometer = new Speedometer();
+
         // Register Tags/Placeholder for MiniMessage
         miniMessageParser = MiniMessage.builder()
                 .editTags(t -> t.resolver(TagResolver.resolver("prefix", Tag.selfClosingInserting(Localization.PREFIX.deserialize()))))
@@ -132,6 +136,10 @@ public final class CraftBahnPlugin extends JavaPlugin {
         // Shutdown MySQL-Adapter
         if(mySQLAdapter != null)
             mySQLAdapter.disconnect();
+
+        // Stop Speedometer
+        if (speedometer != null)
+            speedometer.stop();
 
         // Close TCPServer/TCPClients & Unregister ActionSigns
         if (portalHandler != null)
@@ -150,6 +158,7 @@ public final class CraftBahnPlugin extends JavaPlugin {
     public PortalHandler getPortalHandler() {
         return portalHandler;
     }
+    public Speedometer getSpeedometer() { return speedometer; }
     public MiniMessage getMiniMessageParser() {
         return Objects.requireNonNullElseGet(miniMessageParser, MiniMessage::miniMessage);
     }

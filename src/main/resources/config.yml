@@ -11,6 +11,8 @@ Portals:
   LaunchSpeed: 0.4
   LaunchDelayTicks: 20
   LaunchDistanceBlocks: 10
+Speedometer:
+  Enabled: true
 MySQL:
   Host: 127.0.0.1
   Port: 3306

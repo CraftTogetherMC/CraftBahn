@@ -1,5 +1,6 @@
 package de.crafttogether.craftbahn.util;
 
+import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import com.google.common.io.ByteStreams;
 import de.crafttogether.CraftBahnPlugin;
 import net.kyori.adventure.text.Component;
@@ -48,13 +49,33 @@ public class Util {
 
     }
 
-    public static void debug(String message, boolean broadcast) {
+    public static void debug(String trainName, String message) {
+        if (!CraftBahnPlugin.plugin.getConfig().getBoolean("Settings.Debug"))
+            return;
+
+        MinecartGroup group = TCHelper.getTrain(trainName);
+        if (group == null) return;
+
         Component messageComponent = LegacyComponentSerializer.legacyAmpersand().deserialize("&7&l[Debug]: &r" + message);
 
-        // Broadcast to online players with permission
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (CraftBahnPlugin.plugin.getConfig().getBoolean("Settings.Debug")) continue;
-            player.sendMessage(messageComponent);
+        for (Player player : TCHelper.getPlayerPassengers(group)) {
+            if (!player.hasPermission("craftbahn.debug")) continue;
+                player.sendMessage(messageComponent);
+        }
+
+        CraftBahnPlugin.plugin.getLogger().info(PlainTextComponentSerializer.plainText().serialize(messageComponent));
+    }
+
+    public static void debug(String message, boolean broadcast) {
+        if (!CraftBahnPlugin.plugin.getConfig().getBoolean("Settings.Debug"))
+            return;
+        Component messageComponent = LegacyComponentSerializer.legacyAmpersand().deserialize("&7&l[Debug]: &r" + message);
+
+        if (broadcast) {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if (!player.hasPermission("craftbahn.debug")) continue;
+                player.sendMessage(messageComponent);
+            }
         }
 
         CraftBahnPlugin.plugin.getLogger().info(PlainTextComponentSerializer.plainText().serialize(messageComponent));
@@ -65,6 +86,9 @@ public class Util {
     }
     public static void debug(Component message, boolean broadcast) {
         debug(LegacyComponentSerializer.legacyAmpersand().serialize(message), broadcast);
+    }
+    public static void debug(String trainName, Component message) {
+        debug(trainName, LegacyComponentSerializer.legacyAmpersand().serialize(message));
     }
     public static void debug(Component message) {
         debug(message, false);
