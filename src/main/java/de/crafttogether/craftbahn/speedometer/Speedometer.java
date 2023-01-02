@@ -1,18 +1,26 @@
 package de.crafttogether.craftbahn.speedometer;
 
+import com.bergerkiller.bukkit.common.utils.EntityUtil;
+import com.bergerkiller.bukkit.common.utils.PacketUtil;
+import com.bergerkiller.bukkit.common.wrappers.ChatText;
+import com.bergerkiller.bukkit.common.wrappers.DataWatcher;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
+import com.bergerkiller.generated.net.minecraft.network.protocol.game.PacketPlayOutSpawnEntityLivingHandle;
+import com.bergerkiller.generated.net.minecraft.world.entity.EntityHandle;
 import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.util.TCHelper;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 public class Speedometer implements Runnable {
     private List<SpeedData> trains;
@@ -30,6 +38,32 @@ public class Speedometer implements Runnable {
             this.location = location;
             this.particle = particle;
             this.data = data;
+        }
+
+        public static void createArmorStand(Location location, String name) {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if (!player.hasPermission("craftbahn.debug")) continue;
+
+                DataWatcher metadata = new DataWatcher();
+                metadata.set(EntityHandle.DATA_NO_GRAVITY, true);
+                metadata.set(EntityHandle.DATA_CUSTOM_NAME_VISIBLE, true);
+                metadata.set(EntityHandle.DATA_CUSTOM_NAME, ChatText.fromMessage(name));
+                metadata.set(EntityHandle.DATA_FLAGS, (byte) EntityHandle.DATA_FLAG_INVISIBLE);
+
+                PacketPlayOutSpawnEntityLivingHandle spawnPacket = PacketPlayOutSpawnEntityLivingHandle.T.newHandleNull();
+                spawnPacket.setEntityId(EntityUtil.getUniqueEntityId());
+                spawnPacket.setEntityUUID(UUID.randomUUID());
+                spawnPacket.setEntityType(EntityType.ARMOR_STAND);
+                spawnPacket.setPosX(location.getX());
+                spawnPacket.setPosY(location.getY());
+                spawnPacket.setPosZ(location.getZ());
+                spawnPacket.setMotX(0.0);
+                spawnPacket.setMotY(0.0);
+                spawnPacket.setMotZ(0.0);
+                spawnPacket.setPitch(0.0f);
+                spawnPacket.setYaw(0.0f);
+                PacketUtil.sendEntityLivingSpawnPacket(player, spawnPacket, metadata);
+            }
         }
     }
 

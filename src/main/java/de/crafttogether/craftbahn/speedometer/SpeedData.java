@@ -143,6 +143,8 @@ public class SpeedData {
         PathNode node = provider.getWorld(state.railWorld()).getNodeAtRail(state.railBlock());
         PathNode destination = node.getWorld().getNodeByName(this.destinationName);
 
+        Speedometer.DebugParticle.createArmorStand(node.location.getLocation().add(0, -2, 0), node.getDisplayName() + " (first node)");
+
         // Walk from node to destination
         if (destination != null && node != destination) {
             PathConnection[] connections = node.findRoute(destination);
