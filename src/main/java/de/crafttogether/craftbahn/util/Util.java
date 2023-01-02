@@ -49,46 +49,50 @@ public class Util {
 
     }
 
-    public static void debug(String trainName, String message) {
+    public static void debug(String trainName, Component message) {
         if (!CraftBahnPlugin.plugin.getConfig().getBoolean("Settings.Debug"))
             return;
 
         MinecartGroup group = TCHelper.getTrain(trainName);
-        if (group == null) return;
+        if (group == null)
+            return;
 
-        Component messageComponent = LegacyComponentSerializer.legacyAmpersand().deserialize("&7&l[Debug]: &r" + message);
+        Component prefix = LegacyComponentSerializer.legacyAmpersand().deserialize("&7&l[Debug]: &r");
+        message = prefix.append(message);
 
         for (Player player : TCHelper.getPlayerPassengers(group)) {
-            if (!player.hasPermission("craftbahn.debug")) continue;
-                player.sendMessage(messageComponent);
+            //if (!player.hasPermission("craftbahn.debug")) continue;
+                player.sendMessage(message);
         }
 
-        CraftBahnPlugin.plugin.getLogger().info(PlainTextComponentSerializer.plainText().serialize(messageComponent));
+        CraftBahnPlugin.plugin.getLogger().info(PlainTextComponentSerializer.plainText().serialize(message));
     }
 
-    public static void debug(String message, boolean broadcast) {
+    public static void debug(Component message, boolean broadcast) {
         if (!CraftBahnPlugin.plugin.getConfig().getBoolean("Settings.Debug"))
             return;
-        Component messageComponent = LegacyComponentSerializer.legacyAmpersand().deserialize("&7&l[Debug]: &r" + message);
+
+        Component prefix = LegacyComponentSerializer.legacyAmpersand().deserialize("&7&l[Debug]: &r");
+        message = prefix.append(message);
 
         if (broadcast) {
             for (Player player : Bukkit.getOnlinePlayers()) {
-                if (!player.hasPermission("craftbahn.debug")) continue;
-                player.sendMessage(messageComponent);
+                //if (!player.hasPermission("craftbahn.debug")) continue;
+                player.sendMessage(message);
             }
         }
 
-        CraftBahnPlugin.plugin.getLogger().info(PlainTextComponentSerializer.plainText().serialize(messageComponent));
+        CraftBahnPlugin.plugin.getLogger().info(PlainTextComponentSerializer.plainText().serialize(message));
     }
 
     public static void debug(String message) {
         debug(Component.text(message), false);
     }
-    public static void debug(Component message, boolean broadcast) {
-        debug(LegacyComponentSerializer.legacyAmpersand().serialize(message), broadcast);
+    public static void debug(String message, boolean broadcast) {
+        debug(LegacyComponentSerializer.legacyAmpersand().deserialize(message), broadcast);
     }
-    public static void debug(String trainName, Component message) {
-        debug(trainName, LegacyComponentSerializer.legacyAmpersand().serialize(message));
+    public static void debug(String trainName, String message) {
+        debug(trainName, LegacyComponentSerializer.legacyAmpersand().deserialize(message));
     }
     public static void debug(Component message) {
         debug(message, false);

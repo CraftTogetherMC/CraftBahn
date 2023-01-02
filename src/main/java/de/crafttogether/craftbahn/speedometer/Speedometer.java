@@ -3,46 +3,66 @@ package de.crafttogether.craftbahn.speedometer;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import de.crafttogether.CraftBahnPlugin;
 import de.crafttogether.craftbahn.util.TCHelper;
-import de.crafttogether.craftbahn.util.Util;
 import net.kyori.adventure.text.Component;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class Speedometer implements Runnable {
-    private LinkedList<SpeedData> trains;
-    private HashMap<String, Location> particleLocations;
+    private List<SpeedData> trains;
+    private List<DebugParticle> debugParticles;
     private BukkitTask task;
 
+    public static class DebugParticle {
+        public String trainName;
+        public Location location;
+        public Particle particle;
+        public Object data;
+
+        public DebugParticle(String trainName, Location location, Particle particle, Object data) {
+            this.trainName = trainName;
+            this.location = location;
+            this.particle = particle;
+            this.data = data;
+        }
+    }
+
     public Speedometer() {
-        this.trains = new LinkedList<>();
-        this.particleLocations = new HashMap<>();
+        this.trains = new ArrayList<>();
+        this.debugParticles = new ArrayList<>();
         this.task = Bukkit.getScheduler().runTaskTimer(CraftBahnPlugin.plugin, this, 20L, 5L);
     }
 
     @Override
     public void run() {
-        if (trains.size() < 1)
-            return;
-
-        updateData();
-        sendActionBars();
-
-        if (particleLocations.values().size() < 1)
+        if (debugParticles.size() < 1)
             return;
 
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (!p.hasPermission("craftbahn.debug")) continue;
 
-            for (Location particleLocation : particleLocations.values()) {
-                if (particleLocation.getChunk().isLoaded())
-                    p.spawnParticle(Particle.BLOCK_MARKER, particleLocation, 1, Material.BARRIER.createBlockData());
+            for (Iterator<DebugParticle> it = debugParticles.iterator(); it.hasNext(); ) {
+                DebugParticle particle = it.next();
+
+                if (TCHelper.getTrain(particle.trainName) == null)
+                    debugParticles.remove(particle);
+
+                else if (particle.location.getChunk().isLoaded())
+                    p.spawnParticle(particle.particle, particle.location, 1, particle.data);
             }
         }
+
+        if (trains.size() < 1)
+            return;
+
+        updateData();
+        sendActionBars();
     }
 
     public void stop() {
@@ -75,8 +95,6 @@ public class Speedometer implements Runnable {
         MinecartGroup train = TCHelper.getTrain(trainName);
         TCHelper.sendActionbar(train, Component.text(""));
 
-        Util.debug("REMOVE SPEEDOMETER FOR TRAIN: " + train.getProperties().getTrainName());
-        particleLocations.remove(train.getProperties().getTrainName());
         trains.remove(data);
     }
 
@@ -87,7 +105,7 @@ public class Speedometer implements Runnable {
             Component message;
             String destinationName = data.getDestinationName();
 
-            double realVelocity = data.getRealVelocity();
+            double realVelocity = data.getVelocity();
             double smoothedVelocity = data.getSmoothVelocity();
             double distance = data.getDistance();
 
@@ -123,7 +141,7 @@ public class Speedometer implements Runnable {
             data.update();
     }
 
-    public HashMap<String, Location> getParticleLocations() {
-        return particleLocations;
+    public List<DebugParticle> getDebugParticles() {
+        return debugParticles;
     }
 }
