@@ -41,12 +41,6 @@ public final class CraftBahnPlugin extends JavaPlugin {
         plugin = this;
 
         /* Check dependencies */
-        if (!getServer().getPluginManager().isPluginEnabled("MySQLAdapter")) {
-            plugin.getLogger().warning("Couldn't find MySQLAdapter");
-            Bukkit.getServer().getPluginManager().disablePlugin(plugin);
-            return;
-        }
-
         if (!getServer().getPluginManager().isPluginEnabled("BKCommonLib")) {
             plugin.getLogger().warning("Couldn't find BKCommonLib");
             Bukkit.getServer().getPluginManager().disablePlugin(plugin);
